@@ -1,55 +1,99 @@
+@import '../../Variables.scss';
+
 .JobScanPageMain {
-    font-family: sans-serif;
-    padding: 0;
-    margin: 0;
+  font-family: sans-serif;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f9f9f9;
+
+  .CartHeader_main {
+    width: 100%;
+    height: 55px;
+    background: $headerbgColor;
+    color: white;
     display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background: #f9f9f9;
-  
-    .top-tabs {
+    align-items: center;
+    z-index: 1000;
+
+    .header-container {
+      width: 100%;
+      padding: 0 15px;
       display: flex;
-      justify-content: space-around;
-      background-color: #fff;
-      border-bottom: 1px solid #ccc;
-      padding: 10px 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-      .tab-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 12px;
-        color: #666;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-  
+      justify-content: space-between;
+      flex-direction: row !important;
+      align-items: center;
+    }
+
+    .header_title {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .back-arrow {
+      color: #fff;
+    }
+  }
+
+  .top-tabs {
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative; // default
+
+    &.fixed {
+      position: fixed;
+      top: 0; // fixed at viewport top once header scrolls away
+      left: 0;
+      right: 0;
+      z-index: 999;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+
+      svg {
+        margin-bottom: 4px;
+      }
+
+      &.active {
+        color: #1976d2;
+        font-weight: 600;
+
         svg {
-          margin-bottom: 4px;
-        }
-  
-        &.active {
           color: #1976d2;
-          font-weight: 600;
-  
-          svg {
-            color: #1976d2;
-          }
         }
       }
     }
-  
-    .tab-body {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-    }
-  
-    .tab-content {
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
-    }
   }
-  
+
+  .tab-body {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    margin-top: 10px;
+
+    // Add padding to top to avoid content hidden under fixed tabs when tabs are fixed
+    padding-top: 60px; // Adjust this if tabs height changes
+  }
+
+  .tab-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+  }
+}
