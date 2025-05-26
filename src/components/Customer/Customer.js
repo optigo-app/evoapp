@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./Customer.scss";
-import { Button } from "@mui/material";
+import { Button, Snackbar, Slide } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { AiOutlineCloseCircle } from "react-icons/ai";
+import { AiOutlineLock } from "react-icons/ai"; // 🔒 Icon
 
 const CustomerData = [
   {
@@ -50,6 +52,7 @@ const Customer = () => {
   const [result, setResult] = useState([]);
   const [search, setSearch] = useState("");
   const [timers, setTimers] = useState({});
+  const [snackOpen, setSnackOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,21 +73,45 @@ const Customer = () => {
     return () => clearInterval(interval);
   }, [mainData]);
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      const filtered = mainData.filter((item) =>
+        item.customerName.toLowerCase().includes(search.toLowerCase())
+      );
+      setResult(filtered);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearch("");
+    setResult([]);
+  };
+
   const filteredData = result.length > 0 ? result : mainData;
 
-  const handleSearch = () => {
-    const filtered = mainData.filter((item) =>
-      item.customerName.toLowerCase().includes(search.toLowerCase())
-    );
-    setResult(filtered);
+  const handleClickStatus = (customer) => {
+    const status = customer.customerSessionStatus;
+    const other = customer.customerSessionStatusOther;
+
+    if (status === "true" && other === "true") {
+      setSnackOpen(true);
+    } else {
+      navigate(`/JobScanPage`);
+    }
   };
 
   const renderStatus = (customer) => {
-    if (
+    const isInSession =
       customer.customerSessionStatus === "true" &&
-      customer.customerSessionStatusOther === "true"
-    ) {
-      return <span className="badge bg-info">In Session</span>;
+      customer.customerSessionStatusOther === "true";
+
+    if (isInSession) {
+      return (
+        <span className="status-badge in-session">
+          <AiOutlineLock style={{ marginRight: "5px" }} />
+          In Session
+        </span>
+      );
     }
 
     if (customer.customerSessionStatus === "Active") {
@@ -92,14 +119,14 @@ const Customer = () => {
         timers[customer.customerId] ??
         parseTimeToSeconds(customer.runningSessionTime);
       return (
-        <span className="badge bg-success">
+        <span className="status-badge active-timer">
           {formatSecondsToTime(seconds)}
         </span>
       );
     }
 
     if (customer.customerSessionStatus === "Inactive") {
-      return <span className="badge bg-secondary">Available</span>;
+      return <span className="status-badge available">Available</span>;
     }
 
     return null;
@@ -110,41 +137,63 @@ const Customer = () => {
       <div className="Header_main">
         <div className="header-container">
           <p className="header_title">Customer</p>
-          <Button className="AddCustomer_Btn" onClick={() => navigate("/AddCustomer")}>
+          <Button
+            className="AddCustomer_Btn"
+            onClick={() => navigate("/AddCustomer")}
+            variant="contained"
+          >
             Add Customer
           </Button>
         </div>
       </div>
 
       <div className="CustomerContainer">
+        <div className="CustomerSearch">
+          <div className="search-box">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Filter By Customer Name"
+            />
+            {search && (
+              <AiOutlineCloseCircle
+                className="clear-icon"
+                onClick={handleClearSearch}
+              />
+            )}
+          </div>
+        </div>
+
         <div className="CustomerList">
           {filteredData.map((e, i) => (
-            <div key={i} className="customer-card">
+            <Button
+              key={i}
+              className="customercard_button"
+              onClick={() => handleClickStatus(e)}
+            >
               <div className="card-header">
                 <div>
                   <h5>{e.customerName}</h5>
                   <p className="text-muted">{e.email}</p>
                   <p className="text-muted">{e.mobileNumber}</p>
                 </div>
-                <div className="status-badge">{renderStatus(e)}</div>
+                <div className="status-badge-container">{renderStatus(e)}</div>
               </div>
-            </div>
+            </Button>
           ))}
         </div>
-
-        <div className="CustomerSearch">
-          <label htmlFor="customername">Customer Name</label>
-          <div className="search-box">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Enter customer name"
-            />
-            <button onClick={handleSearch}>Search</button>
-          </div>
-        </div>
       </div>
+
+      <Snackbar
+        open={snackOpen}
+        onClose={() => setSnackOpen(false)}
+        autoHideDuration={3000}
+        TransitionComponent={(props) => <Slide {...props} direction="down" />}
+        message="Already in session!"
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      />
     </div>
   );
 };
