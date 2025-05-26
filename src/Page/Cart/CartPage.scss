@@ -1,0 +1,36 @@
+@import "../../variables.scss";
+
+.CartMain {
+  padding: 0px;
+  font-family: $font-family;
+
+  .CartHeader_main {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 55px;
+    background: $headerbgColor;
+    color: white;
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+
+    .header-container {
+      width: 100%;
+      padding: 0 15px;
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row !important;
+      align-items: center;
+    }
+
+    .header_title {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 0;
+    }
+    .back-arrow{
+      color: #fff;
+    }
+  }
+}
