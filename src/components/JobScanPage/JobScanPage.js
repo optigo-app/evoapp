@@ -1,9 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./JobScanPage.scss";
-import { AiOutlineQrcode, AiOutlineHeart, AiOutlineShoppingCart, AiOutlineFileText } from "react-icons/ai";
+import {
+  AiOutlineQrcode,
+  AiOutlineHeart,
+  AiOutlineShoppingCart,
+  AiOutlineFileText,
+} from "react-icons/ai";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Stack,
+} from "@mui/material";
+import { ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const JobScanPage = () => {
   const [activeTab, setActiveTab] = useState("scan");
+  const [tabsFixed, setTabsFixed] = useState(false);
+  const headerRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!headerRef.current) return;
+      const headerBottom = headerRef.current.getBoundingClientRect().bottom;
+      // If header bottom is <= 0, header is out of viewport
+      setTabsFixed(headerBottom <= 0);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -22,7 +50,20 @@ const JobScanPage = () => {
 
   return (
     <div className="JobScanPageMain">
-      <div className="top-tabs">
+      <Box className="CartHeader_main" ref={headerRef}>
+        <Stack className="header-container">
+          <IconButton>
+            <ChevronLeft className="back-arrow" onClick={() => navigate('/')}/>
+          </IconButton>
+          <Typography variant="h6" fontWeight={600}>
+            Tab Control
+          </Typography>
+          <Box textAlign="right">
+          </Box>
+        </Stack>
+      </Box>
+
+      <div className={`top-tabs ${tabsFixed ? "fixed" : ""}`}>
         <div
           className={`tab-item ${activeTab === "scan" ? "active" : ""}`}
           onClick={() => setActiveTab("scan")}
