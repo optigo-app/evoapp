@@ -1,7 +1,7 @@
 @import '../../Variables.scss';
 
 .JobScanPageMain {
-  font-family: sans-serif;
+  font-family: $font-family;
   padding: 0;
   margin: 0;
   display: flex;
@@ -61,7 +61,7 @@
       flex-direction: column;
       align-items: center;
       font-size: 12px;
-      color: #666;
+      color: $titleColor;
       cursor: pointer;
       transition: all 0.2s ease-in-out;
 
@@ -84,12 +84,10 @@
     flex: 1;
     padding: 15px;
     overflow-y: auto;
-    margin-top: 10px;
   }
 
   .tab-content {
     // background-color: white;
-    padding: 20px;
     border-radius: 8px;
     // box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
   }

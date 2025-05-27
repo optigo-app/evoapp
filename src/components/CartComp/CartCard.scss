@@ -1,6 +1,6 @@
 @import "../../Variables.scss";
 
-.product-card {
+.Cart-card {
   border-radius: 8px !important;
   box-shadow:
     rgba(0, 0, 0, 0.01) 0px 0px 3px 0px,
@@ -18,8 +18,8 @@
   }
 
   .product-image {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
     border-radius: 8px;
     object-fit: cover;
   }
@@ -74,8 +74,9 @@
 
     .actions {
       margin-top: 8px;
-      display: flex;
-      gap: 10px;
+      position: absolute;
+      bottom: 0px;
+      right: -10px;
 
       .btn {
         width: 22px;
@@ -91,7 +92,7 @@
         transition: all 0.3s ease;
 
         &:hover {
-          background-color: $text2ndColor;
+          background-color: $heightlightColor;
           color: #fff;
           cursor: pointer;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -107,7 +108,7 @@
   .product-checkbox {
     position: absolute;
     top: -10px;
-    right: -5px;
+    right: -10px;
     color: $heightlightColor;
 
     &.Mui-checked {

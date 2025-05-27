@@ -1,54 +1,81 @@
-import React from 'react';
-import { Box, Typography, Button, Stack, IconButton, Divider } from '@mui/material';
-import { ChevronLeft } from 'lucide-react';
+import React, { lazy, Suspense, useState } from 'react';
+import { Box, Stack, Button, Divider, Checkbox, FormControlLabel } from '@mui/material';
+import { Printer, ScrollText } from 'lucide-react';
 import './CartPage.scss';
+import cartItems from "../../Utils/cartData.json"
+import ConfirmationDialog from '../../Utils/ConfirmationDialog/ConfirmationDialog';
 
-const dummyCartItems = [
-  {
-    image: 'https://blingbag.co.in/cdn/shop/files/IvorySarthiBridalJewellerySet_1.jpg?v=1730983702',
-    code: 'JB2023-456',
-    title: 'Bangle',
-    tray: 'Tray 3',
-    originalPrice: '45,000',
-    discountedPrice: '42,750',
-  },
-  {
-    image: 'https://media.istockphoto.com/id/1427466115/photo/beauty-model-in-wedding-jewelry-set-elegant-woman-in-necklace-with-earring-and-ring-beautiful.jpg?s=612x612&w=0&k=20&c=AT9DfkZvRbxKkuqjCEGjF9P3D3dOKZvRh2J5hw8mjt0=',
-    code: 'JB2023-456',
-    title: 'Bangle',
-    tray: 'Tray 3',
-    originalPrice: '45,000',
-    discountedPrice: '42,750',
-  },
-  {
-    image: 'https://www.shutterstock.com/image-photo/beautiful-girl-set-jewelry-woman-600nw-1482513683.jpg',
-    code: 'JB2023-456',
-    title: 'Bangle',
-    tray: 'Tray 3',
-    originalPrice: '45,000',
-    discountedPrice: '42,750',
-  },
-];
+const CartItemCard = lazy(() => import('../../components/CartComp/CartCard'));
 
 const CartPage = () => {
+  const [opencnfDialogOpen, setOpenCnfDialog] = React.useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+
+
+  const handleOpenDialog = () => {
+    setOpenCnfDialog(true);
+  }
+  const handleCloseDialog = () => {
+    setOpenCnfDialog(false);
+  }
+  const handleConfirmRemoveAll = () => {
+    console.log("All items removed from the cart");
+    handleCloseDialog();
+  }
+
+  const handlePrint = () => {
+    // Implement print functionality here
+    console.log("Print Estimate clicked");
+  }
+
   return (
     <Box className="CartMain">
-      {/* Header */}
-      <Box className='CartHeader_main'>
-        <Stack className='header-container'>
-          <IconButton>
-            <ChevronLeft className='back-arrow'/>
-          </IconButton>
-          <Typography variant="h6" fontWeight={600}>
-            Cart Items
-          </Typography>
-          <Box textAlign="right">
-            <Typography variant="body2" fontWeight={600}>John Smith</Typography>
-            <Typography variant="caption">#C12345</Typography>
-          </Box>
+      {/* Header Section */}
+      {/* <Box display="flex" justifyContent="flex-end">
+        <FormControlLabel
+          label="Select All"
+          labelPlacement="start"
+          control={<Checkbox className="cartAll-checkbox" onChange={handleSelectAll} />}
+        />
+      </Box> */}
+      {/* Cart Items List */}
+      <Suspense fallback={<></>}>
+        <Box className="CartItemList">
+          {cartItems.map(item => (
+            <CartItemCard
+              key={item.id}
+              cartItem={item}
+              handleOpenDialog={handleOpenDialog}
+              isSelected={selectedItems.includes(item)}
+            />
+          ))}
+        </Box>
+      </Suspense>
+      {/* Bottom Fixed Buttons */}
+      <Box className="CartActionsFooter">
+        <Stack direction="row" spacing={2} justifyContent="center" className="action-buttons">
+          <Button variant="outlined" startIcon={<ScrollText size={18} />}>
+            Move to Billing
+          </Button>
+          <Button variant="outlined" startIcon={<Printer size={18} />} onClick={handlePrint}>
+            Print Estimate
+          </Button>
+        </Stack>
+
+        <Divider className="footer-divider" />
+
+        <Stack direction="row" spacing={2} justifyContent="center" className="text-buttons">
+          <Button variant="text">Go to Customer</Button>
+          <Button variant="text">Remark</Button>
         </Stack>
       </Box>
-
+      <ConfirmationDialog
+        open={opencnfDialogOpen}
+        onClose={handleCloseDialog}
+        onConfirm={handleConfirmRemoveAll}
+        title="Confirm"
+        content="Are you sure you want to remove this item?"
+      />
     </Box>
   );
 };
