@@ -85,15 +85,12 @@
     padding: 15px;
     overflow-y: auto;
     margin-top: 10px;
-
-    // Add padding to top to avoid content hidden under fixed tabs when tabs are fixed
-    padding-top: 60px; // Adjust this if tabs height changes
   }
 
   .tab-content {
-    background-color: white;
+    // background-color: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+    // box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
   }
 }

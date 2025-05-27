@@ -6,14 +6,10 @@ import {
   AiOutlineShoppingCart,
   AiOutlineFileText,
 } from "react-icons/ai";
-import {
-  Box,
-  Typography,
-  IconButton,
-  Stack,
-} from "@mui/material";
+import { Box, Typography, IconButton, Stack } from "@mui/material";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CartPage from "../../Page/Cart/CartPage";
 
 const JobScanPage = () => {
   const [activeTab, setActiveTab] = useState("scan");
@@ -25,7 +21,6 @@ const JobScanPage = () => {
     const handleScroll = () => {
       if (!headerRef.current) return;
       const headerBottom = headerRef.current.getBoundingClientRect().bottom;
-      // If header bottom is <= 0, header is out of viewport
       setTabsFixed(headerBottom <= 0);
     };
 
@@ -40,7 +35,11 @@ const JobScanPage = () => {
       case "wishlist":
         return <div className="tab-content">Wishlist content here</div>;
       case "cart":
-        return <div className="tab-content">Cart content here</div>;
+        return (
+          <div className="tab-content">
+            <CartPage />
+          </div>
+        );
       case "note":
         return <div className="tab-content">Note content here</div>;
       default:
@@ -53,13 +52,12 @@ const JobScanPage = () => {
       <Box className="CartHeader_main" ref={headerRef}>
         <Stack className="header-container">
           <IconButton>
-            <ChevronLeft className="back-arrow" onClick={() => navigate('/')}/>
+            <ChevronLeft className="back-arrow" onClick={() => navigate("/")} />
           </IconButton>
           <Typography variant="h6" fontWeight={600}>
             Tab Control
           </Typography>
-          <Box textAlign="right">
-          </Box>
+          <Box textAlign="right"></Box>
         </Stack>
       </Box>
 
