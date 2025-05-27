@@ -1,13 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./JobScanPage.scss";
-import {
-  AiOutlineQrcode,
-  AiOutlineHeart,
-  AiOutlineShoppingCart,
-  AiOutlineFileText,
-} from "react-icons/ai";
 import { Box, Typography, IconButton, Stack } from "@mui/material";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FileSpreadsheet, Heart, QrCode, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CartPage from "../../Page/Cart/CartPage";
 import WishlistPage from "../../Page/Wishlist/WishlistPage";
@@ -69,28 +63,28 @@ const JobScanPage = () => {
           className={`tab-item ${activeTab === "scan" ? "active" : ""}`}
           onClick={() => setActiveTab("scan")}
         >
-          <AiOutlineQrcode size={20} />
+          <QrCode  size={20} />
           <span>Scan Job</span>
         </div>
         <div
           className={`tab-item ${activeTab === "wishlist" ? "active" : ""}`}
           onClick={() => setActiveTab("wishlist")}
         >
-          <AiOutlineHeart size={20} />
+          <Heart  size={20} />
           <span>Wishlist</span>
         </div>
         <div
           className={`tab-item ${activeTab === "cart" ? "active" : ""}`}
           onClick={() => setActiveTab("cart")}
         >
-          <AiOutlineShoppingCart size={20} />
+          <ShoppingCart  size={20} />
           <span>Cart</span>
         </div>
         <div
           className={`tab-item ${activeTab === "note" ? "active" : ""}`}
           onClick={() => setActiveTab("note")}
         >
-          <AiOutlineFileText size={20} />
+          <FileSpreadsheet  size={20} />
           <span>Note</span>
         </div>
       </div>

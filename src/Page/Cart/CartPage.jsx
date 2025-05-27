@@ -11,21 +11,6 @@ const CartPage = () => {
   const [opencnfDialogOpen, setOpenCnfDialog] = React.useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
 
-  const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      setSelectedItems(cartItems);
-    } else {
-      setSelectedItems([]);
-    }
-  }
-
-  const handleSelectItem = (item) => {
-    setSelectedItems(prevSelectedItems =>
-      prevSelectedItems.includes(item)
-        ? prevSelectedItems.filter(selectedItem => selectedItem !== item)
-        : [...prevSelectedItems, item]
-    );
-  }
 
   const handleOpenDialog = () => {
     setOpenCnfDialog(true);
@@ -36,6 +21,11 @@ const CartPage = () => {
   const handleConfirmRemoveAll = () => {
     console.log("All items removed from the cart");
     handleCloseDialog();
+  }
+
+  const handlePrint = () => {
+    // Implement print functionality here
+    console.log("Print Estimate clicked");
   }
 
   return (
@@ -57,7 +47,6 @@ const CartPage = () => {
               cartItem={item}
               handleOpenDialog={handleOpenDialog}
               isSelected={selectedItems.includes(item)}
-              handleSelectItem={() => handleSelectItem(item)}
             />
           ))}
         </Box>
@@ -68,7 +57,7 @@ const CartPage = () => {
           <Button variant="outlined" startIcon={<ScrollText size={18} />}>
             Move to Billing
           </Button>
-          <Button variant="outlined" startIcon={<Printer size={18} />}>
+          <Button variant="outlined" startIcon={<Printer size={18} />} onClick={handlePrint}>
             Print Estimate
           </Button>
         </Stack>
