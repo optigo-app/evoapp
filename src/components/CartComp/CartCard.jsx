@@ -1,9 +1,9 @@
 import React from 'react';
-import './CartItemCard.scss';
+import './CartCard.scss';
 import { Card, Typography, IconButton, Checkbox, Box } from '@mui/material';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 
-const ProductCard = ({ cartItem }) => {
+const CartCard = ({ cartItem, handleOpenDialog, isSelected, handleSelectItem }) => {
   const {
     id,
     itemCode,
@@ -12,11 +12,10 @@ const ProductCard = ({ cartItem }) => {
     oldPrice,
     newPrice,
     inStock = true,
-    selected = false,
   } = cartItem;
 
   return (
-    <Card className="product-card">
+    <Card className="Cart-card">
       <Box className="card-content">
         <img src={image} alt={title} className="product-image" />
         <Box className="product-details">
@@ -32,18 +31,18 @@ const ProductCard = ({ cartItem }) => {
             <Typography className="new-price">₹{newPrice.toLocaleString()}</Typography>
           </Box>
           <Box className="actions">
-            <IconButton>
-              <ShoppingCart  className='btn'/>
-            </IconButton>
-            <IconButton>
-              <Trash2  className='btn'/>
+            <IconButton onClick={handleOpenDialog}>
+              <Trash2 className='btn' />
             </IconButton>
           </Box>
         </Box>
-        <Checkbox className="product-checkbox" checked={selected} />
+        {/* <Checkbox className="product-checkbox"
+          checked={isSelected}
+          onChange={handleSelectItem}
+        /> */}
       </Box>
     </Card>
   );
 };
 
-export default ProductCard;
+export default CartCard;
