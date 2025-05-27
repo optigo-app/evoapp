@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useState } from 'react';
-import { Box, Stack, Button, Divider, Checkbox, FormControlLabel } from '@mui/material';
+import { Box, Stack, Button, Divider} from '@mui/material';
 import { Printer, ScrollText } from 'lucide-react';
 import './CartPage.scss';
 import cartItems from "../../Utils/cartData.json"
@@ -30,23 +30,15 @@ const CartPage = () => {
 
   return (
     <Box className="CartMain">
-      {/* Header Section */}
-      {/* <Box display="flex" justifyContent="flex-end">
-        <FormControlLabel
-          label="Select All"
-          labelPlacement="start"
-          control={<Checkbox className="cartAll-checkbox" onChange={handleSelectAll} />}
-        />
-      </Box> */}
       {/* Cart Items List */}
       <Suspense fallback={<></>}>
         <Box className="CartItemList">
-          {cartItems.map(item => (
+          {cartItems?.map(item => (
             <CartItemCard
               key={item.id}
               cartItem={item}
               handleOpenDialog={handleOpenDialog}
-              isSelected={selectedItems.includes(item)}
+              isSelected={selectedItems?.includes(item)}
             />
           ))}
         </Box>
