@@ -4,6 +4,7 @@ import { Button, Snackbar, Slide } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { AiOutlineLock } from "react-icons/ai"; // 🔒 Icon
+import { GetProfileData } from "../../API/GetProfileData/GetProfileData";
 
 const CustomerData = [
   {
@@ -54,6 +55,16 @@ const Customer = () => {
   const [timers, setTimers] = useState({});
   const [snackOpen, setSnackOpen] = useState(false);
   const navigate = useNavigate();
+
+  const GetProfileDataFun = async () => {
+    const response = await GetProfileData();
+    console.log('responseresponse', response);
+  };
+
+  useEffect(() => {
+    GetProfileDataFun();
+  },[])
+
 
   useEffect(() => {
     const interval = setInterval(() => {
