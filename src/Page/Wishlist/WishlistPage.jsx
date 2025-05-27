@@ -43,7 +43,7 @@ const WishlistPage = () => {
       {/* Cart Items List */}
       <Suspense fallback={<></>}>
         <Box className="WishItemList">
-          {cartItems.map(item => (
+          {cartItems?.map(item => (
             <WishlistCard
               key={item.id}
               cartItem={item}
