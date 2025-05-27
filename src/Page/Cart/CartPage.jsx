@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Stack, IconButton, Button, Divider } from '@mui/material';
+import { Box, Typography, Stack, IconButton, Button, Divider, Checkbox } from '@mui/material';
 import {ChevronLeft, Printer, ScrollText } from 'lucide-react';
 import CartItemCard from '../../components/CardCompoennt/CartCard';
 import './CartPage.scss';
@@ -17,10 +17,11 @@ const CartPage = () => {
           <Typography variant="body" fontWeight={600} className='header_title'>
             Cart Items
           </Typography>
-          <Box textAlign="right" className="header_subtitle">
+          {/* <Box textAlign="right" className="header_subtitle">
             <Typography variant="body2" fontWeight={600}>John Smith</Typography>
             <Typography variant="caption">#C12345</Typography>
-          </Box>
+          </Box> */}
+           <Checkbox className="cartAll-checkbox" />
         </Stack>
       </Box>
 
@@ -37,7 +38,7 @@ const CartPage = () => {
             Move to Billing
           </Button>
           <Button variant="outlined" startIcon={<Printer size={18} />}>
-            Print
+            Print Estimate
           </Button>
         </Stack>
 
