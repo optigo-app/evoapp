@@ -3,6 +3,7 @@
 .CartMain {
   padding: 0px;
   font-family: $font-family;
+  height: 100vh;
 
   .CartHeader_main {
     position: fixed;
@@ -22,15 +23,85 @@
       justify-content: space-between;
       flex-direction: row !important;
       align-items: center;
+      .MuiButtonBase-root {
+        padding: 0;
+      }
     }
 
     .header_title {
       font-size: 20px;
       font-weight: bold;
+      color: #fff;
       margin: 0;
+    }
+    .header_subtitle{
+      p{
+        font-size: 14px;
+        color: #fff;
+        margin: 0;
+      }
+      span{
+        font-size: 12px;
+        color: #fff;
+      }
     }
     .back-arrow{
       color: #fff;
     }
   }
+  .CartItemList{
+    margin-top: 70px;
+    padding-bottom: 118px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-inline: 15px;
+  }
+  .CartActionsFooter {
+    height: 100px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    
+    .action-buttons {
+      padding: 0 15px;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 12px;
+      
+      button {
+        margin-top: 8px;
+        width: 50%;
+        color: $titleColor !important;
+        border: 1px solid #d3d3d3 !important;
+        border-radius: 8px !important;
+        text-transform: none;
+        font-family: $font-family !important;
+      }
+    }
+  
+    .footer-divider {
+      margin: 8px 0;
+    }
+  
+    .text-buttons {
+      display: flex;
+      gap: 12px;
+      padding: 0 15px;
+  
+      button {
+        font-family: $font-family !important;
+        color: $heightlightColor !important;
+        font-weight: 500;
+        width: 50%;
+        text-transform: none;
+      }
+    }
+  }
+  
 }

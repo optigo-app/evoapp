@@ -1,54 +1,53 @@
 import React from 'react';
-import { Box, Typography, Button, Stack, IconButton, Divider } from '@mui/material';
-import { ChevronLeft } from 'lucide-react';
+import { Box, Typography, Stack, IconButton, Button, Divider } from '@mui/material';
+import {ChevronLeft, Printer, ScrollText } from 'lucide-react';
+import CartItemCard from '../../components/CardCompoennt/CartCard';
 import './CartPage.scss';
-
-const dummyCartItems = [
-  {
-    image: 'https://blingbag.co.in/cdn/shop/files/IvorySarthiBridalJewellerySet_1.jpg?v=1730983702',
-    code: 'JB2023-456',
-    title: 'Bangle',
-    tray: 'Tray 3',
-    originalPrice: '45,000',
-    discountedPrice: '42,750',
-  },
-  {
-    image: 'https://media.istockphoto.com/id/1427466115/photo/beauty-model-in-wedding-jewelry-set-elegant-woman-in-necklace-with-earring-and-ring-beautiful.jpg?s=612x612&w=0&k=20&c=AT9DfkZvRbxKkuqjCEGjF9P3D3dOKZvRh2J5hw8mjt0=',
-    code: 'JB2023-456',
-    title: 'Bangle',
-    tray: 'Tray 3',
-    originalPrice: '45,000',
-    discountedPrice: '42,750',
-  },
-  {
-    image: 'https://www.shutterstock.com/image-photo/beautiful-girl-set-jewelry-woman-600nw-1482513683.jpg',
-    code: 'JB2023-456',
-    title: 'Bangle',
-    tray: 'Tray 3',
-    originalPrice: '45,000',
-    discountedPrice: '42,750',
-  },
-];
+import cartItems from "../../Utils/cartData.json"
 
 const CartPage = () => {
   return (
     <Box className="CartMain">
       {/* Header */}
-      <Box className='CartHeader_main'>
-        <Stack className='header-container'>
+      <Box className="CartHeader_main">
+        <Stack direction="row" justifyContent="space-between" alignItems="center" className="header-container">
           <IconButton>
-            <ChevronLeft className='back-arrow'/>
+            <ChevronLeft className="back-arrow" />
           </IconButton>
-          <Typography variant="h6" fontWeight={600}>
+          <Typography variant="body" fontWeight={600} className='header_title'>
             Cart Items
           </Typography>
-          <Box textAlign="right">
+          <Box textAlign="right" className="header_subtitle">
             <Typography variant="body2" fontWeight={600}>John Smith</Typography>
             <Typography variant="caption">#C12345</Typography>
           </Box>
         </Stack>
       </Box>
 
+      {/* Cart Items List */}
+      <Box className="CartItemList">
+        {cartItems.map(item => (
+          <CartItemCard key={item.id} cartItem={item} />
+        ))}
+      </Box>
+      {/* Bottom Fixed Buttons */}
+      <Box className="CartActionsFooter">
+        <Stack direction="row" spacing={2} justifyContent="center" className="action-buttons">
+          <Button variant="outlined" startIcon={<ScrollText  size={18} />}>
+            Move to Billing
+          </Button>
+          <Button variant="outlined" startIcon={<Printer size={18} />}>
+            Print
+          </Button>
+        </Stack>
+
+        <Divider className="footer-divider" />
+
+        <Stack direction="row" spacing={2} justifyContent="center" className="text-buttons">
+          <Button variant="text">Go to Customer</Button>
+          <Button variant="text">Remark</Button>
+        </Stack>
+      </Box>
     </Box>
   );
 };
