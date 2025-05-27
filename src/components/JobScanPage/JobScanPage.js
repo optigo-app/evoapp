@@ -10,6 +10,7 @@ import { Box, Typography, IconButton, Stack } from "@mui/material";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CartPage from "../../Page/Cart/CartPage";
+import Scanner from "./Scanner/Scanner";
 
 const JobScanPage = () => {
   const [activeTab, setActiveTab] = useState("scan");
@@ -31,7 +32,11 @@ const JobScanPage = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "scan":
-        return <div className="tab-content">Scan Job content here</div>;
+        return (
+          <div className="tab-content">
+            <Scanner />
+          </div>
+        );
       case "wishlist":
         return <div className="tab-content">Wishlist content here</div>;
       case "cart":
