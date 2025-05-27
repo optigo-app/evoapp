@@ -53,13 +53,13 @@ const JobScanPage = () => {
     <div className="JobScanPageMain">
       <Box className="CartHeader_main" ref={headerRef}>
         <Stack className="header-container">
-          <IconButton>
+          <IconButton style={{width: '35%', display: 'flex', justifyContent: 'flex-start'}}>
             <ChevronLeft className="back-arrow" onClick={() => navigate("/")} />
           </IconButton>
-          <Typography variant="h6" fontWeight={600}>
-            Tab Control
+          <Typography variant="h6" style={{width: '33.33%' , color: 'white'}} fontWeight={600}>
+            Evo Control
           </Typography>
-          <Box textAlign="right"></Box>
+          <Box textAlign="right" style={{width: '33.33%'}}></Box>
         </Stack>
       </Box>
 
