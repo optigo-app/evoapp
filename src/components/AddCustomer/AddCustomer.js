@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import "./AddCustomer.scss";
-import { Button, Modal, Box, TextField } from "@mui/material";
-import { IoHomeSharp } from "react-icons/io5";
+import { Button, Modal, Box, TextField, Collapse, Typography, Link } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { House } from "lucide-react";
 
@@ -39,6 +38,7 @@ const AddCustomer = () => {
   const [input, setInput] = useState("");
   const [foundCustomer, setFoundCustomer] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -46,6 +46,12 @@ const AddCustomer = () => {
     lastName: "",
     email: "",
     mobile: "",
+    country: "",
+    state: "",
+    city: "",
+    pincode: "",
+    area: "",
+    fullAddress: "",
   });
 
   const handleSearch = () => {
@@ -65,6 +71,12 @@ const AddCustomer = () => {
         lastName: "",
         email: input.includes("@") ? input : "",
         mobile: input.match(/^\+?[0-9]+$/) ? input : "",
+        country: "",
+        state: "",
+        city: "",
+        pincode: "",
+        area: "",
+        fullAddress: "",
       });
       setOpenModal(true);
     }
@@ -75,7 +87,6 @@ const AddCustomer = () => {
   };
 
   const handleModalSave = () => {
-    console.log("Customer Data:", form);
     setOpenModal(false);
     setFoundCustomer({
       customerName: `${form.firstName} ${form.lastName}`,
@@ -133,6 +144,7 @@ const AddCustomer = () => {
         <Modal open={openModal} onClose={() => setOpenModal(false)}>
           <Box className="addCustomer_modalbox">
             <h3>Add New Customer</h3>
+
             <TextField
               fullWidth
               label="First Name"
@@ -165,6 +177,67 @@ const AddCustomer = () => {
               onChange={handleFormChange}
               margin="dense"
             />
+
+            <Link
+              component="button"
+              variant="body2"
+              sx={{ mt: 1, mb: 1 }}
+              onClick={() => setShowMore(!showMore)}
+            >
+              {showMore ? "Hide Extra Fields" : "Show More"}
+            </Link>
+
+            <Collapse in={showMore}>
+              <TextField
+                fullWidth
+                label="Country"
+                name="country"
+                value={form.country}
+                onChange={handleFormChange}
+                margin="dense"
+              />
+              <TextField
+                fullWidth
+                label="State"
+                name="state"
+                value={form.state}
+                onChange={handleFormChange}
+                margin="dense"
+              />
+              <TextField
+                fullWidth
+                label="City"
+                name="city"
+                value={form.city}
+                onChange={handleFormChange}
+                margin="dense"
+              />
+              <TextField
+                fullWidth
+                label="Pincode"
+                name="pincode"
+                value={form.pincode}
+                onChange={handleFormChange}
+                margin="dense"
+              />
+              <TextField
+                fullWidth
+                label="Area"
+                name="area"
+                value={form.area}
+                onChange={handleFormChange}
+                margin="dense"
+              />
+              <TextField
+                fullWidth
+                label="Full Address"
+                name="fullAddress"
+                value={form.fullAddress}
+                onChange={handleFormChange}
+                margin="dense"
+              />
+            </Collapse>
+
             <Button
               variant="contained"
               color="success"
