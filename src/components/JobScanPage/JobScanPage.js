@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./JobScanPage.scss";
-import { Box, Typography, IconButton, Stack } from "@mui/material";
-import { ChevronLeft, FileSpreadsheet, Heart, QrCode, ShoppingCart } from "lucide-react";
+import { Box, Typography, IconButton, Stack, Button } from "@mui/material";
+import {
+  ChevronLeft,
+  FileSpreadsheet,
+  Heart,
+  House,
+  QrCode,
+  ShoppingCart,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CartPage from "../../Page/Cart/CartPage";
 import WishlistPage from "../../Page/Wishlist/WishlistPage";
@@ -33,9 +40,11 @@ const JobScanPage = () => {
           </div>
         );
       case "wishlist":
-        return <div className="tab-content">
-          <WishlistPage/>
-        </div>;
+        return (
+          <div className="tab-content">
+            <WishlistPage />
+          </div>
+        );
       case "cart":
         return (
           <div className="tab-content">
@@ -53,13 +62,30 @@ const JobScanPage = () => {
     <div className="JobScanPageMain">
       <Box className="CartHeader_main" ref={headerRef}>
         <Stack className="header-container">
-          <IconButton style={{width: '35%', display: 'flex', justifyContent: 'flex-start'}}>
-            <ChevronLeft className="back-arrow" onClick={() => navigate("/")} />
-          </IconButton>
-          <Typography variant="h6" style={{width: '33.33%' , color: 'white'}} fontWeight={600}>
+          <p
+            style={{
+              width: "33.33%",
+              color: "white",
+              fontSize: "20px",
+              fontWeight: "bold",
+            }}
+          >
             Evo Control
-          </Typography>
-          <Box textAlign="right" style={{width: '33.33%'}}></Box>
+          </p>
+          <Typography
+            variant="h6"
+            style={{ width: "33.33%" }}
+            fontWeight={600}
+          ></Typography>
+          <Box textAlign="right" style={{ width: "33.33%" }}>
+            <Button
+              className="AddCustomer_Btn"
+              onClick={() => navigate("/")}
+              variant="contained"
+            >
+              <House />
+            </Button>
+          </Box>
         </Stack>
       </Box>
 
@@ -68,28 +94,28 @@ const JobScanPage = () => {
           className={`tab-item ${activeTab === "scan" ? "active" : ""}`}
           onClick={() => setActiveTab("scan")}
         >
-          <QrCode  size={20} />
+          <QrCode size={20} />
           <span>Scan Job</span>
         </div>
         <div
           className={`tab-item ${activeTab === "wishlist" ? "active" : ""}`}
           onClick={() => setActiveTab("wishlist")}
         >
-          <Heart  size={20} />
+          <Heart size={20} />
           <span>Wishlist</span>
         </div>
         <div
           className={`tab-item ${activeTab === "cart" ? "active" : ""}`}
           onClick={() => setActiveTab("cart")}
         >
-          <ShoppingCart  size={20} />
+          <ShoppingCart size={20} />
           <span>Cart</span>
         </div>
         <div
           className={`tab-item ${activeTab === "note" ? "active" : ""}`}
           onClick={() => setActiveTab("note")}
         >
-          <FileSpreadsheet  size={20} />
+          <FileSpreadsheet size={20} />
           <span>Note</span>
         </div>
       </div>

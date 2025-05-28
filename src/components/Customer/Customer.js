@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { AiOutlineLock } from "react-icons/ai"; // 🔒 Icon
 import { GetProfileData } from "../../API/GetProfileData/GetProfileData";
+import { CirclePlus } from "lucide-react";
+import { CircleUser } from 'lucide-react';
 
 const CustomerData = [
   {
@@ -58,13 +60,12 @@ const Customer = () => {
 
   const GetProfileDataFun = async () => {
     const response = await GetProfileData();
-    console.log('responseresponse', response);
+    console.log("responseresponse", response);
   };
 
   useEffect(() => {
     GetProfileDataFun();
-  },[])
-
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -148,13 +149,22 @@ const Customer = () => {
       <div className="Header_main">
         <div className="header-container">
           <p className="header_title">Customer</p>
-          <Button
-            className="AddCustomer_Btn"
-            onClick={() => navigate("/AddCustomer")}
-            variant="contained"
-          >
-            Add Customer
-          </Button>
+          <div style={{display :'flex', gap: '15px'}}>
+            <Button
+              className="AddCustomer_Btn"
+              onClick={() => navigate("/Profile")}
+              variant="contained"
+            >
+              <CircleUser />
+            </Button>
+            <Button
+              className="AddCustomer_Btn"
+              onClick={() => navigate("/AddCustomer")}
+              variant="contained"
+            >
+              <CirclePlus />
+            </Button>
+          </div>
         </div>
       </div>
 
