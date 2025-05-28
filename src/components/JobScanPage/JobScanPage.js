@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import CartPage from "../../Page/Cart/CartPage";
 import WishlistPage from "../../Page/Wishlist/WishlistPage";
 import Scanner from "./Scanner/Scanner";
+import NotePage from "../../Page/Note/NotePage";
 
 const JobScanPage = () => {
   const [activeTab, setActiveTab] = useState("scan");
@@ -52,7 +53,9 @@ const JobScanPage = () => {
           </div>
         );
       case "note":
-        return <div className="tab-content">Note content here</div>;
+        return <div className="tab-content">
+          <NotePage/>
+        </div>;
       default:
         return null;
     }
