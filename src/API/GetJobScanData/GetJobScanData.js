@@ -1,15 +1,14 @@
 import { CommonAPI } from "../CommonAPI/CommonAPI";
 
-export const GetProfileData = async () => {
-
+export const GetJobScanData = async (jobNumber) => {
+    
   let Device_Token = sessionStorage.getItem('device_token');
-
   try {
     const body = {
-      Mode: "GetProfileData",
+      Mode: "GetScanJobData",
       Token: `"${Device_Token}"`,
       ReqData:
-        `[{"ForEvt":"GetProfileData","DeviceToken":"${Device_Token}","AppId":"3"}]`,
+        `[{"ForEvt":"GetScanJobData","DeviceToken":"${Device_Token}","AppId":"3","JobNo":"${jobNumber}"}]`,
     };
     const response = await CommonAPI(body);
     if (response?.Data) {

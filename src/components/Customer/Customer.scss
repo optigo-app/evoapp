@@ -31,15 +31,20 @@
 
     .AddCustomer_Btn {
       height: 36px;
-      min-width: 120px;
+      width: 40px;
       border-radius: 6px;
       font-weight: bold;
       box-shadow: none;
+      background-color: #b15bbe;
+      min-width: 10px !important;
+      padding: 0px !important;
+      margin: 0px !important;
+      border-radius: 50px !important;
     }
   }
 
   .CustomerContainer {
-    padding: 16px;
+    padding: 10px;
 
     .CustomerSearch {
       margin-bottom: 10px;

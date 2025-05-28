@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { QrReader } from "react-qr-reader";
-import productData from "./ProductData.json";
 import "./Scanner.scss";
-import { Box, Button, Divider, Stack } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
+import { GetJobScanData } from "../../../API/GetJobScanData/GetJobScanData";
+import { ShoppingBag } from "lucide-react";
 
 const Scanner = () => {
   const [scannedData, setScannedData] = useState([]);
@@ -13,46 +14,66 @@ const Scanner = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const savedScans = sessionStorage.getItem("AllScanJobData");
+    if (savedScans) {
+      const parsed = JSON.parse(savedScans);
+      setScannedData(parsed);
+      if (parsed.length > 0) setActiveDetail(parsed[0]);
+    }
+
+    // Camera permission
     navigator.mediaDevices
       .getUserMedia({ video: true })
       .then((stream) => {
         console.log("Camera permission granted");
-        stream.getTracks().forEach((track) => track.stop()); // release immediately
+        stream.getTracks().forEach((track) => track.stop());
       })
       .catch((err) => {
         console.error("Camera permission denied", err);
-        setError(
-          "Camera permission denied. Please allow camera access in settings."
-        );
+        setError("Camera permission denied. Please allow camera access.");
       });
   }, []);
 
-  const findProduct = (jobNumber) =>
-    productData.find((item) => item.jobNumber === jobNumber);
+  const addScan = async (jobNumber) => {
+    try {
+      const response = await GetJobScanData(jobNumber);
 
-  const addScan = (jobNumber) => {
-    const product = findProduct(jobNumber);
-    if (!product) return;
-    setScannedData((prev) => {
-      const newList = [jobNumber, ...prev.filter((j) => j !== jobNumber)];
-      return newList.slice(0, 5);
-    });
+      const jobData = response?.DT[0];
 
-    setActiveDetail(product);
-    setIsExpanded(true);
-  };
-
-  const handleScan = (result) => {
-    if (result) {
-      const data = result?.text || "";
-      const isLikelyValidQR = data.length > 3; // You can make this stricter
-
-      if (isLikelyValidQR) {
-        addScan(data);
+      console.log("response", response);
+      if (!jobData) {
+        setError("Invalid Job Number or No Data Found.");
+        return;
       }
-    }
-    if (error) {
-      console.error("QR Error:", error);
+
+      const formatted = {
+        jobNumber: jobData.JobNo,
+        designNo: jobData.DesignNo,
+        price: jobData.Amount,
+        metal: jobData.TotalMetalCost,
+        diamoond: jobData.TotalDiamondCost,
+        colorStone: jobData.TotalColorstoneCost,
+        makingCharge: jobData.TotalMakingCost,
+        taxAmount: jobData.TotalOtherCost,
+        netWeight: jobData.NetWt,
+        GrossWeight: jobData.GrossWt,
+        status: "Scanned",
+        image: `${jobData.CDNDesignImageFol}${jobData.ImageName}`,
+      };
+
+      const updatedData = [
+        formatted,
+        ...scannedData.filter((j) => j.jobNumber !== formatted.jobNumber),
+      ].slice(0, 5);
+
+      setScannedData(updatedData);
+      setActiveDetail(formatted);
+      setIsExpanded(true);
+      sessionStorage.setItem("AllScanJobData", JSON.stringify(updatedData));
+      setError(null);
+    } catch (err) {
+      console.error("Error during scan", err);
+      setError("Failed to fetch job data.");
     }
   };
 
@@ -63,72 +84,76 @@ const Scanner = () => {
     }
   };
 
-  const renderCollapsedTop = () => (
-    <div
-      className="top-detail-card collapsed"
-      onClick={() => setIsExpanded(true)}
-    >
-      <div className="left">
-        <strong>{activeDetail.jobNumber}</strong>
-        <p>₹{activeDetail.price}</p>
+  const renderCollapsedTop = () =>
+    activeDetail && (
+      <div
+        className="top-detail-card collapsed"
+        onClick={() => setIsExpanded(true)}
+      >
+        <div className="left">
+          <strong>{activeDetail.jobNumber}</strong>
+          <p>₹{activeDetail.price}</p>
+        </div>
+        <div className="right">Tap to open</div>
       </div>
-      <div className="right">Tap to open</div>
-    </div>
-  );
+    );
 
-  const renderExpandedTop = () => (
-    <div className="top-detail-card expanded">
-      <div className="header">
-        <span>{activeDetail.jobNumber}</span>
-        <button onClick={() => setIsExpanded(false)}>Close</button>
-      </div>
-      <div className="body">
-        <h3>₹{activeDetail.price}</h3>
-        <p className="info_main_section">
-          Metal:
-          <span className="info_main_section_span">₹{activeDetail.metal}</span>
-        </p>
-        <p className="info_main_section">
-          Diamond:{" "}
-          <span className="info_main_section_span">
-            ₹{activeDetail.diamoond}
-          </span>
-        </p>
-        <p className="info_main_section">
-          Color Stone:{" "}
-          <span className="info_main_section_span">
-            ₹{activeDetail.colorStone}
-          </span>
-        </p>
-        <p className="info_main_section">
-          Making Charges:{" "}
-          <span className="info_main_section_span">
-            ₹{activeDetail.makingCharge}
-          </span>
-        </p>
-        <p className="info_main_section">
-          Tax Amount:{" "}
-          <span className="info_main_section_span">
-            ₹{activeDetail.taxAmount}
-          </span>
-        </p>
-        <div className="weights">
-          <p style={{ display: "flex", flexDirection: "column" }}>
-            Net Weight{" "}
-            <span style={{ color: "#00a2e1", fontWeight: 600 }}>
-              {activeDetail.netWeight} gm
+  const renderExpandedTop = () =>
+    activeDetail && (
+      <div className="top-detail-card expanded">
+        <div className="header">
+          <span>{activeDetail.jobNumber}</span>
+          <button onClick={() => setIsExpanded(false)}>Close</button>
+        </div>
+        <div className="body">
+          <h3>₹{activeDetail.price}</h3>
+          <p className="info_main_section">
+            Metal:{" "}
+            <span className="info_main_section_span">
+              ₹{activeDetail.metal}
             </span>
           </p>
-          <p style={{ display: "flex", flexDirection: "column" }}>
-            Gross Weight{" "}
-            <span style={{ color: "#00a2e1", fontWeight: 600 }}>
-              {activeDetail.GrossWeight} gm
+          <p className="info_main_section">
+            Diamond:{" "}
+            <span className="info_main_section_span">
+              ₹{activeDetail.diamoond}
             </span>
           </p>
+          <p className="info_main_section">
+            Color Stone:{" "}
+            <span className="info_main_section_span">
+              ₹{activeDetail.colorStone}
+            </span>
+          </p>
+          <p className="info_main_section">
+            Making Charges:{" "}
+            <span className="info_main_section_span">
+              ₹{activeDetail.makingCharge}
+            </span>
+          </p>
+          <p className="info_main_section">
+            Tax Amount:{" "}
+            <span className="info_main_section_span">
+              ₹{activeDetail.taxAmount}
+            </span>
+          </p>
+          <div className="weights">
+            <p style={{ display: "flex", flexDirection: "column" }}>
+              Net Weight{" "}
+              <span style={{ color: "#00a2e1", fontWeight: 600 }}>
+                {activeDetail.netWeight} gm
+              </span>
+            </p>
+            <p style={{ display: "flex", flexDirection: "column" }}>
+              Gross Weight{" "}
+              <span style={{ color: "#00a2e1", fontWeight: 600 }}>
+                {activeDetail.GrossWeight} gm
+              </span>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="scanner-container">
@@ -166,32 +191,33 @@ const Scanner = () => {
         </div>
       )}
 
+      {error && <p className="error-message">{error}</p>}
+
       {activeDetail &&
         (isExpanded ? renderExpandedTop() : renderCollapsedTop())}
 
       {scannedData.length !== 0 && (
         <div className="recent-scans">
           <p className="ProductScanTitleRecent">Recent Scans</p>
-          {scannedData.map((jobNumber, idx) => {
-            const data = findProduct(jobNumber);
-            if (!data) return null;
-            return (
-              <div
-                key={idx}
-                className="recent-item"
-                onClick={() => {
-                  setActiveDetail(data);
-                  setIsExpanded(true);
-                }}
-              >
-                <div className="left">
-                  <strong>{data.jobNumber}</strong>
-                  <p>₹{data.price}</p>
-                </div>
-                <div className="status">{data.status}</div>
+          {scannedData.map((data, idx) => (
+            <div
+              key={idx}
+              className="recent-item"
+              onClick={() => {
+                setActiveDetail(data);
+                setIsExpanded(true);
+              }}
+            >
+              <div className="left">
+                <strong>{data.jobNumber}</strong>
+                <p>₹{data.price}</p>
               </div>
-            );
-          })}
+              <div>
+                <ShoppingBag />
+              </div>
+              {/* <div className="status">{data.status}</div> */}
+            </div>
+          ))}
         </div>
       )}
 

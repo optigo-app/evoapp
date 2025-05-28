@@ -3,6 +3,7 @@ import "./AddCustomer.scss";
 import { Button, Modal, Box, TextField } from "@mui/material";
 import { IoHomeSharp } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { House } from "lucide-react";
 
 const CustomerData = [
   {
@@ -85,8 +86,18 @@ const AddCustomer = () => {
   return (
     <div className="AddCustomerContainer">
       <div className="Header_main">
-        <p className="header_title">Add Customer</p>
-        <IoHomeSharp style={{fontSize: '30px', marginRight: '10px'}} onClick={() => navigate('/')}/>
+        <div className="header-container">
+          <p className="header_title">Add Customer</p>
+          <div style={{ display: "flex", gap: "15px" }}>
+            <Button
+              className="AddCustomer_Btn"
+              onClick={() => navigate("/")}
+              variant="contained"
+            >
+              <House />
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="AddCustomer_sub">
