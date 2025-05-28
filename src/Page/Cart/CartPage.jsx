@@ -1,16 +1,26 @@
-import React, { lazy, Suspense, useState } from 'react';
-import { Box, Stack, Button, Divider} from '@mui/material';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+import { Box, Stack, Button, Divider } from '@mui/material';
 import { Printer, ScrollText } from 'lucide-react';
 import './CartPage.scss';
-import cartItems from "../../Utils/cartData.json"
 import ConfirmationDialog from '../../Utils/ConfirmationDialog/ConfirmationDialog';
+import { GetCartWishApi } from '../../API/Cart_WishlistAPI/GetCartlistApi';
 
 const CartItemCard = lazy(() => import('../../components/CartComp/CartCard'));
 
 const CartPage = () => {
+  const [cartItems, setCartItems] = useState();
   const [opencnfDialogOpen, setOpenCnfDialog] = React.useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
 
+  const getCartData = async () => {
+    const mode = "GetCartList";
+    const res = await GetCartWishApi({ mode });
+    setCartItems(res?.DT);
+  }
+
+  useEffect(() => {
+    getCartData();
+  }, [])
 
   const handleOpenDialog = () => {
     setOpenCnfDialog(true);

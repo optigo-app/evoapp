@@ -1,15 +1,28 @@
-import React, { lazy, Suspense, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Box, Stack, Button, Divider, Checkbox, FormControlLabel } from '@mui/material';
 import { Printer, ScrollText } from 'lucide-react';
 import './WishlistPage.scss';
 import cartItems from "../../Utils/cartData.json"
 import ConfirmationDialog from '../../Utils/ConfirmationDialog/ConfirmationDialog';
+import { GetCartWishApi } from '../../API/Cart_WishlistAPI/GetCartlistApi';
 
 const WishlistCard = lazy(() => import('../../components/WishlistComp/WishCard'));
 
 const WishlistPage = () => {
+  const [WishlistItems, setWishlistItems] = useState();
+  console.log('WishlistItems: ', WishlistItems);
   const [opencnfDialogOpen, setOpenCnfDialog] = React.useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+
+  const getWishlistData = async () => {
+    const mode = "GetWishList";
+    const res = await GetCartWishApi({ mode });
+    setWishlistItems(res?.DT);
+  }
+
+  useEffect(() => {
+    getWishlistData();
+  }, [])
 
   const handleSelectAll = (event) => {
     if (event.target.checked) {

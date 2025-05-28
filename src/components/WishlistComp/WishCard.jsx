@@ -27,8 +27,8 @@ const WishlistCard = ({ cartItem, handleOpenDialog, isSelected, handleSelectItem
             {title}
           </Typography>
           <Box className="price-section">
-            <Typography className="old-price">₹{oldPrice.toLocaleString()}</Typography>
-            <Typography className="new-price">₹{newPrice.toLocaleString()}</Typography>
+            <Typography className="old-price">₹{oldPrice?.toLocaleString()}</Typography>
+            <Typography className="new-price">₹{newPrice?.toLocaleString()}</Typography>
           </Box>
           <Box className="actions">
             <IconButton>
