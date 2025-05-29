@@ -86,6 +86,7 @@
         position: relative;
         font-family: $font-family;
         transition: 0.3s ease-in-out;
+        min-height: 70px;
 
         .card-header {
           display: flex;

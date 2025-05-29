@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LoadingBackdrop from "./Utils/LoadingBackdrop";
 import Profile from "./components/ProfilePage/Profile";
+import { ToastContainer } from "./Utils/Tostify/ToastManager";
 
 const Customer = lazy(() => import("./components/Customer/Customer"));
 const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
@@ -15,13 +16,7 @@ function App() {
     const token = queryParams.get("token");
     const SV = queryParams.get("SV");
 
-    // if (device_token !== undefined && SV !== null && token !== null) {
-    //   sessionStorage.setItem("device_token", device_token);
-    //   sessionStorage.setItem("token", token);
-    //   sessionStorage.setItem("SV", SV);
-    //   sessionStorage.setItem("isLogin", true);
-    // }
-    if (device_token !== undefined) {
+    if (device_token !== undefined && device_token !== null) {
       sessionStorage.setItem("device_token", device_token);
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("SV", SV);
@@ -31,7 +26,8 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Suspense fallback={<LoadingBackdrop />}> 
+     <ToastContainer />
+      <Suspense fallback={<LoadingBackdrop />}>
         <Routes>
           <Route path="/" element={<Customer />} />
           <Route path="/AddCustomer" element={<AddCustomer />} />
