@@ -11,8 +11,8 @@ export const GetCartWishApi = async ({ mode }) => {
             ForEvt: mode,
             DeviceToken: `${Device_Token}`,
             AppId: "3",
-            CustomerId: activeCust?.CustomerId || "",
-            IsVisitor: activeCust?.IsVisitor || "",
+            CustomerId: activeCust?.CustomerId,
+            IsVisitor: activeCust?.IsVisitor,
         }
     ];
     try {
