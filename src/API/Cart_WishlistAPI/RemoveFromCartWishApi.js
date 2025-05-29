@@ -8,7 +8,7 @@ export const RemoveFromCartWishApi = async ({
 }) => {
   const Device_Token = sessionStorage.getItem("device_token");
   if (!mode && !cartWishData) {
-    return console.error("Mode are required for RemoveFromCartApi");
+    return console.error("Mode are required for RemoveFromCartWishApi");
   }
   try {
     const body = {
