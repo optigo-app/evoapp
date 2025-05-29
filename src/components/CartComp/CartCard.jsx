@@ -12,7 +12,7 @@ const CartCard = ({ cartItem, handleOpenDialog }) => {
         <img src={cartItem?.CDNDesignImageFol + cartItem?.ImageName} alt={cartItem?.TitalLine} className="product-image" />
         <Box className="product-details">
           <Box className="product-id">
-            <Typography className='itemCode'>{cartItem?.DesignNo}</Typography>
+            <Typography className='itemCode'>{cartItem?.JobNo}({cartItem?.DesignNo})</Typography>
             {cartItem?.StockId && <span className="status-dot" />}
           </Box>
           <Typography variant="subtitle1" className="product-title">
@@ -23,12 +23,12 @@ const CartCard = ({ cartItem, handleOpenDialog }) => {
             <Typography className="new-price">₹{parseFloat(cartItem?.Amount).toFixed(2)?.toLocaleString()}</Typography>
           </Box>
           <Box className="actions">
-            <IconButton onClick={handleOpenDialog}>
+            <IconButton onClick={() => handleOpenDialog(cartItem)}>
               <Trash2 className='btn' />
             </IconButton>
           </Box>
         </Box>
-      </Box>  
+      </Box>
     </Card>
   );
 };
