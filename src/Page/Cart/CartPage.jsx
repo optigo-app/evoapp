@@ -88,12 +88,12 @@ const CartPage = () => {
               </Button>
             </Stack>
 
-            <Divider className="footer-divider" />
+            {/* <Divider className="footer-divider" />
 
             <Stack direction="row" spacing={2} justifyContent="center" className="text-buttons">
               <Button variant="text">Go to Customer</Button>
               <Button variant="text">Remark</Button>
-            </Stack>
+            </Stack> */}
           </Box>
         </>
       ) : (

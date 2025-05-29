@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import { Printer, ScrollText } from "lucide-react";
 import "./WishlistPage.scss";
-import cartItems from "../../Utils/cartData.json";
 import ConfirmationDialog from "../../Utils/ConfirmationDialog/ConfirmationDialog";
 import { GetCartWishApi } from "../../API/Cart_WishlistAPI/GetCartlistApi";
 import LoadingBackdrop from "../../Utils/LoadingBackdrop";
@@ -23,18 +22,16 @@ const WishlistCard = lazy(() =>
 
 const WishlistPage = () => {
   const [isLoading, setIsLoading] = useState(null);
-  const [WishlistItems, setWishlistItems] = useState();
-  console.log("WishlistItems: ", WishlistItems);
-  const [opencnfDialogOpen, setOpenCnfDialog] = React.useState(false);
+  const [WishlistItems, setWishlistItems] = useState([]);
+  const [opencnfDialogOpen, setOpenCnfDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
-  console.log('selectedItems: ', selectedItems);
 
   const getWishlistData = async () => {
     setIsLoading(true);
-    const mode = "GetWishList";
-    const res = await GetCartWishApi({ mode });
+    const res = await GetCartWishApi({ mode: "GetWishList" });
     if (res) {
-      setWishlistItems(res?.DT);
+      const updated = res?.DT?.map(item => ({ ...item, isSelected: false }));
+      setWishlistItems(updated);
       setIsLoading(false);
     }
   };
@@ -44,41 +41,44 @@ const WishlistPage = () => {
   }, []);
 
   const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      setSelectedItems(cartItems);
-    } else {
-      setSelectedItems([]);
-    }
+    const checked = event.target.checked;
+    const updatedItems = WishlistItems.map((item) => ({
+      ...item,
+      isSelected: checked,
+    }));
+    setWishlistItems(updatedItems);
+    setSelectedItems(checked ? updatedItems : []);
   };
 
   const handleSelectItem = (item) => {
-    setSelectedItems((prevSelectedItems) =>
-      prevSelectedItems.includes(item)
-        ? prevSelectedItems.filter((selectedItem) => selectedItem !== item)
-        : [...prevSelectedItems, item]
+    const updatedItems = WishlistItems.map((wishlistItem) =>
+      wishlistItem.id === item.id
+        ? { ...wishlistItem, isSelected: !wishlistItem.isSelected }
+        : wishlistItem
     );
+    setWishlistItems(updatedItems);
+
+    const updatedSelectedItems = updatedItems.filter(i => i.isSelected);
+    setSelectedItems(updatedSelectedItems);
   };
+
   const hanldeRemoveFromCart = async () => {
     setIsLoading(true);
     const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", cartWishData: selectedItems[0] });
     if (res) {
-      setWishlistItems(prevItems => prevItems.filter(item => !selectedItems.includes(item)));
+      setWishlistItems(prev => prev.filter(item => !selectedItems.includes(item)));
       setSelectedItems([]);
-    } else {
-      console.error("Failed to remove items from cart");
     }
     setIsLoading(false);
     handleCloseDialog();
-  }
+  };
 
-  const handleWishToCart = async (wishlistItems) => {
+  const handleWishToCart = async (wishlistItem) => {
     setIsLoading(true);
-    const res = await AddCartFromWishListApi({ flag: "single", cartWishData: wishlistItems });
+    const res = await AddCartFromWishListApi({ flag: "single", cartWishData: wishlistItem });
     if (res) {
-      console.log("wishlist to cart added successfully");
-      setSelectedItems([]);
-    } else {
-      console.error("Failed to remove items from cart");
+      console.log("Moved to cart");
+      setSelectedItems(prev => prev.filter(item => item.id !== wishlistItem.id));
     }
     setIsLoading(false);
     handleCloseDialog();
@@ -88,26 +88,22 @@ const WishlistPage = () => {
     setIsLoading(true);
     const res = await AddCartFromWishListApi({ flag: "multi", cartWishData: WishlistItems[0], IsMoveAll: 1 });
     if (res) {
-      console.log("wishlist to cart added successfully");
+      console.log("All wishlist items moved to cart");
       setSelectedItems([]);
-    } else {
-      console.error("Failed to remove items from cart");
     }
     setIsLoading(false);
     handleCloseDialog();
   };
 
-  const handleOpenDialog = (wishlistItems) => {
-    setSelectedItems([wishlistItems]);
+  const handleOpenDialog = (wishlistItem) => {
+    setSelectedItems([wishlistItem]);
     setOpenCnfDialog(true);
   };
-  const handleCloseDialog = () => {
-    setOpenCnfDialog(false);
-  };
 
-  const handleConfirmRemoveAll = () => {
-    hanldeRemoveFromCart();
-  }
+  const handleCloseDialog = () => setOpenCnfDialog(false);
+  const handleConfirmRemoveAll = () => hanldeRemoveFromCart();
+
+  const allSelected = WishlistItems.length > 0 && WishlistItems.every(item => item.isSelected);
 
   return (
     <Box className="WishlistMain">
@@ -122,14 +118,15 @@ const WishlistPage = () => {
                   key={item.id}
                   cartItem={item}
                   wishlistItems={item}
+                  isSelected={item.isSelected}
                   handleOpenDialog={handleOpenDialog}
-                  isSelected={selectedItems.includes(item)}
                   handleSelectItem={() => handleSelectItem(item)}
                   handleWishToCart={handleWishToCart}
                 />
               ))}
             </Box>
           </Suspense>
+
           <Box className="WishActionsFooter">
             <Box display="flex" justifyContent="flex-start">
               <FormControlLabel
@@ -139,6 +136,7 @@ const WishlistPage = () => {
                 control={
                   <Checkbox
                     className="WishAll-checkbox"
+                    checked={allSelected}
                     onChange={handleSelectAll}
                   />
                 }
@@ -146,12 +144,7 @@ const WishlistPage = () => {
             </Box>
             <Divider className="footer-divider" />
 
-            <Stack
-              direction="row"
-              spacing={2}
-              justifyContent="center"
-              className="action-buttons"
-            >
+            <Stack direction="row" spacing={2} justifyContent="center" className="action-buttons">
               <Button variant="outlined" startIcon={<ScrollText size={18} />} onClick={handleAllWishToCart}>
                 Move to Cart
               </Button>
