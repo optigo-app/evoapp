@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { QrReader } from "react-qr-reader";
 import "./Scanner.scss";
-import { Box, Button, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  Stack,
+  Modal,
+  Typography,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
 import { ShoppingBag } from "lucide-react";
 import { showToast } from "../../../Utils/Tostify/ToastManager";
 import { Heart } from "lucide-react";
 import { ShoppingCart } from "lucide-react";
 import { Percent } from "lucide-react";
 import { CallApi } from "../../../API/CallApi/CallApi";
+import DiscountModal from "./DiscountModal";
 
 const Scanner = () => {
   const [scannedData, setScannedData] = useState([]);
@@ -16,9 +26,30 @@ const Scanner = () => {
   const [activeDetail, setActiveDetail] = useState(null);
   const [isExpanded, setIsExpanded] = useState(true);
   const [error, setError] = useState(null);
+  const [discountModalOpen, setDiscountModalOpen] = useState(false);
+  const [discountType, setDiscountType] = useState("flat"); // 'flat' or 'percentage'
+  const [discountValue, setDiscountValue] = useState();
+  const [calculatedPrice, setCalculatedPrice] = useState();
+
   const activeCustomer = JSON.parse(
     sessionStorage.getItem("curruntActiveCustomer")
   );
+
+  useEffect(() => {
+    if (!activeDetail) return;
+
+    const original = Number(activeDetail.price);
+    const discount = Number(discountValue);
+
+    let final = 0;
+    if (discountType === "flat") {
+      final = original - discount;
+    } else {
+      final = original - (original * discount) / 100;
+    }
+
+    setCalculatedPrice(final > 0 ? final.toFixed(2) : 0);
+  }, [discountValue, discountType, activeDetail]);
 
   useEffect(() => {
     const savedScans = sessionStorage.getItem("AllScanJobData");
@@ -67,6 +98,8 @@ const Scanner = () => {
         taxAmount: jobData.TotalOtherCost,
         netWeight: jobData.NetWt,
         GrossWeight: jobData.GrossWt,
+        CartListId: jobData.CartListId,
+        WishListId: jobData.WishListId,
         status: "Scanned",
         image: `${jobData.CDNDesignImageFol}${jobData.ImageName}`,
         isInCartList: jobData.IsInCartList, // NEW
@@ -109,7 +142,7 @@ const Scanner = () => {
               ForEvt: "RemoveFromWishList",
               DeviceToken: Device_Token,
               AppId: 3,
-              CartWishId: current.CartWishId || 0,
+              CartWishId: current.WishListId || 0,
               IsRemoveAll: 0,
               CustomerId: activeCustomer?.CustomerId || 0,
               IsVisitor: activeCustomer?.IsVisitor || 0,
@@ -178,10 +211,10 @@ const Scanner = () => {
   const toggleCart = async () => {
     const Device_Token = sessionStorage.getItem("device_token");
     const current = activeDetail;
-  
+
     try {
       if (!current) return;
-  
+
       if (current.isInCartList) {
         const body = {
           Mode: "RemoveFromCart",
@@ -191,7 +224,7 @@ const Scanner = () => {
               ForEvt: "RemoveFromCart",
               DeviceToken: Device_Token,
               AppId: 3,
-              CartWishId: current.CartWishId || 0,
+              CartWishId: current.CartListId,
               IsRemoveAll: 0,
               CustomerId: activeCustomer.CustomerId || 0,
               IsVisitor: activeCustomer.IsVisitor || 0,
@@ -205,7 +238,7 @@ const Scanner = () => {
           fontColor: "#fff",
           duration: 4000,
         });
-  
+
         const updated = {
           ...current,
           isInCartList: 0,
@@ -253,7 +286,7 @@ const Scanner = () => {
       });
     }
   };
-  
+
   const updateScannedAndSession = (updatedItem) => {
     const updatedList = scannedData.map((item) =>
       item.jobNumber === updatedItem.jobNumber ? updatedItem : item
@@ -363,7 +396,10 @@ const Scanner = () => {
             <p>Cart</p>
           </div>
 
-          <div className="scanner_List_moreview">
+          <div
+            className="scanner_List_moreview"
+            onClick={() => setDiscountModalOpen(true)}
+          >
             <Percent />
             <p>Discount</p>
           </div>
@@ -371,8 +407,134 @@ const Scanner = () => {
       </div>
     );
 
+  const handleApplyDiscount = async () => {
+    const Device_Token = sessionStorage.getItem("device_token");
+    const discount = Number(discountValue);
+    const body = {
+      Mode: "AddToCart",
+      Token: Device_Token,
+      ReqData: JSON.stringify([
+        {
+          ForEvt: "AddToCart",
+          DeviceToken: Device_Token,
+          AppId: 3,
+          JobNo: activeDetail?.jobNumber,
+          CustomerId: activeDetail?.CustomerId,
+          IsVisitor: activeDetail?.IsVisitor,
+          DiscountOnId: discountType == "flat" ? 1 : 0,
+          Discount: discount ?? 0,
+        },
+      ]),
+    };
+
+    try {
+      await CallApi(body);
+      showToast({
+        message: "Item added to cart with discount",
+        bgColor: "#4caf50",
+        fontColor: "#fff",
+        duration: 5000,
+      });
+
+      const updated = {
+        ...activeDetail,
+        isInCartList: 1,
+        discountedPrice: calculatedPrice,
+      };
+      updateScannedAndSession(updated);
+      setDiscountModalOpen(false);
+    } catch (error) {
+      console.error("Error applying discount", error);
+      showToast({
+        message: "Failed to apply discount",
+        bgColor: "#f44336",
+        fontColor: "#fff",
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <div className="scanner-container">
+      <DiscountModal
+        discountModalOpen={discountModalOpen}
+        setDiscountModalOpen={setDiscountModalOpen}
+        activeDetail={activeDetail}
+        updateScannedAndSession={updateScannedAndSession}
+        showToast={showToast}
+      />
+
+      {/* <Modal
+        open={discountModalOpen}
+        onClose={() => setDiscountModalOpen(false)}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 350,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            outline: 'none',
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Apply Discount
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            <strong>Job No:</strong> {activeDetail?.jobNumber}
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            <strong>Original Price:</strong> ₹{activeDetail?.price}
+          </Typography>
+
+          <ToggleButtonGroup
+            value={discountType}
+            exclusive
+            onChange={(e, newType) => newType && setDiscountType(newType)}
+            fullWidth
+            sx={{ my: 2 }}
+          >
+            <ToggleButton value="flat">Flat Amount</ToggleButton>
+            <ToggleButton value="percentage">Percentage</ToggleButton>
+          </ToggleButtonGroup>
+
+          <TextField
+            label={discountType === "flat" ? "Discount (₹)" : "Discount (%)"}
+            type="number"
+            value={discountValue === 0 ? "" : discountValue}
+            onChange={(e) => setDiscountValue(Number(e.target.value))}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+
+          <Typography variant="body2" gutterBottom>
+            <strong>Discounted Price:</strong> ₹{calculatedPrice}
+          </Typography>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleApplyDiscount}
+            >
+              Save & Add to Cart
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => setDiscountModalOpen(false)}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      </Modal> */}
+
       <p className="ProductScanTitle">Product Scanner</p>
 
       {mode === "qr" ? (
