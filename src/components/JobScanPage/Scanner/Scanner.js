@@ -175,15 +175,85 @@ const Scanner = () => {
       });
     }
   };
-
-  const toggleCart = () => {
-    const updated = {
-      ...activeDetail,
-      isInCartList: activeDetail.isInCartList ? 0 : 1,
-    };
-    updateScannedAndSession(updated);
+  const toggleCart = async () => {
+    const Device_Token = sessionStorage.getItem("device_token");
+    const current = activeDetail;
+  
+    try {
+      if (!current) return;
+  
+      if (current.isInCartList) {
+        const body = {
+          Mode: "RemoveFromCart",
+          Token: `"${Device_Token}"`,
+          ReqData: JSON.stringify([
+            {
+              ForEvt: "RemoveFromCart",
+              DeviceToken: Device_Token,
+              AppId: 3,
+              CartWishId: current.CartWishId || 0,
+              IsRemoveAll: 0,
+              CustomerId: activeCustomer.CustomerId || 0,
+              IsVisitor: activeCustomer.IsVisitor || 0,
+            },
+          ]),
+        };
+        const response = await CallApi(body);
+        showToast({
+          message: "Removed from Cart",
+          bgColor: "#f44336",
+          fontColor: "#fff",
+          duration: 4000,
+        });
+  
+        const updated = {
+          ...current,
+          isInCartList: 0,
+        };
+        updateScannedAndSession(updated);
+      } else {
+        const body = {
+          Mode: "AddToCart",
+          Token: `"${Device_Token}"`,
+          ReqData: JSON.stringify([
+            {
+              ForEvt: "AddToCart",
+              DeviceToken: Device_Token,
+              AppId: 3,
+              JobNo: current.jobNumber,
+              CustomerId: activeCustomer.CustomerId || 0,
+              IsVisitor: activeCustomer.IsVisitor || 0,
+              DiscountOnId: 0,
+              Discount: 0,
+            },
+          ]),
+        };
+        const response = await CallApi(body);
+        const insertedId = response?.DT?.[0]?.CartWishId || 0;
+        showToast({
+          message: "Added to Cart",
+          bgColor: "#4caf50",
+          fontColor: "#fff",
+          duration: 4000,
+        });
+        const updated = {
+          ...current,
+          isInCartList: 1,
+          CartWishId: insertedId,
+        };
+        updateScannedAndSession(updated);
+      }
+    } catch (error) {
+      console.error("Cart toggle failed:", error);
+      showToast({
+        message: "Something went wrong. Try again.",
+        bgColor: "#ff9800",
+        fontColor: "#fff",
+        duration: 4000,
+      });
+    }
   };
-
+  
   const updateScannedAndSession = (updatedItem) => {
     const updatedList = scannedData.map((item) =>
       item.jobNumber === updatedItem.jobNumber ? updatedItem : item
