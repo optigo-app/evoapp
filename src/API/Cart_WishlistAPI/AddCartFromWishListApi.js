@@ -7,7 +7,7 @@ export const AddCartFromWishListApi = async ({
 }) => {
     const Device_Token = sessionStorage.getItem("device_token");
     if (!cartWishData) {
-        return console.error("cartWishData are required for RemoveFromCartApi");
+        return console.error("cartWishData are required for AddCartFromWishListApi");
     }
     try {
         const body = {
