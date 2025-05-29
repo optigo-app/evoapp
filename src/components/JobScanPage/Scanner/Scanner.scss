@@ -5,7 +5,7 @@
 .scanner-container {
   max-width: 500px;
   margin: auto;
-  padding-bottom: 100px;
+  padding-bottom: 150px;
   font-family: sans-serif;
   background: #f9f9f9;
 
@@ -159,13 +159,12 @@
     }
   }
 
-  .top-detail-card {
+  .top-detail-card_Big {
     transition: all 0.3s ease-in-out;
     margin-top: 1rem;
     background: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
-    padding: 1rem;
     font-family: $font-family;
 
     &.collapsed {
@@ -226,6 +225,8 @@
           font-size: 17px !important;
         }
 
+      
+
         .weights {
           display: flex;
           justify-content: space-between;
@@ -233,6 +234,25 @@
           color: #00a2e1;
           border-top: 1px solid rgb(247 236 236);
         }
+      }
+
+      .scanner_List_moreview{
+        display: flex;
+        align-items: center;
+        background-color: #ebe7e7;
+        gap: 7px;
+        height: 30px;
+        border-radius: 5px;
+        padding: 5px 10px;
+        min-width: 90px;
+        justify-content: center;
+        p{
+          font-weight: 600;
+        }
+      }
+      .scanner_List_moreview svg {
+        transition: all 0.2s ease;
+        cursor: pointer;
       }
     }
   }

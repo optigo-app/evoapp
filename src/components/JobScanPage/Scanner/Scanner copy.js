@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { QrReader } from "react-qr-reader";
 import "./Scanner.scss";
 import { Box, Button, Stack } from "@mui/material";
+import { GetJobScanData } from "../../../API/GetJobScanData/GetJobScanData";
 import { ShoppingBag } from "lucide-react";
 import { showToast } from "../../../Utils/Tostify/ToastManager";
 import { Heart } from "lucide-react";
 import { ShoppingCart } from "lucide-react";
 import { Percent } from "lucide-react";
-import { CallApi } from "../../../API/CallApi/CallApi";
 
 const Scanner = () => {
   const [scannedData, setScannedData] = useState([]);
@@ -16,9 +16,6 @@ const Scanner = () => {
   const [activeDetail, setActiveDetail] = useState(null);
   const [isExpanded, setIsExpanded] = useState(true);
   const [error, setError] = useState(null);
-  const activeCustomer = JSON.parse(
-    sessionStorage.getItem("curruntActiveCustomer")
-  );
 
   useEffect(() => {
     const savedScans = sessionStorage.getItem("AllScanJobData");
@@ -42,15 +39,9 @@ const Scanner = () => {
 
   const addScan = async (jobNumber) => {
     try {
-      const Device_Token = sessionStorage.getItem("device_token");
-      const body = {
-        Mode: "GetScanJobData",
-        Token: `"${Device_Token}"`,
-        ReqData: `[{"ForEvt":"GetScanJobData","DeviceToken":"${Device_Token}","AppId":"3","JobNo":"${jobNumber}"}]`,
-      };
-      const response = await CallApi(body);
+      const response = await GetJobScanData(jobNumber);
       const jobData = response?.DT[0];
-      console.log("job scan response data", response);
+      console.log("response", response);
       if (!jobData) {
         setError("Invalid Job Number or No Data Found.");
         return;
@@ -69,8 +60,6 @@ const Scanner = () => {
         GrossWeight: jobData.GrossWt,
         status: "Scanned",
         image: `${jobData.CDNDesignImageFol}${jobData.ImageName}`,
-        isInCartList: jobData.IsInCartList, // NEW
-        isInWishList: jobData.IsInWishList, // NEW
       };
 
       const updatedData = [
@@ -92,105 +81,6 @@ const Scanner = () => {
         duration: 5000,
       });
     }
-  };
-
-  const toggleWishlist = async () => {
-    const Device_Token = sessionStorage.getItem("device_token");
-    const current = activeDetail;
-
-    try {
-      if (!current) return;
-      if (current.isInWishList) {
-        const body = {
-          Mode: "RemoveFromWishList",
-          Token: `"${Device_Token}"`,
-          ReqData: JSON.stringify([
-            {
-              ForEvt: "RemoveFromWishList",
-              DeviceToken: Device_Token,
-              AppId: 3,
-              CartWishId: current.CartWishId || 0,
-              IsRemoveAll: 0,
-              CustomerId: activeCustomer?.CustomerId || 0,
-              IsVisitor: activeCustomer?.IsVisitor || 0,
-            },
-          ]),
-        };
-
-        const response = await CallApi(body);
-        showToast({
-          message: "Removed from Wishlist",
-          bgColor: "#f44336",
-          fontColor: "#fff",
-          duration: 2000,
-        });
-        const updated = {
-          ...current,
-          isInWishList: 0,
-        };
-        updateScannedAndSession(updated);
-      } else {
-        const body = {
-          Mode: "AddToWishList",
-          Token: `"${Device_Token}"`,
-          ReqData: JSON.stringify([
-            {
-              ForEvt: "AddToWishList",
-              DeviceToken: Device_Token,
-              AppId: 3,
-              JobNo: current.jobNumber,
-              CustomerId: activeCustomer?.CustomerId || 0,
-              IsWishList: 1,
-              IsVisitor: activeCustomer?.IsVisitor || 0,
-              DiscountOnId: 0,
-              Discount: 0,
-            },
-          ]),
-        };
-
-        const response = await CallApi(body);
-        const insertedId = response?.DT?.[0]?.CartWishId || 0;
-
-        showToast({
-          message: "Added to Wishlist",
-          bgColor: "#4caf50",
-          fontColor: "#fff",
-          duration: 2000,
-        });
-
-        const updated = {
-          ...current,
-          isInWishList: 1,
-          CartWishId: insertedId,
-        };
-        updateScannedAndSession(updated);
-      }
-    } catch (error) {
-      console.error("Wishlist toggle failed:", error);
-      showToast({
-        message: "Something went wrong. Try again.",
-        bgColor: "#ff9800",
-        fontColor: "#fff",
-        duration: 4000,
-      });
-    }
-  };
-
-  const toggleCart = () => {
-    const updated = {
-      ...activeDetail,
-      isInCartList: activeDetail.isInCartList ? 0 : 1,
-    };
-    updateScannedAndSession(updated);
-  };
-
-  const updateScannedAndSession = (updatedItem) => {
-    const updatedList = scannedData.map((item) =>
-      item.jobNumber === updatedItem.jobNumber ? updatedItem : item
-    );
-    setScannedData(updatedList);
-    setActiveDetail(updatedItem);
-    sessionStorage.setItem("AllScanJobData", JSON.stringify(updatedList));
   };
 
   const handleManualSave = () => {
@@ -277,22 +167,14 @@ const Scanner = () => {
             marginBottom: "10px",
           }}
         >
-          <div className="scanner_List_moreview" onClick={toggleWishlist}>
-            <Heart
-              fill={activeDetail.isInWishList ? "#ff3366" : "none"}
-              color={activeDetail.isInWishList ? "#ff3366" : "black"}
-            />
-            <p>Wishlist</p>
+          <div className="scanner_List_moreview">
+            <Heart />
+            <p>Widhlist</p>
           </div>
-
-          <div className="scanner_List_moreview" onClick={toggleCart}>
-            <ShoppingCart
-              fill={activeDetail.isInCartList ? "#4caf50" : "none"}
-              color={activeDetail.isInCartList ? "#4caf50" : "black"}
-            />
+          <div className="scanner_List_moreview">
+            <ShoppingCart />
             <p>Cart</p>
           </div>
-
           <div className="scanner_List_moreview">
             <Percent />
             <p>Discount</p>
