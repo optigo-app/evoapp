@@ -25,7 +25,7 @@ const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelec
             <IconButton onClick={() => handleWishToCart(wishlistItems)}>
               <ShoppingCart className='btn' />
             </IconButton>
-            <IconButton onClick={() => handleOpenDialog(wishlistItems)}>
+            <IconButton onClick={() => handleOpenDialog(wishlistItems, "single")}>
               <Trash2 className='btn' />
             </IconButton>
           </Box>

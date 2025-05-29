@@ -56,6 +56,7 @@
 
     .checkboxBtn {
         margin-top: 10px;
+        margin: 0;
 
         .WishAll-checkbox {
             color: $heightlightColor;
@@ -89,6 +90,36 @@
         border-top: 1px solid #ddd;
         box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
         z-index: 1000;
+
+        .wishActionBtn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            margin-top: 8px;
+
+            .left-action,
+            .right-action {
+                display: flex;
+                align-items: center;
+            }
+
+            .left-action {
+                button {
+                    font-family: $font-family !important;
+                    text-transform: capitalize !important;
+                    font-size: 16px;
+                    color: $titleColor !important;
+                    padding: 0px 8px;
+                    text-decoration: underline !important;
+
+                    &:hover {
+                        background: transparent !important;
+                        color: $heightlightColor !important;
+                    }
+                }
+            }
+        }
 
         .action-buttons {
             padding: 0 15px;

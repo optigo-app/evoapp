@@ -2,6 +2,7 @@ import { CommonAPI } from "../CommonAPI/CommonAPI";
 
 export const RemoveFromCartWishApi = async ({
   mode,
+  flag,
   cartWishData,
   IsRemoveAll = 0,
 }) => {
@@ -18,7 +19,7 @@ export const RemoveFromCartWishApi = async ({
           ForEvt: mode,
           DeviceToken: Device_Token,
           AppId: "3",
-          CartWishId: cartWishData?.CartWishId,
+          CartWishId: flag == "single" ? cartWishData?.CartWishId : "",
           CustomerId: cartWishData?.CustomerId,
           IsVisitor: cartWishData?.IsVisitor,
           IsRemoveAll: IsRemoveAll,

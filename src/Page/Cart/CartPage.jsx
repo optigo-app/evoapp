@@ -7,6 +7,7 @@ import { GetCartWishApi } from '../../API/Cart_WishlistAPI/GetCartlistApi';
 import { RemoveFromCartWishApi } from '../../API/Cart_WishlistAPI/RemoveFromCartWishApi';
 import LoadingBackdrop from '../../Utils/LoadingBackdrop';
 import NoDataFound from '../../Utils/NoDataFound';
+import { showToast } from '../../Utils/Tostify/ToastManager';
 
 const CartItemCard = lazy(() => import('../../components/CartComp/CartCard'));
 
@@ -30,8 +31,19 @@ const CartPage = () => {
     if (res) {
       setCartItems(prevItems => prevItems.filter(item => !selectedItems.includes(item)));
       setSelectedItems([]);
+      showToast({
+        message: "Item removed from cart",
+        bgColor: "#d4edda",
+        fontColor: "#155724",
+        duration: 3000,
+      });
     } else {
-      console.error("Failed to remove items from cart");
+      showToast({
+        message: "Item removed from cart",
+        bgColor: "#f44336",
+        fontColor: "#fff",
+        duration: 3000,
+      });
     }
     setIsLoading(false);
     handleCloseDialog();
@@ -80,11 +92,11 @@ const CartPage = () => {
           </Suspense>
           <Box className="CartActionsFooter">
             <Stack direction="row" spacing={2} justifyContent="center" className="action-buttons">
-              <Button variant="outlined" startIcon={<ScrollText size={18} />}>
-                Move to Billing
-              </Button>
               <Button variant="outlined" startIcon={<Printer size={18} />} onClick={handlePrint}>
                 Print Estimate
+              </Button>
+              <Button variant="outlined" startIcon={<ScrollText size={18} />}>
+                Move to Billing
               </Button>
             </Stack>
 

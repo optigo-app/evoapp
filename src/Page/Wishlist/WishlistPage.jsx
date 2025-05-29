@@ -15,6 +15,7 @@ import LoadingBackdrop from "../../Utils/LoadingBackdrop";
 import { RemoveFromCartWishApi } from "../../API/Cart_WishlistAPI/RemoveFromCartWishApi";
 import NoDataFound from "../../Utils/NoDataFound";
 import { AddCartFromWishListApi } from "../../API/Cart_WishlistAPI/AddCartFromWishListApi";
+import { showToast } from "../../Utils/Tostify/ToastManager";
 
 const WishlistCard = lazy(() =>
   import("../../components/WishlistComp/WishCard")
@@ -25,6 +26,7 @@ const WishlistPage = () => {
   const [WishlistItems, setWishlistItems] = useState([]);
   const [opencnfDialogOpen, setOpenCnfDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [rmflag, setRmFlag] = useState("");
 
   const getWishlistData = async () => {
     setIsLoading(true);
@@ -64,10 +66,33 @@ const WishlistPage = () => {
 
   const hanldeRemoveFromCart = async () => {
     setIsLoading(true);
-    const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", cartWishData: selectedItems[0] });
+    const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", flag:rmflag, cartWishData: selectedItems[0] });
     if (res) {
       setWishlistItems(prev => prev.filter(item => !selectedItems.includes(item)));
       setSelectedItems([]);
+      showToast({
+        message: "Item removed from wishlist",
+        bgColor: "#d4edda",
+        fontColor: "#155724",
+        duration: 3000,
+      });
+    }
+    setIsLoading(false);
+    handleCloseDialog();
+  };
+
+  const handleRemoveFromCartAll = async () => {
+    setIsLoading(true);
+    const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", flag:rmflag, cartWishData: WishlistItems[0], IsRemoveAll: 1 });
+    if (res) {
+      setWishlistItems([]);
+      setSelectedItems([]);
+      showToast({
+        message: "Items removed from wishlist",
+        bgColor: "#d4edda",
+        fontColor: "#155724",
+        duration: 3000,
+      });
     }
     setIsLoading(false);
     handleCloseDialog();
@@ -77,7 +102,12 @@ const WishlistPage = () => {
     setIsLoading(true);
     const res = await AddCartFromWishListApi({ flag: "single", cartWishData: wishlistItem });
     if (res) {
-      console.log("Moved to cart");
+      showToast({
+        message: "Moved to cart",
+        bgColor: "#d4edda",
+        fontColor: "#155724",
+        duration: 3000,
+      });
       setSelectedItems(prev => prev.filter(item => item.id !== wishlistItem.id));
     }
     setIsLoading(false);
@@ -88,22 +118,35 @@ const WishlistPage = () => {
     setIsLoading(true);
     const res = await AddCartFromWishListApi({ flag: "multi", cartWishData: WishlistItems[0], IsMoveAll: 1 });
     if (res) {
-      console.log("All wishlist items moved to cart");
+      showToast({
+        message: "Items moved to cart",
+        bgColor: "#d4edda",
+        fontColor: "#155724",
+        duration: 3000,
+      });
       setSelectedItems([]);
     }
     setIsLoading(false);
     handleCloseDialog();
   };
 
-  const handleOpenDialog = (wishlistItem) => {
+  const handleOpenDialog = (wishlistItem, flag) => {
+    console.log('flag: ', flag);
+    setRmFlag(flag);
     setSelectedItems([wishlistItem]);
     setOpenCnfDialog(true);
   };
 
   const handleCloseDialog = () => setOpenCnfDialog(false);
-  const handleConfirmRemoveAll = () => hanldeRemoveFromCart();
+  const handleConfirmRemoveAll = () => {
+    if (rmflag === "all") {
+      handleRemoveFromCartAll()
+    } else {
+      hanldeRemoveFromCart()
+    }
+  };
 
-  const allSelected = WishlistItems.length > 0 && WishlistItems.every(item => item.isSelected);
+  const allSelected = WishlistItems?.length > 0 && WishlistItems?.every(item => item.isSelected);
 
   return (
     <Box className="WishlistMain">
@@ -128,28 +171,36 @@ const WishlistPage = () => {
           </Suspense>
 
           <Box className="WishActionsFooter">
-            <Box display="flex" justifyContent="flex-start">
-              <FormControlLabel
-                className="checkboxBtn"
-                label="Select All"
-                labelPlacement="start"
-                control={
-                  <Checkbox
-                    className="WishAll-checkbox"
-                    checked={allSelected}
-                    onChange={handleSelectAll}
-                  />
-                }
-              />
+            <Box className="wishActionBtn">
+              <Box className="left-action">
+                <Button variant="text" onClick={() => handleOpenDialog({}, "all")}>
+                  Clear All
+                </Button>
+              </Box>
+              <Box className="right-action">
+                <FormControlLabel
+                  className="checkboxBtn"
+                  label="Select All"
+                  labelPlacement="start"
+                  control={
+                    <Checkbox
+                      className="WishAll-checkbox"
+                      checked={allSelected}
+                      onChange={handleSelectAll}
+                    />
+                  }
+                />
+              </Box>
             </Box>
+
             <Divider className="footer-divider" />
 
             <Stack direction="row" spacing={2} justifyContent="center" className="action-buttons">
-              <Button variant="outlined" startIcon={<ScrollText size={18} />} onClick={handleAllWishToCart}>
-                Move to Cart
-              </Button>
               <Button variant="outlined" startIcon={<Printer size={18} />}>
                 Print Estimate
+              </Button>
+              <Button variant="outlined" startIcon={<ScrollText size={18} />} onClick={handleAllWishToCart}>
+                Move to Cart
               </Button>
             </Stack>
           </Box>
