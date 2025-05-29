@@ -5,13 +5,14 @@ export const GetCartWishApi = async ({ mode }) => {
     if (!mode) {
         return console.error("Mode is required for GetCartApi");
     }
+    const activeCust = JSON.parse(sessionStorage.getItem('curruntActiveCustomer'));
     const reqData = [
         {
             ForEvt: mode,
             DeviceToken: `${Device_Token}`,
             AppId: "3",
-            CustomerId: "18699",
-            IsVisitor: "0",
+            CustomerId: activeCust?.CustomerId || "",
+            IsVisitor: activeCust?.CustomerId || "",
         }
     ];
     try {
