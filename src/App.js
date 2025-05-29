@@ -31,7 +31,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Suspense fallback={<LoadingBackdrop />}>
+      <Suspense fallback={<LoadingBackdrop />}> 
         <Routes>
           <Route path="/" element={<Customer />} />
           <Route path="/AddCustomer" element={<AddCustomer />} />

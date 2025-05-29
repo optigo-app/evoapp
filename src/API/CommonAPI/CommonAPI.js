@@ -13,7 +13,7 @@ export const CommonAPI = async (body) => {
     const header = {
       "Content-Type": "application/json",
     };
-    
+
     const response = await axios.post(APIURL, body, { headers: header });
     return response?.data;
   } catch (error) {

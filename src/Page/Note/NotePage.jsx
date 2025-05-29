@@ -39,10 +39,9 @@ const NotePage = () => {
       date: new Date().toLocaleDateString("en-US", {
         month: "short", day: "numeric", year: "numeric"
       }),
-      isFavorite: false,
       color:
-        tabIndex === 0 ? "#ffe082" :
-          tabIndex === 1 ? "#ffab91" : "#b39ddb"
+        tabIndex === 0 ? "#ffe08261" :
+          tabIndex === 1 ? "#ffab9173" : "#b39ddb66"
     };
 
     setRemarkData(prev => ({
