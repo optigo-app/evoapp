@@ -2,13 +2,20 @@ import React from 'react';
 import './CartCard.scss';
 import { Card, Typography, IconButton, Box } from '@mui/material';
 import { Trash2 } from 'lucide-react';
+import PlaceHolderImg from '../../assests/placeHolderImg.svg';
 
 const CartCard = ({ cartItem, handleOpenDialog }) => {
 
   return (
     <Card className="Cart-card">
       <Box className="card-content">
-        <img src={cartItem?.CDNDesignImageFol + cartItem?.ImageName} alt={cartItem?.TitalLine} className="product-image" />
+        <img
+          src={cartItem?.CDNDesignImageFol + cartItem?.ImageName}
+          alt={cartItem?.TitalLine}
+          className="product-image"
+          loading='lazy'
+          onError={(e) => e.target.src = PlaceHolderImg}
+        />
         <Box className="product-details">
           <Box className="product-id">
             <Typography className='itemCode'>{cartItem?.DesignNo}({cartItem?.JobNo})</Typography>
@@ -22,7 +29,7 @@ const CartCard = ({ cartItem, handleOpenDialog }) => {
             <Typography className="new-price">₹{parseFloat(cartItem?.FinalAmount).toFixed(2)?.toLocaleString()}</Typography>
           </Box>
           <Box className="actions">
-            <IconButton onClick={() => handleOpenDialog(cartItem)}>
+            <IconButton onClick={() => handleOpenDialog(cartItem, "single")}>
               <Trash2 className='btn' />
             </IconButton>
           </Box>

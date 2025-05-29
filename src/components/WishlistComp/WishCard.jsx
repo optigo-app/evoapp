@@ -2,13 +2,20 @@ import React from 'react';
 import './WishCard.scss';
 import { Card, Typography, IconButton, Checkbox, Box } from '@mui/material';
 import { ShoppingCart, Trash2 } from 'lucide-react';
+import PlaceHolderImg from '../../assests/placeHolderImg.svg';
 
 const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelectItem, handleWishToCart }) => {
 
   return (
     <Card className="Wishlist-card">
       <Box className="card-content">
-        <img src={wishlistItems?.CDNDesignImageFol + wishlistItems?.ImageName} alt={wishlistItems?.TitalLine} className="product-image" />
+        <img
+          src={wishlistItems?.CDNDesignImageFol + wishlistItems?.ImageName}
+          alt={wishlistItems?.TitalLine}
+          className="product-image"
+          loading='lazy'
+          onError={(e) => e.target.src = PlaceHolderImg}
+        />
         <Box className="product-details">
           <Box className="product-id">
             <Typography className='itemCode'>{wishlistItems?.DesignNo}({wishlistItems?.JobNo})</Typography>
@@ -32,7 +39,7 @@ const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelec
         </Box>
         <Checkbox className="product-checkbox"
           checked={isSelected}
-          onChange={handleSelectItem}
+          onChange={() => handleSelectItem(wishlistItems)}
         />
       </Box>
     </Card>

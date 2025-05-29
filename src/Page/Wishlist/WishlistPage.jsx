@@ -26,6 +26,7 @@ const WishlistPage = () => {
   const [WishlistItems, setWishlistItems] = useState([]);
   const [opencnfDialogOpen, setOpenCnfDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  console.log('selectedItems: ', selectedItems);
   const [rmflag, setRmFlag] = useState("");
 
   const getWishlistData = async () => {
@@ -54,7 +55,7 @@ const WishlistPage = () => {
 
   const handleSelectItem = (item) => {
     const updatedItems = WishlistItems.map((wishlistItem) =>
-      wishlistItem.id === item.id
+      wishlistItem.CartWishId === item.CartWishId
         ? { ...wishlistItem, isSelected: !wishlistItem.isSelected }
         : wishlistItem
     );
@@ -65,8 +66,7 @@ const WishlistPage = () => {
   };
 
   const hanldeRemoveFromCart = async () => {
-    setIsLoading(true);
-    const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", flag:rmflag, cartWishData: selectedItems[0] });
+    const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", flag: rmflag, cartWishData: selectedItems[0] });
     if (res) {
       setWishlistItems(prev => prev.filter(item => !selectedItems.includes(item)));
       setSelectedItems([]);
@@ -77,13 +77,12 @@ const WishlistPage = () => {
         duration: 3000,
       });
     }
-    setIsLoading(false);
     handleCloseDialog();
   };
 
   const handleRemoveFromCartAll = async () => {
     setIsLoading(true);
-    const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", flag:rmflag, cartWishData: WishlistItems[0], IsRemoveAll: 1 });
+    const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", flag: rmflag, cartWishData: WishlistItems[0], IsRemoveAll: 1 });
     if (res) {
       setWishlistItems([]);
       setSelectedItems([]);
@@ -99,7 +98,6 @@ const WishlistPage = () => {
   };
 
   const handleWishToCart = async (wishlistItem) => {
-    setIsLoading(true);
     const res = await AddCartFromWishListApi({ flag: "single", cartWishData: wishlistItem });
     if (res) {
       showToast({
@@ -110,7 +108,6 @@ const WishlistPage = () => {
       });
       setSelectedItems(prev => prev.filter(item => item.id !== wishlistItem.id));
     }
-    setIsLoading(false);
     handleCloseDialog();
   };
 
@@ -159,7 +156,6 @@ const WishlistPage = () => {
               {WishlistItems?.map((item) => (
                 <WishlistCard
                   key={item.id}
-                  cartItem={item}
                   wishlistItems={item}
                   isSelected={item.isSelected}
                   handleOpenDialog={handleOpenDialog}

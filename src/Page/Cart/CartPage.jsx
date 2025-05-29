@@ -16,8 +16,10 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState();
   const [opencnfDialogOpen, setOpenCnfDialog] = React.useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [rmflag, setRmFlag] = useState("");
 
-  const handleOpenDialog = (cartItems) => {
+  const handleOpenDialog = (cartItems, flag) => {
+    setRmFlag(flag)
     setSelectedItems([cartItems]);
     setOpenCnfDialog(true);
   }
@@ -27,7 +29,7 @@ const CartPage = () => {
 
   const hanldeRemoveFromCart = async () => {
     setIsLoading(true);
-    const res = await RemoveFromCartWishApi({ mode: "RemoveFromCart", cartWishData: selectedItems[0] });
+    const res = await RemoveFromCartWishApi({ mode: "RemoveFromCart", flag: rmflag, cartWishData: selectedItems[0] });
     if (res) {
       setCartItems(prevItems => prevItems.filter(item => !selectedItems.includes(item)));
       setSelectedItems([]);
@@ -37,11 +39,21 @@ const CartPage = () => {
         fontColor: "#155724",
         duration: 3000,
       });
-    } else {
+    }
+    setIsLoading(false);
+    handleCloseDialog();
+  }
+
+  const handleRemoveAllFromCart = async () => {
+    setIsLoading(true);
+    const res = await RemoveFromCartWishApi({ mode: "RemoveFromCart", flag: rmflag, cartWishData: cartItems[0], IsRemoveAll: 1 });
+    if (res) {
+      setCartItems([]);
+      setSelectedItems([]);
       showToast({
-        message: "Item removed from cart",
-        bgColor: "#f44336",
-        fontColor: "#fff",
+        message: "Items removed from cart",
+        bgColor: "#d4edda",
+        fontColor: "#155724",
         duration: 3000,
       });
     }
@@ -50,7 +62,11 @@ const CartPage = () => {
   }
 
   const handleConfirmRemoveAll = () => {
-    hanldeRemoveFromCart();
+    if (rmflag == "single") {
+      hanldeRemoveFromCart();
+    } else {
+      handleRemoveAllFromCart();
+    }
   }
 
   const getCartData = async () => {
@@ -80,6 +96,11 @@ const CartPage = () => {
       ) : cartItems?.length > 0 ? (
         <>
           <Suspense fallback={<></>}>
+            <Box className="CartHeaderClBtn">
+              <Button variant="text" onClick={() => handleOpenDialog({}, "all")}>
+                Clear All
+              </Button>
+            </Box>
             <Box className="CartItemList">
               {cartItems?.map(item => (
                 <CartItemCard
