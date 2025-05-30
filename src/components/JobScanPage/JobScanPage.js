@@ -53,9 +53,11 @@ const JobScanPage = () => {
           </div>
         );
       case "note":
-        return <div className="tab-content">
-          <NotePage/>
-        </div>;
+        return (
+          <div className="tab-content">
+            <NotePage />
+          </div>
+        );
       default:
         return null;
     }
@@ -67,13 +69,17 @@ const JobScanPage = () => {
         <Stack className="header-container">
           <p
             style={{
-              width: "33.33%",
-              color: "white",
               fontSize: "20px",
               fontWeight: "bold",
             }}
           >
-            Evo Control
+            {activeTab == "scan"
+              ? "Scan Job"
+              : activeTab == "wishlist"
+              ? "WishList"
+              : activeTab == "cart"
+              ? "Cart List"
+              : "Notes"}
           </p>
           <Typography
             variant="h6"

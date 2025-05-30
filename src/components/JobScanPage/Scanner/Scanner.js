@@ -11,13 +11,21 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { ShoppingBag } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Keyboard,
+  ScanLine,
+  ShoppingBag,
+  Tally3,
+} from "lucide-react";
 import { showToast } from "../../../Utils/Tostify/ToastManager";
 import { Heart } from "lucide-react";
 import { ShoppingCart } from "lucide-react";
 import { Percent } from "lucide-react";
 import { CallApi } from "../../../API/CallApi/CallApi";
 import DiscountModal from "./DiscountModal";
+import PlaceHolderImg from "../../../assests/placeHolderImg.svg";
 
 const Scanner = () => {
   const [scannedData, setScannedData] = useState([]);
@@ -27,29 +35,11 @@ const Scanner = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [error, setError] = useState(null);
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
-  const [discountType, setDiscountType] = useState("flat"); // 'flat' or 'percentage'
-  const [discountValue, setDiscountValue] = useState();
-  const [calculatedPrice, setCalculatedPrice] = useState();
+  const [discountProductData, setDiscoutProductData] = useState();
 
   const activeCustomer = JSON.parse(
     sessionStorage.getItem("curruntActiveCustomer")
   );
-
-  useEffect(() => {
-    if (!activeDetail) return;
-
-    const original = Number(activeDetail.price);
-    const discount = Number(discountValue);
-
-    let final = 0;
-    if (discountType === "flat") {
-      final = original - discount;
-    } else {
-      final = original - (original * discount) / 100;
-    }
-
-    setCalculatedPrice(final > 0 ? final.toFixed(2) : 0);
-  }, [discountValue, discountType, activeDetail]);
 
   useEffect(() => {
     const savedScans = sessionStorage.getItem("AllScanJobData");
@@ -59,16 +49,24 @@ const Scanner = () => {
       if (parsed.length > 0) setActiveDetail(parsed[0]);
     }
 
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        console.log("Camera permission granted");
-        stream.getTracks().forEach((track) => track.stop());
-      })
-      .catch((err) => {
-        console.error("Camera permission denied", err);
-        setError("Camera permission denied. Please allow camera access.");
-      });
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.mediaDevices?.getUserMedia
+    ) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          console.log("Camera permission granted");
+          stream.getTracks().forEach((track) => track.stop());
+        })
+        .catch((err) => {
+          console.error("Camera permission denied", err);
+          setError("Camera permission denied. Please allow camera access.");
+        });
+    } else {
+      console.warn("Media devices are not supported on this browser.");
+      setError("Camera access is not supported in this environment.");
+    }
   }, []);
 
   const addScan = async (jobNumber) => {
@@ -88,8 +86,9 @@ const Scanner = () => {
       }
 
       const formatted = {
-        jobNumber: jobData.JobNo,
+        JobNo: jobData.JobNo,
         designNo: jobData.DesignNo,
+        price: jobData.Amount,
         price: jobData.Amount,
         metal: jobData.TotalMetalCost,
         diamoond: jobData.TotalDiamondCost,
@@ -100,8 +99,25 @@ const Scanner = () => {
         GrossWeight: jobData.GrossWt,
         CartListId: jobData.CartListId,
         WishListId: jobData.WishListId,
+        Category: jobData?.Category,
+        DiamondWtP: `${jobData?.DiaWt}${
+          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs + "pcs" : ""
+        }`,
+        colorStoneWtP: `${jobData?.CsWt}${
+          jobData?.CsPcs !== 0 ? " / " + jobData.CsPcs + "pcs" : ""
+        }`,
+        MiscWtP: `${jobData?.DiaWt}${
+          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs : ""
+        }`,
+        MetalTypeTitle: `${
+          jobData?.MetalPurity +
+          " " +
+          jobData?.MetalTypeName +
+          " " +
+          jobData?.MetalColorName
+        }`,
         status: "Scanned",
-        image: `${jobData.CDNDesignImageFol}${jobData.ImageName}`,
+        image: `${jobData.CDNDesignImageFol}${jobData.ImageName}`, // "1/281165"
         isInCartList: jobData.IsInCartList, // NEW
         isInWishList: jobData.IsInWishList, // NEW
       };
@@ -127,9 +143,9 @@ const Scanner = () => {
     }
   };
 
-  const toggleWishlist = async () => {
+  const toggleWishlist = async (detailItem, data) => {
     const Device_Token = sessionStorage.getItem("device_token");
-    const current = activeDetail;
+    const current = data ? detailItem : activeDetail;
 
     try {
       if (!current) return;
@@ -141,6 +157,7 @@ const Scanner = () => {
             {
               ForEvt: "RemoveFromWishList",
               DeviceToken: Device_Token,
+              JobNo: current.jobNumber,
               AppId: 3,
               CartWishId: current.WishListId || 0,
               IsRemoveAll: 0,
@@ -150,13 +167,14 @@ const Scanner = () => {
           ]),
         };
 
-        const response = await CallApi(body);
+        await CallApi(body);
         showToast({
           message: "Removed from Wishlist",
           bgColor: "#f44336",
           fontColor: "#fff",
           duration: 2000,
         });
+
         const updated = {
           ...current,
           isInWishList: 0,
@@ -208,9 +226,11 @@ const Scanner = () => {
       });
     }
   };
-  const toggleCart = async () => {
+
+  const toggleCart = async (detailItem , data) => {
     const Device_Token = sessionStorage.getItem("device_token");
-    const current = activeDetail;
+    const current = data ? detailItem : activeDetail;
+
 
     try {
       if (!current) return;
@@ -225,13 +245,14 @@ const Scanner = () => {
               DeviceToken: Device_Token,
               AppId: 3,
               CartWishId: current.CartListId,
+              JobNo: current.jobNumber,
               IsRemoveAll: 0,
               CustomerId: activeCustomer.CustomerId || 0,
               IsVisitor: activeCustomer.IsVisitor || 0,
             },
           ]),
         };
-        const response = await CallApi(body);
+        await CallApi(body);
         showToast({
           message: "Removed from Cart",
           bgColor: "#f44336",
@@ -263,12 +284,14 @@ const Scanner = () => {
         };
         const response = await CallApi(body);
         const insertedId = response?.DT?.[0]?.CartWishId || 0;
+
         showToast({
           message: "Added to Cart",
           bgColor: "#4caf50",
           fontColor: "#fff",
           duration: 4000,
         });
+
         const updated = {
           ...current,
           isInCartList: 1,
@@ -323,7 +346,13 @@ const Scanner = () => {
         <div style={{ padding: "1rem" }}>
           <div className="header">
             <span>{activeDetail.jobNumber}</span>
-            <button onClick={() => setIsExpanded(false)}>Close</button>
+          </div>
+          <div>
+            <img
+              src={activeDetail?.image}
+              onError={(e) => (e.target.src = PlaceHolderImg)}
+              style={{ width: "100%" }}
+            />
           </div>
           <div className="body">
             <h3>₹{activeDetail.price}</h3>
@@ -380,7 +409,10 @@ const Scanner = () => {
             marginBottom: "10px",
           }}
         >
-          <div className="scanner_List_moreview" onClick={toggleWishlist}>
+          <div
+            className="scanner_List_moreview"
+            onClick={() => toggleWishlist("", false)}
+          >
             <Heart
               fill={activeDetail.isInWishList ? "#ff3366" : "none"}
               color={activeDetail.isInWishList ? "#ff3366" : "black"}
@@ -388,7 +420,7 @@ const Scanner = () => {
             <p>Wishlist</p>
           </div>
 
-          <div className="scanner_List_moreview" onClick={toggleCart}>
+          <div className="scanner_List_moreview" onClick={() => toggleCart("" , false)}>
             <ShoppingCart
               fill={activeDetail.isInCartList ? "#4caf50" : "none"}
               color={activeDetail.isInCartList ? "#4caf50" : "black"}
@@ -398,7 +430,10 @@ const Scanner = () => {
 
           <div
             className="scanner_List_moreview"
-            onClick={() => setDiscountModalOpen(true)}
+            onClick={() => {
+              setDiscountModalOpen(true);
+              setDiscoutProductData(activeDetail);
+            }}
           >
             <Percent />
             <p>Discount</p>
@@ -407,134 +442,19 @@ const Scanner = () => {
       </div>
     );
 
-  const handleApplyDiscount = async () => {
-    const Device_Token = sessionStorage.getItem("device_token");
-    const discount = Number(discountValue);
-    const body = {
-      Mode: "AddToCart",
-      Token: Device_Token,
-      ReqData: JSON.stringify([
-        {
-          ForEvt: "AddToCart",
-          DeviceToken: Device_Token,
-          AppId: 3,
-          JobNo: activeDetail?.jobNumber,
-          CustomerId: activeDetail?.CustomerId,
-          IsVisitor: activeDetail?.IsVisitor,
-          DiscountOnId: discountType == "flat" ? 1 : 0,
-          Discount: discount ?? 0,
-        },
-      ]),
-    };
+  const [expandedItems, setExpandedItems] = useState([]);
 
-    try {
-      await CallApi(body);
-      showToast({
-        message: "Item added to cart with discount",
-        bgColor: "#4caf50",
-        fontColor: "#fff",
-        duration: 5000,
-      });
-
-      const updated = {
-        ...activeDetail,
-        isInCartList: 1,
-        discountedPrice: calculatedPrice,
-      };
-      updateScannedAndSession(updated);
-      setDiscountModalOpen(false);
-    } catch (error) {
-      console.error("Error applying discount", error);
-      showToast({
-        message: "Failed to apply discount",
-        bgColor: "#f44336",
-        fontColor: "#fff",
-        duration: 5000,
-      });
-    }
-  };
+  console.log("scannedDatascannedData", scannedData);
 
   return (
     <div className="scanner-container">
       <DiscountModal
         discountModalOpen={discountModalOpen}
         setDiscountModalOpen={setDiscountModalOpen}
-        activeDetail={activeDetail}
+        activeDetail={discountProductData}
         updateScannedAndSession={updateScannedAndSession}
         showToast={showToast}
       />
-
-      {/* <Modal
-        open={discountModalOpen}
-        onClose={() => setDiscountModalOpen(false)}
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 350,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-            outline: 'none',
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Apply Discount
-          </Typography>
-          <Typography variant="body2" gutterBottom>
-            <strong>Job No:</strong> {activeDetail?.jobNumber}
-          </Typography>
-          <Typography variant="body2" gutterBottom>
-            <strong>Original Price:</strong> ₹{activeDetail?.price}
-          </Typography>
-
-          <ToggleButtonGroup
-            value={discountType}
-            exclusive
-            onChange={(e, newType) => newType && setDiscountType(newType)}
-            fullWidth
-            sx={{ my: 2 }}
-          >
-            <ToggleButton value="flat">Flat Amount</ToggleButton>
-            <ToggleButton value="percentage">Percentage</ToggleButton>
-          </ToggleButtonGroup>
-
-          <TextField
-            label={discountType === "flat" ? "Discount (₹)" : "Discount (%)"}
-            type="number"
-            value={discountValue === 0 ? "" : discountValue}
-            onChange={(e) => setDiscountValue(Number(e.target.value))}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-
-          <Typography variant="body2" gutterBottom>
-            <strong>Discounted Price:</strong> ₹{calculatedPrice}
-          </Typography>
-
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleApplyDiscount}
-            >
-              Save & Add to Cart
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => setDiscountModalOpen(false)}
-            >
-              Cancel
-            </Button>
-          </Box>
-        </Box>
-      </Modal> */}
-
       <p className="ProductScanTitle">Product Scanner</p>
 
       {mode === "qr" ? (
@@ -565,38 +485,217 @@ const Scanner = () => {
             type="text"
             value={manualInput}
             onChange={(e) => setManualInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleManualSave();
+              }
+            }}
             placeholder="Enter job number"
           />
           <button onClick={handleManualSave}>Save</button>
         </div>
       )}
 
-      {error && <p className="error-message">{error}</p>}
+      {error && mode != "AllScanItem" && (
+        <p className="error-message">{error}</p>
+      )}
 
       {activeDetail &&
+        mode != "AllScanItem" &&
         (isExpanded ? renderExpandedTop() : renderCollapsedTop())}
 
-      {scannedData.length !== 0 && mode == "AllScanItem" && (
-        <div className="recent-scans">
-          <p className="ProductScanTitleRecent">Recent Scans</p>
-          {scannedData.map((data, idx) => (
-            <div
-              key={idx}
-              className="recent-item"
-              onClick={() => {
-                setActiveDetail(data);
-                setIsExpanded(true);
-              }}
-            >
-              <div className="left">
-                <strong>{data.jobNumber}</strong>
-                <p>₹{data.price}</p>
+      {scannedData.length !== 0 && mode === "AllScanItem" && (
+        <div className={`expand-container ${isExpanded ? "expanded" : ""}`}>
+          {scannedData.map((data, idx) => {
+            const isExpanded = expandedItems.includes(idx);
+            return (
+              <div key={idx} className="recent-item">
+                <div
+                  className="top-detail-card_Big"
+                  style={{
+                    border: "1px solid #ccc",
+                    marginBottom: "10px",
+                    overflow: "hidden",
+                    boxShadow:
+                      "rgba(0, 0, 0, 0.01) 0px 0px 3px 0px, rgba(27, 31, 35, 0.1) 0px 0px 0px 1px !important",
+                    backgroundColor: "rgb(248 248 248 / 49%)",
+                    marginBottom: "100px",
+                  }}
+                >
+                  <div
+                    className="summary-row"
+                    onClick={() => {
+                      setExpandedItems((prev) =>
+                        prev.includes(idx)
+                          ? prev.filter((i) => i !== idx)
+                          : [...prev, idx]
+                      );
+                    }}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "5px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div style={{ width: "100%" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <h4 style={{ margin: "5px 2px" }}>
+                          {data.jobNumber}({data?.designNo})
+                        </h4>
+                        <h4 style={{ margin: "5px 2px" }}>₹{data.price}</h4>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <p style={{ margin: "0px" }}>{data.Category}</p>
+                        <div style={{ fontSize: "1.5rem" }}>
+                          {isExpanded ? (
+                            <ArrowUp
+                              style={{
+                                height: "17px",
+                                width: "17px",
+                                border: "1px solid #b3b2b2",
+                                padding: "5px",
+                                borderRadius: "50px",
+                                color: "#b3b2b2",
+                              }}
+                            />
+                          ) : (
+                            <ArrowDown
+                              style={{
+                                height: "17px",
+                                width: "17px",
+                                border: "1px solid #b3b2b2",
+                                padding: "5px",
+                                borderRadius: "50px",
+                                color: "#b3b2b2",
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div
+                      style={{
+                        padding: "5px",
+                        borderTop: "1px solid rgb(221 221 221 / 42%)",
+                      }}
+                    >
+                      <div>
+                        <img
+                          src={data?.image}
+                          onError={(e) => (e.target.src = PlaceHolderImg)}
+                          style={{
+                            width: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      </div>
+
+                      <div className="body">
+                        <h3>Actual Price : ₹{data.price}</h3>
+                        <h3>
+                          {data?.discountedPrice
+                            ? `Discounted Price ₹ ${data?.discountedPrice}`
+                            : ""}
+                        </h3>
+                        <div>{data?.MetalTypeTitle}</div>
+                        <div style={{ display: "flex" }}>
+                          <p className="info_main_section">
+                            Gross Wt:{" "}
+                            <span className="info_main_section_span">
+                              {data.GrossWeight} Grms
+                            </span>
+                          </p>
+                          <p className="info_main_section">
+                            Net Wt:{" "}
+                            <span className="info_main_section_span">
+                              {data.netWeight} Grms
+                            </span>
+                          </p>
+                        </div>
+
+                        <div style={{ display: "flex" }}>
+                          <p className="info_main_section">
+                            Diamond:{" "}
+                            <span className="info_main_section_span">
+                              ₹{data.DiamondWtP}
+                            </span>
+                          </p>
+                          <p className="info_main_section">
+                            colorStoneWtP:{" "}
+                            <span className="info_main_section_span">
+                              ₹{data.colorStoneWtP}
+                            </span>
+                          </p>
+                        </div>
+                        <p className="info_main_section">
+                          MiscWtP:{" "}
+                          <span className="info_main_section_span">
+                            ₹{data.MiscWtP}
+                          </span>
+                        </p>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-around",
+                          marginTop: "10px",
+                        }}
+                      >
+                        <div
+                          className="scanner_List_moreview"
+                          onClick={() => toggleWishlist(data, true)}
+                        >
+                          <Heart
+                            fill={data.isInWishList ? "#ff3366" : "none"}
+                            color={data.isInWishList ? "#ff3366" : "black"}
+                          />
+                          <p>Wishlist</p>
+                        </div>
+
+                        <div
+                          className="scanner_List_moreview"
+                          onClick={() => toggleCart(data , true)}
+                        >
+                          <ShoppingCart
+                            fill={data.isInCartList ? "#4caf50" : "none"}
+                            color={data.isInCartList ? "#4caf50" : "black"}
+                          />
+                          <p>Cart</p>
+                        </div>
+
+                        <div
+                          className="scanner_List_moreview"
+                          onClick={() => {
+                            setDiscountModalOpen(true);
+                            setDiscoutProductData(data);
+                          }}
+                        >
+                          <Percent />
+                          <p>Discount</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <ShoppingBag />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -612,21 +711,21 @@ const Scanner = () => {
             className={mode === "AllScanItem" ? "active" : ""}
             variant="text"
           >
-            All Scan Item
+            <Tally3 />
           </Button>
           <Button
             onClick={() => setMode("qr")}
             className={mode === "qr" ? "active" : ""}
             variant="text"
           >
-            Scanner
+            <ScanLine />
           </Button>
           <Button
             onClick={() => setMode("manual")}
             className={mode === "manual" ? "active" : ""}
             variant="text"
           >
-            Manual
+            <Keyboard />
           </Button>
         </Stack>
       </Box>
