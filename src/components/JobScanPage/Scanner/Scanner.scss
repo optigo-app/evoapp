@@ -1,15 +1,12 @@
-
-
-@import '../../../Variables.scss';
+@import "../../../Variables.scss";
 
 .scanner-container {
   max-width: 500px;
   margin: auto;
-  padding-bottom: 185px;
   font-family: sans-serif;
-  background: #f9f9f9;
+  // background: #f9f9f9;
 
-  .ProductScanTitle{
+  .ProductScanTitle {
     font-size: 20px;
     margin: 0px;
     text-align: center;
@@ -17,7 +14,7 @@
     font-family: $font-family;
   }
 
-  .ProductScanTitleRecent{
+  .ProductScanTitleRecent {
     font-size: 20px;
     margin: 0px;
     font-weight: 600;
@@ -163,6 +160,26 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     font-family: $font-family;
+    margin-bottom: 100px;
+
+      .scanner_List_moreview {
+        display: flex;
+        align-items: center;
+        background-color: #ebe7e7;
+        gap: 7px;
+        height: 30px;
+        border-radius: 5px;
+        padding: 5px 10px;
+        min-width: 90px;
+        justify-content: center;
+        p {
+          font-weight: 600;
+        }
+      }
+      .scanner_List_moreview svg {
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
 
     &.collapsed {
       cursor: pointer;
@@ -222,8 +239,6 @@
           font-size: 17px !important;
         }
 
-      
-
         .weights {
           display: flex;
           justify-content: space-between;
@@ -233,7 +248,7 @@
         }
       }
 
-      .scanner_List_moreview{
+      .scanner_List_moreview {
         display: flex;
         align-items: center;
         background-color: #ebe7e7;
@@ -243,7 +258,7 @@
         padding: 5px 10px;
         min-width: 90px;
         justify-content: center;
-        p{
+        p {
           font-weight: 600;
         }
       }
@@ -253,8 +268,6 @@
       }
     }
   }
-
-
 
   .JobScannerPage {
     height: 50px;
@@ -266,13 +279,13 @@
     border-top: 1px solid #ddd;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
     z-index: 1000;
-    
+
     .action-buttons {
       padding: 0 15px;
       margin-bottom: 8px;
       display: flex;
       gap: 12px;
-      
+
       button {
         margin-top: 8px;
         width: 50%;
@@ -283,20 +296,20 @@
         font-family: $font-family !important;
       }
     }
-  
+
     .footer-divider {
       margin: 8px 0;
     }
-  
+
     .text-buttons {
       display: flex;
       height: 100%;
 
-      .active{
+      .active {
         background-color: #2196f3 !important;
         color: white !important;
       }
-  
+
       button {
         font-family: $font-family !important;
         color: $heightlightColor !important;
@@ -306,8 +319,19 @@
       }
     }
   }
-}
 
+  .expand-container {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+  }
+
+  .expand-container.expanded {
+    max-height: 1000px; /* Large enough to hold the content */
+    opacity: 1;
+  }
+}
 
 .discount-modal {
   position: fixed;

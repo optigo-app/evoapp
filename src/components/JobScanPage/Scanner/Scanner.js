@@ -11,7 +11,14 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { Keyboard, ScanLine, ShoppingBag, Tally3 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Keyboard,
+  ScanLine,
+  ShoppingBag,
+  Tally3,
+} from "lucide-react";
 import { showToast } from "../../../Utils/Tostify/ToastManager";
 import { Heart } from "lucide-react";
 import { ShoppingCart } from "lucide-react";
@@ -79,8 +86,9 @@ const Scanner = () => {
       }
 
       const formatted = {
-        jobNumber: jobData.JobNo,
+        JobNo: jobData.JobNo,
         designNo: jobData.DesignNo,
+        price: jobData.Amount,
         price: jobData.Amount,
         metal: jobData.TotalMetalCost,
         diamoond: jobData.TotalDiamondCost,
@@ -91,6 +99,23 @@ const Scanner = () => {
         GrossWeight: jobData.GrossWt,
         CartListId: jobData.CartListId,
         WishListId: jobData.WishListId,
+        Category: jobData?.Category,
+        DiamondWtP: `${jobData?.DiaWt}${
+          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs + "pcs" : ""
+        }`,
+        colorStoneWtP: `${jobData?.CsWt}${
+          jobData?.CsPcs !== 0 ? " / " + jobData.CsPcs + "pcs" : ""
+        }`,
+        MiscWtP: `${jobData?.DiaWt}${
+          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs : ""
+        }`,
+        MetalTypeTitle: `${
+          jobData?.MetalPurity +
+          " " +
+          jobData?.MetalTypeName +
+          " " +
+          jobData?.MetalColorName
+        }`,
         status: "Scanned",
         image: `${jobData.CDNDesignImageFol}${jobData.ImageName}`, // "1/281165"
         isInCartList: jobData.IsInCartList, // NEW
@@ -118,9 +143,9 @@ const Scanner = () => {
     }
   };
 
-  const toggleWishlist = async (detailItem) => {
+  const toggleWishlist = async (detailItem, data) => {
     const Device_Token = sessionStorage.getItem("device_token");
-    const current = detailItem || activeDetail;
+    const current = data ? detailItem : activeDetail;
 
     try {
       if (!current) return;
@@ -132,11 +157,12 @@ const Scanner = () => {
             {
               ForEvt: "RemoveFromWishList",
               DeviceToken: Device_Token,
+              JobNo: current.jobNumber,
               AppId: 3,
               CartWishId: current.WishListId || 0,
               IsRemoveAll: 0,
-              CustomerId: current?.CustomerId || 0,
-              IsVisitor: current?.IsVisitor || 0,
+              CustomerId: activeCustomer?.CustomerId || 0,
+              IsVisitor: activeCustomer?.IsVisitor || 0,
             },
           ]),
         };
@@ -164,9 +190,9 @@ const Scanner = () => {
               DeviceToken: Device_Token,
               AppId: 3,
               JobNo: current.jobNumber,
-              CustomerId: current?.CustomerId || 0,
+              CustomerId: activeCustomer?.CustomerId || 0,
               IsWishList: 1,
-              IsVisitor: current?.IsVisitor || 0,
+              IsVisitor: activeCustomer?.IsVisitor || 0,
               DiscountOnId: 0,
               Discount: 0,
             },
@@ -201,9 +227,10 @@ const Scanner = () => {
     }
   };
 
-  const toggleCart = async (detailItem) => {
+  const toggleCart = async (detailItem , data) => {
     const Device_Token = sessionStorage.getItem("device_token");
-    const current = detailItem || activeDetail;
+    const current = data ? detailItem : activeDetail;
+
 
     try {
       if (!current) return;
@@ -218,6 +245,7 @@ const Scanner = () => {
               DeviceToken: Device_Token,
               AppId: 3,
               CartWishId: current.CartListId,
+              JobNo: current.jobNumber,
               IsRemoveAll: 0,
               CustomerId: activeCustomer.CustomerId || 0,
               IsVisitor: activeCustomer.IsVisitor || 0,
@@ -381,7 +409,10 @@ const Scanner = () => {
             marginBottom: "10px",
           }}
         >
-          <div className="scanner_List_moreview" onClick={toggleWishlist}>
+          <div
+            className="scanner_List_moreview"
+            onClick={() => toggleWishlist("", false)}
+          >
             <Heart
               fill={activeDetail.isInWishList ? "#ff3366" : "none"}
               color={activeDetail.isInWishList ? "#ff3366" : "black"}
@@ -389,7 +420,7 @@ const Scanner = () => {
             <p>Wishlist</p>
           </div>
 
-          <div className="scanner_List_moreview" onClick={toggleCart}>
+          <div className="scanner_List_moreview" onClick={() => toggleCart("" , false)}>
             <ShoppingCart
               fill={activeDetail.isInCartList ? "#4caf50" : "none"}
               color={activeDetail.isInCartList ? "#4caf50" : "black"}
@@ -410,6 +441,10 @@ const Scanner = () => {
         </div>
       </div>
     );
+
+  const [expandedItems, setExpandedItems] = useState([]);
+
+  console.log("scannedDatascannedData", scannedData);
 
   return (
     <div className="scanner-container">
@@ -469,117 +504,198 @@ const Scanner = () => {
         mode != "AllScanItem" &&
         (isExpanded ? renderExpandedTop() : renderCollapsedTop())}
 
-      {scannedData.length !== 0 && mode == "AllScanItem" && (
-        <div>
-          {scannedData.map((data, idx) => (
-            <div
-              key={idx}
-              className="recent-item"
-              // onClick={() => {
-              //   setActiveDetail(data);
-              //   setIsExpanded(true);
-              // }}
-            >
-              <div className="top-detail-card_Big expanded">
-                <div style={{ padding: "1rem" }}>
-                  <div className="header">
-                    <span>{data.jobNumber}</span>
-                  </div>
-                  <div>
-                    <img
-                      src={data?.image}
-                      onError={(e) => (e.target.src = PlaceHolderImg)}
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                  <div className="body">
-                    <h3>₹{data.price}</h3>
-                    <p className="info_main_section">
-                      Metal:{" "}
-                      <span className="info_main_section_span">
-                        ₹{data.metal}
-                      </span>
-                    </p>
-                    <p className="info_main_section">
-                      Diamond:{" "}
-                      <span className="info_main_section_span">
-                        ₹{data.diamoond}
-                      </span>
-                    </p>
-                    <p className="info_main_section">
-                      Color Stone:{" "}
-                      <span className="info_main_section_span">
-                        ₹{data.colorStone}
-                      </span>
-                    </p>
-                    <p className="info_main_section">
-                      Making Charges:{" "}
-                      <span className="info_main_section_span">
-                        ₹{data.makingCharge}
-                      </span>
-                    </p>
-                    <p className="info_main_section">
-                      Tax Amount:{" "}
-                      <span className="info_main_section_span">
-                        ₹{data.taxAmount}
-                      </span>
-                    </p>
-                    <div className="weights">
-                      <p style={{ display: "flex", flexDirection: "column" }}>
-                        Net Weight{" "}
-                        <span style={{ color: "#00a2e1", fontWeight: 600 }}>
-                          {data.netWeight} gm
-                        </span>
-                      </p>
-                      <p style={{ display: "flex", flexDirection: "column" }}>
-                        Gross Weight{" "}
-                        <span style={{ color: "#00a2e1", fontWeight: 600 }}>
-                          {data.GrossWeight} gm
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
+      {scannedData.length !== 0 && mode === "AllScanItem" && (
+        <div className={`expand-container ${isExpanded ? "expanded" : ""}`}>
+          {scannedData.map((data, idx) => {
+            const isExpanded = expandedItems.includes(idx);
+            return (
+              <div key={idx} className="recent-item">
                 <div
+                  className="top-detail-card_Big"
                   style={{
-                    display: "flex",
-                    justifyContent: "space-around",
+                    border: "1px solid #ccc",
                     marginBottom: "10px",
+                    overflow: "hidden",
+                    boxShadow:
+                      "rgba(0, 0, 0, 0.01) 0px 0px 3px 0px, rgba(27, 31, 35, 0.1) 0px 0px 0px 1px !important",
+                    backgroundColor: "rgb(248 248 248 / 49%)",
+                    marginBottom: "100px",
                   }}
                 >
                   <div
-                    className="scanner_List_moreview"
-                    onClick={() => toggleWishlist(data)}
-                  >
-                    <Heart
-                      fill={data.isInWishList ? "#ff3366" : "none"}
-                      color={data.isInWishList ? "#ff3366" : "black"}
-                    />
-                    <p>Wishlist</p>
-                  </div>
-
-                  <div className="scanner_List_moreview" onClick={toggleCart}>
-                    <ShoppingCart
-                      fill={data.isInCartList ? "#4caf50" : "none"}
-                      color={data.isInCartList ? "#4caf50" : "black"}
-                    />
-                    <p>Cart</p>
-                  </div>
-
-                  <div
-                    className="scanner_List_moreview"
+                    className="summary-row"
                     onClick={() => {
-                      setDiscountModalOpen(true);
-                      setDiscoutProductData(data);
+                      setExpandedItems((prev) =>
+                        prev.includes(idx)
+                          ? prev.filter((i) => i !== idx)
+                          : [...prev, idx]
+                      );
+                    }}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "5px",
+                      cursor: "pointer",
                     }}
                   >
-                    <Percent />
-                    <p>Discount</p>
+                    <div style={{ width: "100%" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <h4 style={{ margin: "5px 2px" }}>
+                          {data.jobNumber}({data?.designNo})
+                        </h4>
+                        <h4 style={{ margin: "5px 2px" }}>₹{data.price}</h4>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <p style={{ margin: "0px" }}>{data.Category}</p>
+                        <div style={{ fontSize: "1.5rem" }}>
+                          {isExpanded ? (
+                            <ArrowUp
+                              style={{
+                                height: "17px",
+                                width: "17px",
+                                border: "1px solid #b3b2b2",
+                                padding: "5px",
+                                borderRadius: "50px",
+                                color: "#b3b2b2",
+                              }}
+                            />
+                          ) : (
+                            <ArrowDown
+                              style={{
+                                height: "17px",
+                                width: "17px",
+                                border: "1px solid #b3b2b2",
+                                padding: "5px",
+                                borderRadius: "50px",
+                                color: "#b3b2b2",
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
+                  {isExpanded && (
+                    <div
+                      style={{
+                        padding: "5px",
+                        borderTop: "1px solid rgb(221 221 221 / 42%)",
+                      }}
+                    >
+                      <div>
+                        <img
+                          src={data?.image}
+                          onError={(e) => (e.target.src = PlaceHolderImg)}
+                          style={{
+                            width: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      </div>
+
+                      <div className="body">
+                        <h3>Actual Price : ₹{data.price}</h3>
+                        <h3>
+                          {data?.discountedPrice
+                            ? `Discounted Price ₹ ${data?.discountedPrice}`
+                            : ""}
+                        </h3>
+                        <div>{data?.MetalTypeTitle}</div>
+                        <div style={{ display: "flex" }}>
+                          <p className="info_main_section">
+                            Gross Wt:{" "}
+                            <span className="info_main_section_span">
+                              {data.GrossWeight} Grms
+                            </span>
+                          </p>
+                          <p className="info_main_section">
+                            Net Wt:{" "}
+                            <span className="info_main_section_span">
+                              {data.netWeight} Grms
+                            </span>
+                          </p>
+                        </div>
+
+                        <div style={{ display: "flex" }}>
+                          <p className="info_main_section">
+                            Diamond:{" "}
+                            <span className="info_main_section_span">
+                              ₹{data.DiamondWtP}
+                            </span>
+                          </p>
+                          <p className="info_main_section">
+                            colorStoneWtP:{" "}
+                            <span className="info_main_section_span">
+                              ₹{data.colorStoneWtP}
+                            </span>
+                          </p>
+                        </div>
+                        <p className="info_main_section">
+                          MiscWtP:{" "}
+                          <span className="info_main_section_span">
+                            ₹{data.MiscWtP}
+                          </span>
+                        </p>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-around",
+                          marginTop: "10px",
+                        }}
+                      >
+                        <div
+                          className="scanner_List_moreview"
+                          onClick={() => toggleWishlist(data, true)}
+                        >
+                          <Heart
+                            fill={data.isInWishList ? "#ff3366" : "none"}
+                            color={data.isInWishList ? "#ff3366" : "black"}
+                          />
+                          <p>Wishlist</p>
+                        </div>
+
+                        <div
+                          className="scanner_List_moreview"
+                          onClick={() => toggleCart(data , true)}
+                        >
+                          <ShoppingCart
+                            fill={data.isInCartList ? "#4caf50" : "none"}
+                            color={data.isInCartList ? "#4caf50" : "black"}
+                          />
+                          <p>Cart</p>
+                        </div>
+
+                        <div
+                          className="scanner_List_moreview"
+                          onClick={() => {
+                            setDiscountModalOpen(true);
+                            setDiscoutProductData(data);
+                          }}
+                        >
+                          <Percent />
+                          <p>Discount</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
