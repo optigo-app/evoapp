@@ -202,7 +202,6 @@ const AddCustomer = () => {
       ]),
     };
     const response = await CallApi(body);
-    console.log("response", response);
     if (response?.DT[0]?.stat == 1) {
       showToast({
         message: "Now Customer OnFloor",
@@ -210,7 +209,35 @@ const AddCustomer = () => {
         fontColor: "#fff",
         duration: 5000,
       });
-      navigate("/JobScanPage");
+      sessionStorage.removeItem("AllScanJobData");
+
+      const body = {
+        Mode: "StartSession",
+        Token: `"${Device_Token}"`,
+        ReqData: JSON.stringify([
+          {
+            ForEvt: "StartSession",
+            DeviceToken: Device_Token,
+            CustomerId: foundCustomer?.CustomerId,
+            AppId: 3,
+          },
+        ]),
+      };
+
+      const response = await CallApi(body);
+      if (response?.DT[0]?.stat == 1) {
+        showToast({
+          message: "Customer Session Start",
+          bgColor: "#4caf50",
+          fontColor: "#fff",
+          duration: 5000,
+        });
+        navigate(`/JobScanPage`);
+        sessionStorage.setItem(
+          "curruntActiveCustomer",
+          JSON.stringify(foundCustomer)
+        );
+      }
     }
   };
 
@@ -276,7 +303,7 @@ const AddCustomer = () => {
           <div className="result-section">
             <h4>Available Customer</h4>
 
-            <Button className="customercard_button" onClick={handleNaviagte}>
+            <Button className="customercard_button" onClick={() => handleNaviagte(foundCustomer)}>
               <div className="card-header">
                 <div>
                   <h5>

@@ -105,11 +105,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.75rem;
       margin-bottom: 0.5rem;
-      background: #fff;
       border-radius: 6px;
-      border: 1px solid #ddd;
       cursor: pointer;
 
       .left {
@@ -260,7 +257,7 @@
 
 
   .JobScannerPage {
-    height: 70px;
+    height: 50px;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -293,14 +290,18 @@
   
     .text-buttons {
       display: flex;
-      gap: 12px;
-      padding: 0 15px;
+      height: 100%;
+
+      .active{
+        background-color: #2196f3 !important;
+        color: white !important;
+      }
   
       button {
         font-family: $font-family !important;
         color: $heightlightColor !important;
         font-weight: 500;
-        width: 50%;
+        width: 33%;
         text-transform: none;
       }
     }

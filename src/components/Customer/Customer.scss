@@ -148,12 +148,12 @@
 
 .submitBtn_feedBack{
   height: 50px;
-  background-color: $heightlightColor;
-  color: $BtnFontColor;
+  background-color: $heightlightColor !important;
+  color: $BtnFontColor !important;
 }
 
 .ReleseBtn{
   height: 50px;
-  background-color: rgb(238, 54, 54);
-  color: $BtnFontColor;
+  background-color: rgb(238, 54, 54) !important;
+  color: $BtnFontColor !important;
 }

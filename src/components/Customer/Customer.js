@@ -237,12 +237,26 @@ const Customer = () => {
     setOpen(newOpen);
   };
 
+  const handleNaviagte = () => {
+    const isAnyRunning = mainData.some(
+      (cust) => cust.IsLockTimer === 2 && !stopped[cust.CustomerId]
+    );
+    if (isAnyRunning) {
+      showToast({
+        message: "First End The Running Customer",
+        bgColor: "#f44336",
+        fontColor: "#fff",
+        duration: 5000,
+      });
+      return;
+    }
+    navigate("/AddCustomer");
+  };
+  
   return (
     <div className="CustomerMain">
       <LoadingBackdrop isLoading={loading} />
-      {/* <Button variant="contained" onClick={toggleDrawer(true)}>
-        Open Bottom Drawer
-      </Button> */}
+
       <Drawer anchor="bottom" open={open} onClose={toggleDrawer(false)}>
         <Box
           sx={{
@@ -276,7 +290,7 @@ const Customer = () => {
             </Button>
             <Button
               className="AddCustomer_Btn"
-              onClick={() => navigate("/AddCustomer")}
+              onClick={handleNaviagte}
               variant="contained"
             >
               <CirclePlus />
