@@ -8,10 +8,13 @@ import { RemoveFromCartWishApi } from '../../API/Cart_WishlistAPI/RemoveFromCart
 import LoadingBackdrop from '../../Utils/LoadingBackdrop';
 import NoDataFound from '../../Utils/NoDataFound';
 import { showToast } from '../../Utils/Tostify/ToastManager';
+import { useNavigate } from 'react-router-dom';
+import { moveToBillApi } from '../../API/Cart_WishlistAPI/MoveToBillApi';
 
 const CartItemCard = lazy(() => import('../../components/CartComp/CartCard'));
 
 const CartPage = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [cartItems, setCartItems] = useState();
   const [opencnfDialogOpen, setOpenCnfDialog] = React.useState(false);
@@ -83,6 +86,19 @@ const CartPage = () => {
     getCartData();
   }, [])
 
+  const handleMoveToBill = async () => {
+    const res = await moveToBillApi();
+    if (res?.DT[0]?.stat != 0) {
+      navigate("/orderSuccess", { replace: true });
+    } else {
+      showToast({
+        message: "Failed to move to billing",
+        bgColor: "#f8d7da",
+        fontColor: "#721c24",
+        duration: 3000,
+      });
+    }
+  }
 
   const handlePrint = () => {
     // Implement print functionality here
@@ -116,7 +132,7 @@ const CartPage = () => {
               <Button variant="outlined" startIcon={<Printer size={18} />} onClick={handlePrint}>
                 Print Estimate
               </Button>
-              <Button variant="outlined" startIcon={<ScrollText size={18} />}>
+              <Button variant="outlined" startIcon={<ScrollText size={18} />} onClick={handleMoveToBill}>
                 Move to Billing
               </Button>
             </Stack>

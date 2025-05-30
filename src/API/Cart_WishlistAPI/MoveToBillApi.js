@@ -1,26 +1,22 @@
 import { CommonAPI } from "../CommonAPI/CommonAPI";
 
-export const moveToBillApi = async ({
-    cartWishData,
-    IsMoveAll = 0,
-}) => {
+export const moveToBillApi = async () => {
     const Device_Token = sessionStorage.getItem("device_token");
-    if (!cartWishData) {
-        return console.error("cartWishData are required for moveToBillApi");
+    const activeCust = JSON?.parse(sessionStorage.getItem("curruntActiveCustomer"));
+    if (!activeCust?.CustomerId) {
+        return console.error("CustomerId are required for moveToBillApi");
     }
     try {
         const body = {
-            Mode: "moveToBillApi",
+            Mode: "MoveToBill",
             Token: `${Device_Token}`,
             ReqData: JSON.stringify([
                 {
-                    ForEvt: "moveToBillApi",
+                    ForEvt: "MoveToBill",
                     DeviceToken: Device_Token,
                     AppId: "3",
-                    CartWishId: cartWishData?.CartWishId,
-                    CustomerId: cartWishData?.CustomerId,
-                    IsVisitor: cartWishData?.IsVisitor,
-                    IsMoveAll: IsMoveAll,
+                    CustomerId: activeCust?.CustomerId,
+                    IsVisitor: activeCust?.IsVisitor,
                 },
             ]),
         };

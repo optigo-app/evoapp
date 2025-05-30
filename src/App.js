@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LoadingBackdrop from "./Utils/LoadingBackdrop";
 import Profile from "./components/ProfilePage/Profile";
 import { ToastContainer } from "./Utils/Tostify/ToastManager";
+import OrderSuccess from "./Page/OrderSucess/OrderSuccess";
 
 const Customer = lazy(() => import("./components/Customer/Customer"));
 const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
@@ -33,6 +34,7 @@ function App() {
           <Route path="/AddCustomer" element={<AddCustomer />} />
           <Route path="/JobScanPage" element={<JobScanPage />} />
           <Route path="/Profile" element={<Profile />} />
+          <Route path="/orderSuccess" element={<OrderSuccess />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

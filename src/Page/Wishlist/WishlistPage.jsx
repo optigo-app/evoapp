@@ -66,10 +66,15 @@ const WishlistPage = () => {
   };
 
   const hanldeRemoveFromCart = async () => {
+    let allScanJobData = JSON?.parse(sessionStorage.getItem("AllScanJobData")) || [];
     const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", flag: rmflag, cartWishData: selectedItems[0] });
     if (res) {
       setWishlistItems(prev => prev.filter(item => !selectedItems.includes(item)));
       setSelectedItems([]);
+      allScanJobData = allScanJobData?.map(item =>
+        item.CartWishId === selectedItems[0].CartWishId ? { ...item, isInWishList: 0 } : item
+      );
+      sessionStorage.setItem("AllScanJobData", JSON.stringify(allScanJobData));
       showToast({
         message: "Item removed from wishlist",
         bgColor: "#d4edda",
@@ -86,6 +91,11 @@ const WishlistPage = () => {
     if (res) {
       setWishlistItems([]);
       setSelectedItems([]);
+      let allScanJobData = JSON?.parse(sessionStorage.getItem("AllScanJobData")) || [];
+      allScanJobData = allScanJobData?.map(item =>
+        WishlistItems?.some(wishlistItem => wishlistItem.CartWishId === item.CartWishId) ? { ...item, isInWishList: 0 } : item
+      );
+      sessionStorage?.setItem("AllScanJobData", JSON?.stringify(allScanJobData));
       showToast({
         message: "Items removed from wishlist",
         bgColor: "#d4edda",

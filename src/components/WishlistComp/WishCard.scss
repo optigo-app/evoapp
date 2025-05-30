@@ -51,6 +51,7 @@
       font-family: $font-family;
       line-height: 1.2;
       font-size: 14px;
+      text-transform: capitalize;
     }
 
     .price-section {
@@ -76,7 +77,11 @@
     .actions {
       margin-top: 8px;
       display: flex;
-      gap: 10px;
+      gap: 15px;
+
+      .MuiIconButton-root {
+        padding: 0 !important;
+      }
 
       .btn {
         width: 22px;

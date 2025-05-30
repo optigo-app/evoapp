@@ -12,6 +12,8 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.9.0",
+    "canvas-confetti": "^1.9.3",
+    "howler": "^2.2.4",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.511.0",
     "react": "^19.1.0",
