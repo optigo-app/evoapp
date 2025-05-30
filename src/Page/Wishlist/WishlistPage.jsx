@@ -77,8 +77,8 @@ const WishlistPage = () => {
       sessionStorage.setItem("AllScanJobData", JSON.stringify(allScanJobData));
       showToast({
         message: "Item removed from wishlist",
-        bgColor: "#d4edda",
-        fontColor: "#155724",
+        bgColor: "#4caf50",
+        fontColor: "#fff",
         duration: 3000,
       });
     }
@@ -98,8 +98,8 @@ const WishlistPage = () => {
       sessionStorage?.setItem("AllScanJobData", JSON?.stringify(allScanJobData));
       showToast({
         message: "Items removed from wishlist",
-        bgColor: "#d4edda",
-        fontColor: "#155724",
+        bgColor: "#4caf50",
+        fontColor: "#fff",
         duration: 3000,
       });
     }
@@ -112,8 +112,8 @@ const WishlistPage = () => {
     if (res) {
       showToast({
         message: "Moved to cart",
-        bgColor: "#d4edda",
-        fontColor: "#155724",
+        bgColor: "#4caf50",
+        fontColor: "#fff",
         duration: 3000,
       });
       setSelectedItems(prev => prev.filter(item => item.id !== wishlistItem.id));
@@ -127,8 +127,8 @@ const WishlistPage = () => {
     if (res) {
       showToast({
         message: "Items moved to cart",
-        bgColor: "#d4edda",
-        fontColor: "#155724",
+        bgColor: "#4caf50",
+        fontColor: "#fff",
         duration: 3000,
       });
       setSelectedItems([]);
@@ -162,6 +162,11 @@ const WishlistPage = () => {
       ) : WishlistItems?.length > 0 ? (
         <>
           <Suspense fallback={<></>}>
+          <Box className="WishHeaderClBtn">
+              <Button variant="text" onClick={() => handleOpenDialog({}, "all")}>
+                Clear All
+              </Button>
+            </Box>
             <Box className="WishItemList">
               {WishlistItems?.map((item) => (
                 <WishlistCard
@@ -177,7 +182,7 @@ const WishlistPage = () => {
           </Suspense>
 
           <Box className="WishActionsFooter">
-            <Box className="wishActionBtn">
+            {/* <Box className="wishActionBtn">
               <Box className="left-action">
                 <Button variant="text" onClick={() => handleOpenDialog({}, "all")}>
                   Clear All
@@ -197,9 +202,9 @@ const WishlistPage = () => {
                   }
                 />
               </Box>
-            </Box>
+            </Box> */}
 
-            <Divider className="footer-divider" />
+            {/* <Divider className="footer-divider" /> */}
 
             <Stack direction="row" spacing={2} justifyContent="center" className="action-buttons">
               <Button variant="outlined" startIcon={<Printer size={18} />}>

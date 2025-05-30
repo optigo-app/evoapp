@@ -37,10 +37,10 @@ const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelec
             </IconButton>
           </Box>
         </Box>
-        <Checkbox className="product-checkbox"
+        {/* <Checkbox className="product-checkbox"
           checked={isSelected}
           onChange={() => handleSelectItem(wishlistItems)}
-        />
+        /> */}
       </Box>
     </Card>
   );

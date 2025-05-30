@@ -43,8 +43,8 @@ const CartPage = () => {
       sessionStorage.setItem("AllScanJobData", JSON.stringify(allScanJobData));
       showToast({
         message: "Item removed from cart",
-        bgColor: "#d4edda",
-        fontColor: "#155724",
+        bgColor: "#4caf50",
+        fontColor: "#fff",
         duration: 3000,
       });
     }
@@ -65,8 +65,8 @@ const CartPage = () => {
       sessionStorage?.setItem("AllScanJobData", JSON?.stringify(allScanJobData));
       showToast({
         message: "Items removed from cart",
-        bgColor: "#d4edda",
-        fontColor: "#155724",
+        bgColor: "#4caf50",
+        fontColor: "#fff",
         duration: 3000,
       });
     }
