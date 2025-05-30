@@ -124,7 +124,7 @@ const Scanner = () => {
 
       const updatedData = [
         formatted,
-        ...scannedData.filter((j) => j.jobNumber !== formatted.jobNumber),
+        ...scannedData.filter((j) => j.JobNo !== formatted.JobNo),
       ];
 
       setScannedData(updatedData);
@@ -227,10 +227,9 @@ const Scanner = () => {
     }
   };
 
-  const toggleCart = async (detailItem , data) => {
+  const toggleCart = async (detailItem, data) => {
     const Device_Token = sessionStorage.getItem("device_token");
     const current = data ? detailItem : activeDetail;
-
 
     try {
       if (!current) return;
@@ -420,7 +419,10 @@ const Scanner = () => {
             <p>Wishlist</p>
           </div>
 
-          <div className="scanner_List_moreview" onClick={() => toggleCart("" , false)}>
+          <div
+            className="scanner_List_moreview"
+            onClick={() => toggleCart("", false)}
+          >
             <ShoppingCart
               fill={activeDetail.isInCartList ? "#4caf50" : "none"}
               color={activeDetail.isInCartList ? "#4caf50" : "black"}
@@ -606,48 +608,92 @@ const Scanner = () => {
                       </div>
 
                       <div className="body">
-                        <h3>Actual Price : ₹{data.price}</h3>
-                        <h3>
-                          {data?.discountedPrice
-                            ? `Discounted Price ₹ ${data?.discountedPrice}`
-                            : ""}
-                        </h3>
-                        <div>{data?.MetalTypeTitle}</div>
-                        <div style={{ display: "flex" }}>
-                          <p className="info_main_section">
-                            Gross Wt:{" "}
-                            <span className="info_main_section_span">
-                              {data.GrossWeight} Grms
-                            </span>
+                        <div>
+                          <p
+                            style={{
+                              margin: "5px 0px",
+                              color: "#988d8d",
+                              fontSize: "15px",
+                            }}
+                          >
+                            Actual Price
                           </p>
-                          <p className="info_main_section">
-                            Net Wt:{" "}
-                            <span className="info_main_section_span">
-                              {data.netWeight} Grms
-                            </span>
-                          </p>
-                        </div>
-
-                        <div style={{ display: "flex" }}>
-                          <p className="info_main_section">
-                            Diamond:{" "}
-                            <span className="info_main_section_span">
-                              ₹{data.DiamondWtP}
-                            </span>
-                          </p>
-                          <p className="info_main_section">
-                            colorStoneWtP:{" "}
-                            <span className="info_main_section_span">
-                              ₹{data.colorStoneWtP}
-                            </span>
+                          <p
+                            style={{
+                              margin: "5px 0px",
+                              fontSize: "20px",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {" "}
+                            ₹{data.price}
                           </p>
                         </div>
-                        <p className="info_main_section">
-                          MiscWtP:{" "}
-                          <span className="info_main_section_span">
-                            ₹{data.MiscWtP}
-                          </span>
+                        {data?.discountedPrice && (
+                          <div>
+                            <p
+                              style={{
+                                margin: "5px 0px",
+                                color: "#988d8d",
+                                fontSize: "15px",
+                              }}
+                            >
+                              Discounted Price
+                            </p>
+                            <p
+                              style={{
+                                margin: "5px 0px",
+                                fontSize: "20px",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {" "}
+                              ₹{data.discountedPrice}
+                            </p>
+                          </div>
+                        )}
+                        <p style={{ fontWeight: 600, margin: "10px 0px" }}>
+                          Metal : {data?.MetalTypeTitle}
                         </p>
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                          <div style={{ display: "flex", gap: "80px" }}>
+                            <div>
+                              <p className="info_main_section">Gross Wt: </p>
+                              <span className="info_main_section_span">
+                                {data.GrossWeight} Grms
+                              </span>
+                            </div>
+                            <div>
+                              <p className="info_main_section">Net Wt: </p>
+                              <span className="info_main_section_span">
+                                {data.netWeight} Grms
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ display: "flex", gap: "80px" }}>
+                            <div>
+                              <p className="info_main_section">Diamond: </p>
+                              <span className="info_main_section_span">
+                                ₹{data.DiamondWtP}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="info_main_section">
+                                colorStoneWtP:{" "}
+                              </p>
+                              <span className="info_main_section_span">
+                                ₹{data.colorStoneWtP}
+                              </span>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="info_main_section">MiscWtP: </p>
+                            <span className="info_main_section_span">
+                              ₹{data.MiscWtP}
+                            </span>
+                          </div>
+                        </div>
                       </div>
 
                       <div
@@ -670,7 +716,7 @@ const Scanner = () => {
 
                         <div
                           className="scanner_List_moreview"
-                          onClick={() => toggleCart(data , true)}
+                          onClick={() => toggleCart(data, true)}
                         >
                           <ShoppingCart
                             fill={data.isInCartList ? "#4caf50" : "none"}

@@ -181,6 +181,17 @@
         cursor: pointer;
       }
 
+      .info_main_section{
+        font-size: 15px;
+        margin: 5px 0px;
+        color: rgb(152, 141, 141);
+      }
+
+      .info_main_section_span{
+        font-size: 18px;
+        font-weight: 600;
+      }
+
     &.collapsed {
       cursor: pointer;
       display: flex;
