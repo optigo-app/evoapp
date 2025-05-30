@@ -31,11 +31,16 @@ const CartPage = () => {
   }
 
   const hanldeRemoveFromCart = async () => {
+    let allScanJobData = JSON?.parse(sessionStorage.getItem("AllScanJobData")) || [];
     setIsLoading(true);
     const res = await RemoveFromCartWishApi({ mode: "RemoveFromCart", flag: rmflag, cartWishData: selectedItems[0] });
     if (res) {
       setCartItems(prevItems => prevItems.filter(item => !selectedItems.includes(item)));
       setSelectedItems([]);
+      allScanJobData = allScanJobData?.map(item =>
+        item.JobNo === selectedItems[0].JobNo ? { ...item, isInCartList: 0 } : item
+      );
+      sessionStorage.setItem("AllScanJobData", JSON.stringify(allScanJobData));
       showToast({
         message: "Item removed from cart",
         bgColor: "#d4edda",
@@ -48,11 +53,16 @@ const CartPage = () => {
   }
 
   const handleRemoveAllFromCart = async () => {
+    let allScanJobData = JSON?.parse(sessionStorage.getItem("AllScanJobData")) || [];
     setIsLoading(true);
     const res = await RemoveFromCartWishApi({ mode: "RemoveFromCart", flag: rmflag, cartWishData: cartItems[0], IsRemoveAll: 1 });
     if (res) {
       setCartItems([]);
       setSelectedItems([]);
+      allScanJobData = allScanJobData?.map(item =>
+        cartItems?.some(cartItem => cartItem.JobNo === item.JobNo) ? { ...item, isInCartList: 0 } : item
+      );
+      sessionStorage?.setItem("AllScanJobData", JSON?.stringify(allScanJobData));
       showToast({
         message: "Items removed from cart",
         bgColor: "#d4edda",

@@ -72,7 +72,7 @@ const WishlistPage = () => {
       setWishlistItems(prev => prev.filter(item => !selectedItems.includes(item)));
       setSelectedItems([]);
       allScanJobData = allScanJobData?.map(item =>
-        item.CartWishId === selectedItems[0].CartWishId ? { ...item, isInWishList: 0 } : item
+        item.JobNo === selectedItems[0].JobNo ? { ...item, isInWishList: 0 } : item
       );
       sessionStorage.setItem("AllScanJobData", JSON.stringify(allScanJobData));
       showToast({
@@ -86,14 +86,14 @@ const WishlistPage = () => {
   };
 
   const handleRemoveFromCartAll = async () => {
+    let allScanJobData = JSON?.parse(sessionStorage.getItem("AllScanJobData")) || [];
     setIsLoading(true);
     const res = await RemoveFromCartWishApi({ mode: "RemoveFromWishList", flag: rmflag, cartWishData: WishlistItems[0], IsRemoveAll: 1 });
     if (res) {
       setWishlistItems([]);
       setSelectedItems([]);
-      let allScanJobData = JSON?.parse(sessionStorage.getItem("AllScanJobData")) || [];
       allScanJobData = allScanJobData?.map(item =>
-        WishlistItems?.some(wishlistItem => wishlistItem.CartWishId === item.CartWishId) ? { ...item, isInWishList: 0 } : item
+        WishlistItems?.some(wishlistItem => wishlistItem.JobNo === item.JobNo) ? { ...item, isInWishList: 0 } : item
       );
       sessionStorage?.setItem("AllScanJobData", JSON?.stringify(allScanJobData));
       showToast({
