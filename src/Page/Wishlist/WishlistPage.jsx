@@ -24,9 +24,9 @@ const WishlistCard = lazy(() =>
 const WishlistPage = () => {
   const [isLoading, setIsLoading] = useState(null);
   const [WishlistItems, setWishlistItems] = useState([]);
+  console.log('WishlistItems: ', WishlistItems);
   const [opencnfDialogOpen, setOpenCnfDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
-  console.log('selectedItems: ', selectedItems);
   const [rmflag, setRmFlag] = useState("");
 
   const getWishlistData = async () => {
@@ -108,15 +108,39 @@ const WishlistPage = () => {
   };
 
   const handleWishToCart = async (wishlistItem) => {
-    const res = await AddCartFromWishListApi({ flag: "single", cartWishData: wishlistItem });
-    if (res) {
-      showToast({
-        message: "Moved to cart",
-        bgColor: "#4caf50",
-        fontColor: "#fff",
-        duration: 3000,
-      });
-      setSelectedItems(prev => prev.filter(item => item.id !== wishlistItem.id));
+    if (wishlistItem?.IsInCartList !== 0) {
+      const res = await RemoveFromCartWishApi({ mode: "RemoveFromCart", flag: "single", pageFlag:"wish", cartWishData: wishlistItem });
+      if (res) {
+        const updatedItems = WishlistItems?.map((item) =>
+          item.CartWishId === wishlistItem.CartWishId
+            ? { ...item, IsInCartList: 0 } // Corrected here
+            : item
+        );
+        setWishlistItems(updatedItems);
+        showToast({
+          message: "Removed from cart",
+          bgColor: "#4caf50",
+          fontColor: "#fff",
+          duration: 3000,
+        });
+      }
+    } else {
+      const res = await AddCartFromWishListApi({ flag: "single", cartWishData: wishlistItem });
+      if (res) {
+        const updatedItems = WishlistItems?.map((item) =>
+          item.CartWishId === wishlistItem.CartWishId
+            ? { ...item, IsInCartList: 1 } // Corrected here
+            : item
+        );
+        setWishlistItems(updatedItems);
+        showToast({
+          message: "Moved to cart",
+          bgColor: "#4caf50",
+          fontColor: "#fff",
+          duration: 3000,
+        });
+        setSelectedItems(prev => prev.filter(item => item.id !== wishlistItem.id));
+      }
     }
     handleCloseDialog();
   };
@@ -167,7 +191,7 @@ const WishlistPage = () => {
       ) : WishlistItems?.length > 0 ? (
         <>
           <Suspense fallback={<></>}>
-          <Box className="WishHeaderClBtn">
+            <Box className="WishHeaderClBtn">
               <Button variant="text" onClick={() => handleOpenDialog({}, "all")}>
                 Clear All
               </Button>

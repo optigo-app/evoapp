@@ -5,6 +5,7 @@ import { Printer, ShoppingCart, Trash2 } from 'lucide-react';
 import PlaceHolderImg from '../../assests/placeHolderImg.svg';
 
 const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelectItem, handleWishToCart, handlePrint }) => {
+  console.log('wishlistItems--->>>: ', wishlistItems);
 
   return (
     <Card className="Wishlist-card">
@@ -30,7 +31,7 @@ const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelec
           </Box>
           <Box className="actions">
             <IconButton onClick={() => handleWishToCart(wishlistItems)}>
-              <ShoppingCart className='btn' />
+              <ShoppingCart className={`btn ${wishlistItems?.IsInCartList != 0 ? "btn-active" : ""}`} />
             </IconButton>
             <IconButton onClick={() => handleOpenDialog(wishlistItems, "single")}>
               <Trash2 className='btn' />

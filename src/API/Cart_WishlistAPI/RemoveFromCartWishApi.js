@@ -3,6 +3,7 @@ import { CommonAPI } from "../CommonAPI/CommonAPI";
 export const RemoveFromCartWishApi = async ({
   mode,
   flag,
+  pageFlag,
   cartWishData,
   IsRemoveAll = 0,
 }) => {
@@ -19,7 +20,8 @@ export const RemoveFromCartWishApi = async ({
           ForEvt: mode,
           DeviceToken: Device_Token,
           AppId: "3",
-          CartWishId: flag == "single" ? cartWishData?.CartWishId : "",
+          JobNo: cartWishData?.JobNo || "",
+          CartWishId: pageFlag == "wish" ? '0' : (flag == "single" ? cartWishData?.CartWishId : ""),
           CustomerId: cartWishData?.CustomerId,
           IsVisitor: cartWishData?.IsVisitor,
           IsRemoveAll: IsRemoveAll,
