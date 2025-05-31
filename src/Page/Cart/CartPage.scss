@@ -55,11 +55,11 @@
 
     .action-buttons {
       padding: 0 15px;
+      margin-top: 8px;
       margin-bottom: 8px;
       display: flex;
 
       button {
-        margin-top: 8px;
         width: 50%;
         color: $titleColor !important;
         border: 1px solid #d3d3d3 !important;

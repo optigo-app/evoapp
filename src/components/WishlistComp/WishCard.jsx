@@ -1,10 +1,10 @@
 import React from 'react';
 import './WishCard.scss';
 import { Card, Typography, IconButton, Checkbox, Box } from '@mui/material';
-import { ShoppingCart, Trash2 } from 'lucide-react';
+import { Printer, ShoppingCart, Trash2 } from 'lucide-react';
 import PlaceHolderImg from '../../assests/placeHolderImg.svg';
 
-const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelectItem, handleWishToCart }) => {
+const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelectItem, handleWishToCart, handlePrint }) => {
 
   return (
     <Card className="Wishlist-card">
@@ -35,12 +35,15 @@ const WishlistCard = ({ wishlistItems, isSelected, handleOpenDialog, handleSelec
             <IconButton onClick={() => handleOpenDialog(wishlistItems, "single")}>
               <Trash2 className='btn' />
             </IconButton>
+            <IconButton onClick={handlePrint}>
+              <Printer className='btn' />
+            </IconButton>
           </Box>
         </Box>
-        <Checkbox className="product-checkbox"
+        {/* <Checkbox className="product-checkbox"
           checked={isSelected}
           onChange={() => handleSelectItem(wishlistItems)}
-        />
+        /> */}
       </Box>
     </Card>
   );
