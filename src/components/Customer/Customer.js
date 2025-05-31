@@ -454,6 +454,12 @@ const Customer = () => {
             <Button
               variant="contained"
               onClick={() => handleExitCustomer(endCustomnerInfo)}
+              style={{ 
+                backgroundColor: '',
+                fontSize: '12px',
+                margin: '0px',
+                padding: '8px'
+              }}
             >
               {customerEnd ? "Save & End Customer" : "Save & Relese Customer"}
             </Button>
@@ -465,7 +471,7 @@ const Customer = () => {
         {DrawerList}
       </Drawer>
 
-      <Drawer anchor="bottom" open={open} onClose={toggleDrawer(false)}>
+      <Drawer anchor="bottom" open={open} onClose={() => setOpen(false)}>
         <Box className="Customer_bottom_button">
           <Stack
             direction="row"
@@ -519,7 +525,7 @@ const Customer = () => {
           <div
             style={{
               display: "flex",
-              gap: "15px",
+              gap: "3px",
               width: "33.33%",
               justifyContent: "flex-end",
             }}

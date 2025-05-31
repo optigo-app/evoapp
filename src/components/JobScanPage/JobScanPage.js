@@ -19,6 +19,9 @@ const JobScanPage = () => {
   const [activeTab, setActiveTab] = useState("scan");
   const [tabsFixed, setTabsFixed] = useState(false);
   const headerRef = useRef(null);
+  const curruntActiveCustomer = JSON.parse(
+    sessionStorage.getItem("curruntActiveCustomer")
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,25 +70,41 @@ const JobScanPage = () => {
     <div className="JobScanPageMain">
       <Box className="CartHeader_main" ref={headerRef}>
         <Stack className="header-container">
+          <div>
           <p
             style={{
               fontSize: "20px",
               fontWeight: "bold",
+              color: "white",
+              margin: '0px'
             }}
           >
-            {activeTab == "scan"
+            {curruntActiveCustomer?.firstname} {curruntActiveCustomer?.lastname}
+            {/* {activeTab == "scan"
               ? "Scan Job"
               : activeTab == "wishlist"
               ? "WishList"
               : activeTab == "cart"
               ? "Cart List"
-              : "Notes"}
+              : "Notes"} */}
           </p>
-          <Typography
+          <p
+            style={{
+              fontSize: "10px",
+              fontWeight: "bold",
+              color: "white",
+              margin: '0px'
+            }}
+          >
+            {curruntActiveCustomer?.CompanyName}
+          </p>
+          </div>
+
+          {/* <Typography
             variant="h6"
             style={{ width: "33.33%" }}
             fontWeight={600}
-          ></Typography>
+          ></Typography> */}
           <Box textAlign="right" style={{ width: "33.33%" }}>
             <Button
               className="AddCustomer_Btn"
