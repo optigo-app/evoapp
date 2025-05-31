@@ -342,9 +342,11 @@ const Scanner = () => {
   const renderExpandedTop = () =>
     activeDetail && (
       <div className="top-detail-card_Big expanded">
-        <div style={{ padding: "1rem" }}>
+        <div style={{ padding: "5px" }}>
           <div className="header">
-            <span>{activeDetail.jobNumber}</span>
+            <span>
+              {activeDetail.JobNo} ({activeDetail?.designNo})
+            </span>
           </div>
           <div>
             <img
@@ -354,91 +356,117 @@ const Scanner = () => {
             />
           </div>
           <div className="body">
-            <h3>₹{activeDetail.price}</h3>
-            <p className="info_main_section">
-              Metal:{" "}
-              <span className="info_main_section_span">
-                ₹{activeDetail.metal}
-              </span>
-            </p>
-            <p className="info_main_section">
-              Diamond:{" "}
-              <span className="info_main_section_span">
-                ₹{activeDetail.diamoond}
-              </span>
-            </p>
-            <p className="info_main_section">
-              Color Stone:{" "}
-              <span className="info_main_section_span">
-                ₹{activeDetail.colorStone}
-              </span>
-            </p>
-            <p className="info_main_section">
-              Making Charges:{" "}
-              <span className="info_main_section_span">
-                ₹{activeDetail.makingCharge}
-              </span>
-            </p>
-            <p className="info_main_section">
-              Tax Amount:{" "}
-              <span className="info_main_section_span">
-                ₹{activeDetail.taxAmount}
-              </span>
-            </p>
-            <div className="weights">
-              <p style={{ display: "flex", flexDirection: "column" }}>
-                Net Weight{" "}
-                <span style={{ color: "#00a2e1", fontWeight: 600 }}>
-                  {activeDetail.netWeight} gm
-                </span>
-              </p>
-              <p style={{ display: "flex", flexDirection: "column" }}>
-                Gross Weight{" "}
-                <span style={{ color: "#00a2e1", fontWeight: 600 }}>
-                  {activeDetail.GrossWeight} gm
-                </span>
-              </p>
+            <div>
+              <p className="showData_price_title">Actual Price</p>
+              <p className="showData_price_deatil"> ₹{activeDetail.price}</p>
+            </div>
+            {activeDetail?.discountedPrice && (
+              <div>
+                <p
+                  style={{
+                    margin: "5px 0px",
+                    color: "#988d8d",
+                    fontSize: "15px",
+                  }}
+                >
+                  Discounted Price
+                </p>
+                <p
+                  style={{
+                    margin: "5px 0px",
+                    fontSize: "20px",
+                    fontWeight: 600,
+                  }}
+                >
+                  {" "}
+                  ₹{activeDetail.discountedPrice}
+                </p>
+              </div>
+            )}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <div style={{ display: "flex" }}>
+                <div style={{ width: "33.33%" }}>
+                  <p className="info_main_section">GW : </p>
+                  <span className="info_main_section_span">
+                    {activeDetail.GrossWeight} Grms
+                  </span>
+                </div>
+                <div style={{ width: "33.33%" }}>
+                  <p className="info_main_section">NetW :</p>
+                  <span className="info_main_section_span">
+                    {activeDetail.netWeight} Grms
+                  </span>
+                </div>
+                <div style={{ width: "33.33%" }}>
+                  <p className="info_main_section">Diamond: </p>
+                  <span className="info_main_section_span">
+                    ₹{activeDetail.DiamondWtP}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex" }}>
+                <div style={{ width: "33.33%" }}>
+                  <p className="info_main_section">CS W/P : </p>
+                  <span className="info_main_section_span">
+                    ₹{activeDetail.colorStoneWtP}
+                  </span>
+                </div>
+                <div style={{ width: "33.33%" }}>
+                  <p className="info_main_section">MiscWtP: </p>
+                  <span className="info_main_section_span">
+                    ₹{activeDetail.MiscWtP}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-around",
-            marginBottom: "10px",
-          }}
-        >
-          <div
-            className="scanner_List_moreview"
-            onClick={() => toggleWishlist("", false)}
-          >
-            <Heart
-              fill={activeDetail.isInWishList ? "#ff3366" : "none"}
-              color={activeDetail.isInWishList ? "#ff3366" : "black"}
-            />
-            <p>Wishlist</p>
-          </div>
 
           <div
-            className="scanner_List_moreview"
-            onClick={() => toggleCart("", false)}
-          >
-            <ShoppingCart
-              fill={activeDetail.isInCartList ? "#4caf50" : "none"}
-              color={activeDetail.isInCartList ? "#4caf50" : "black"}
-            />
-            <p>Cart</p>
-          </div>
-
-          <div
-            className="scanner_List_moreview"
-            onClick={() => {
-              setDiscountModalOpen(true);
-              setDiscoutProductData(activeDetail);
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              marginTop: "10px",
             }}
           >
-            <Percent />
-            <p>Discount</p>
+            <div
+              className="scanner_List_moreview"
+              onClick={() => toggleWishlist("", false)}
+            >
+              <Heart
+                fill={activeDetail.isInWishList ? "#ff3366" : "none"}
+                color={activeDetail.isInWishList ? "#ff3366" : "black"}
+              />
+              <p>Wishlist</p>
+            </div>
+
+            <div
+              className="scanner_List_moreview"
+              onClick={() => toggleCart("", false)}
+            >
+              <ShoppingCart
+                fill={activeDetail.isInCartList ? "#4caf50" : "none"}
+                color={activeDetail.isInCartList ? "#4caf50" : "black"}
+              />
+              <p>Cart</p>
+            </div>
+
+            <div
+              className="scanner_List_moreview"
+              onClick={() => {
+                setDiscountModalOpen(true);
+                setDiscoutProductData(activeDetail);
+              }}
+            >
+              <Percent />
+              <p>Discount</p>
+            </div>
           </div>
         </div>
       </div>
@@ -521,7 +549,6 @@ const Scanner = () => {
                     boxShadow:
                       "rgba(0, 0, 0, 0.01) 0px 0px 3px 0px, rgba(27, 31, 35, 0.1) 0px 0px 0px 1px !important",
                     backgroundColor: "rgb(248 248 248 / 49%)",
-                    marginBottom: "100px",
                   }}
                 >
                   <div
@@ -564,10 +591,8 @@ const Scanner = () => {
                           {isExpanded ? (
                             <ArrowUp
                               style={{
-                                height: "17px",
-                                width: "17px",
-                                border: "1px solid #b3b2b2",
-                                padding: "5px",
+                                height: "20px",
+                                width: "20px",
                                 borderRadius: "50px",
                                 color: "#b3b2b2",
                               }}
@@ -575,10 +600,8 @@ const Scanner = () => {
                           ) : (
                             <ArrowDown
                               style={{
-                                height: "17px",
-                                width: "17px",
-                                border: "1px solid #b3b2b2",
-                                padding: "5px",
+                                height: "20px",
+                                width: "20px",
                                 borderRadius: "50px",
                                 color: "#b3b2b2",
                               }}
@@ -603,28 +626,15 @@ const Scanner = () => {
                           style={{
                             width: "100%",
                             objectFit: "contain",
+                            minHeight: "300px",
                           }}
                         />
                       </div>
 
                       <div className="body">
                         <div>
-                          <p
-                            style={{
-                              margin: "5px 0px",
-                              color: "#988d8d",
-                              fontSize: "15px",
-                            }}
-                          >
-                            Actual Price
-                          </p>
-                          <p
-                            style={{
-                              margin: "5px 0px",
-                              fontSize: "20px",
-                              fontWeight: 600,
-                            }}
-                          >
+                          <p className="showData_price_title">Actual Price</p>
+                          <p className="showData_price_deatil">
                             {" "}
                             ₹{data.price}
                           </p>
@@ -652,46 +662,56 @@ const Scanner = () => {
                             </p>
                           </div>
                         )}
-                        <p style={{ fontWeight: 600, margin: "10px 0px" }}>
+                        <p
+                          className="desc_metal_line"
+                          style={{
+                            fontWeight: 600,
+                            margin: "15px 0px 10px 0px ",
+                          }}
+                        >
                           Metal : {data?.MetalTypeTitle}
                         </p>
-                        <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                          <div style={{ display: "flex", gap: "80px" }}>
-                            <div>
-                              <p className="info_main_section">Gross Wt: </p>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "10px",
+                          }}
+                        >
+                          <div style={{ display: "flex" }}>
+                            <div style={{ width: "33.33%" }}>
+                              <p className="info_main_section">GW : </p>
                               <span className="info_main_section_span">
                                 {data.GrossWeight} Grms
                               </span>
                             </div>
-                            <div>
-                              <p className="info_main_section">Net Wt: </p>
+                            <div style={{ width: "33.33%" }}>
+                              <p className="info_main_section">NetW :</p>
                               <span className="info_main_section_span">
                                 {data.netWeight} Grms
                               </span>
                             </div>
-                          </div>
-
-                          <div style={{ display: "flex", gap: "80px" }}>
-                            <div>
+                            <div style={{ width: "33.33%" }}>
                               <p className="info_main_section">Diamond: </p>
                               <span className="info_main_section_span">
                                 ₹{data.DiamondWtP}
                               </span>
                             </div>
-                            <div>
-                              <p className="info_main_section">
-                                colorStoneWtP:{" "}
-                              </p>
+                          </div>
+
+                          <div style={{ display: "flex" }}>
+                            <div style={{ width: "33.33%" }}>
+                              <p className="info_main_section">CS W/P : </p>
                               <span className="info_main_section_span">
                                 ₹{data.colorStoneWtP}
                               </span>
                             </div>
-                          </div>
-                          <div>
-                            <p className="info_main_section">MiscWtP: </p>
-                            <span className="info_main_section_span">
-                              ₹{data.MiscWtP}
-                            </span>
+                            <div style={{ width: "33.33%" }}>
+                              <p className="info_main_section">MiscWtP: </p>
+                              <span className="info_main_section_span">
+                                ₹{data.MiscWtP}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>

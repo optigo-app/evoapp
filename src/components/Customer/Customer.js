@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from "react";
 import "./Customer.scss";
-import { Button, Drawer, Box, Typography } from "@mui/material";
+import {
+  Button,
+  Drawer,
+  Box,
+  Typography,
+  Stack,
+  Modal,
+  FormControl,
+  Select,
+  InputLabel,
+  MenuItem,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineCloseCircle, AiOutlineLock } from "react-icons/ai";
 import { CallApi } from "../../API/CallApi/CallApi";
@@ -14,7 +25,20 @@ const formatSecondsToTime = (seconds) => {
   const s = String(seconds % 60).padStart(2, "0");
   return `${h}:${m}:${s}`;
 };
-
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "80%",
+  height: "auto",
+  bgcolor: "background.paper",
+  borderRadius: "8px",
+  boxShadow: 24,
+  p: 3,
+  maxHeight: "90vh",
+  overflowY: "auto",
+};
 const Customer = () => {
   const [mainData, setMainData] = useState([]);
   const [result, setResult] = useState([]);
@@ -23,6 +47,9 @@ const Customer = () => {
   const [stopped, setStopped] = useState({});
   const [endCustomnerInfo, setEndCustomerInfo] = useState();
   const [loading, setLoading] = useState(false);
+  const [openFeedback, setOpenFeedBack] = React.useState(false);
+  const handleOpenFeedBack = () => setOpenFeedBack(true);
+  const handleCloseFeedBack = () => setOpenFeedBack(false);
   const navigate = useNavigate();
 
   const GetCustomerData = async () => {
@@ -137,34 +164,34 @@ const Customer = () => {
   };
 
   const handleStop = async (customer) => {
+    setOpen(true);
     setEndCustomerInfo(customer);
-    const Device_Token = sessionStorage.getItem("device_token");
-    const body = {
-      Mode: "EndSession",
-      Token: `"${Device_Token}"`,
-      ReqData: JSON.stringify([
-        {
-          ForEvt: "EndSession",
-          DeviceToken: Device_Token,
-          CustomerId: customer?.CustomerId,
-          IsVisitor: customer?.IsVisitor,
-          AppId: 3,
-        },
-      ]),
-    };
+    // const Device_Token = sessionStorage.getItem("device_token");
+    // const body = {
+    //   Mode: "EndSession",
+    //   Token: `"${Device_Token}"`,
+    //   ReqData: JSON.stringify([
+    //     {
+    //       ForEvt: "EndSession",
+    //       DeviceToken: Device_Token,
+    //       CustomerId: customer?.CustomerId,
+    //       IsVisitor: customer?.IsVisitor,
+    //       AppId: 3,
+    //     },
+    //   ]),
+    // };
 
-    const response = await CallApi(body);
-    if (response?.DT[0]?.stat == 1) {
-      setStopped((prev) => ({ ...prev, [customer?.CustomerId]: true }));
-      showToast({
-        message: "Customer Session End",
-        bgColor: "#4caf50",
-        fontColor: "#fff",
-        duration: 5000,
-      });
-      setOpen(true);
-    } else {
-    }
+    // const response = await CallApi(body);
+    // if (response?.DT[0]?.stat == 1) {
+    //   setStopped((prev) => ({ ...prev, [customer?.CustomerId]: true }));
+    //   showToast({
+    //     message: "Customer Session End",
+    //     bgColor: "#4caf50",
+    //     fontColor: "#fff",
+    //     duration: 5000,
+    //   });
+    // } else {
+    // }
   };
 
   const handleExitCustomer = async () => {
@@ -192,7 +219,6 @@ const Customer = () => {
         fontColor: "#fff",
         duration: 5000,
       });
-      setOpen(true);
     } else {
     }
   };
@@ -273,9 +299,59 @@ const Customer = () => {
   return (
     <div className="CustomerMain">
       <LoadingBackdrop isLoading={loading} />
+      <Modal
+        open={openFeedback}
+        onClose={handleCloseFeedBack}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Give Feedback
+          </Typography>
+
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel id="feedback-select-label">Service</InputLabel>
+            <Select labelId="feedback-select-label" label="Feedback">
+              <MenuItem value="good">Good</MenuItem>
+              <MenuItem value="average">Average</MenuItem>
+              <MenuItem value="bad">Bad</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel id="feedback-select-label">Support</InputLabel>
+            <Select labelId="feedback-select-label" label="Feedback">
+              <MenuItem value="good">Good</MenuItem>
+              <MenuItem value="average">Average</MenuItem>
+              <MenuItem value="bad">Bad</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel id="feedback-select-label">Help</InputLabel>
+            <Select labelId="feedback-select-label" label="Feedback">
+              <MenuItem value="good">Good</MenuItem>
+              <MenuItem value="average">Average</MenuItem>
+              <MenuItem value="bad">Bad</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+            <Button
+              variant="outlined"
+              sx={{ mr: 1 }}
+              onClick={handleCloseFeedBack}
+            >
+              Cancel
+            </Button>
+            <Button variant="contained">Save & End Customer</Button>
+          </Box>
+        </Box>
+      </Modal>
 
       <Drawer anchor="bottom" open={open} onClose={toggleDrawer(false)}>
-        <Box
+        {/* <Box
           sx={{
             height: 200,
             padding: 2,
@@ -291,6 +367,22 @@ const Customer = () => {
           <Button className="ReleseBtn" onClick={handleExitCustomer}>
             Relese Customer
           </Button>
+        </Box> */}
+
+        <Box className="Customer_bottom_button">
+          <Stack
+            direction="row"
+            spacing={2}
+            justifyContent="center"
+            className="action-buttons"
+          >
+            <Button variant="outlined" onClick={() => setOpenFeedBack(true)}>
+              Relese Customer
+            </Button>
+            <Button variant="outlined" onClick={() => setOpenFeedBack(true)}>
+              End Customer
+            </Button>
+          </Stack>
         </Box>
       </Drawer>
 

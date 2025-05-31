@@ -14,7 +14,8 @@
     display: flex;
     align-items: center;
     z-index: 1000;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px,
+      rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
 
     .header-container {
       width: 100%;
@@ -146,13 +147,59 @@
   }
 }
 
-.submitBtn_feedBack{
+.Customer_bottom_button {
+  height: 50px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+
+  .action-buttons {
+    padding: 0 15px;
+    margin-bottom: 8px;
+    display: flex;
+
+    button {
+      margin-top: 8px;
+      width: 50%;
+      color: $titleColor !important;
+      border: 1px solid #d3d3d3 !important;
+      border-radius: 8px !important;
+      text-transform: none;
+      font-family: $font-family !important;
+    }
+  }
+
+  .footer-divider {
+    margin: 8px 0;
+  }
+
+  .text-buttons {
+    display: flex;
+    gap: 12px;
+    padding: 0 15px;
+
+    button {
+      font-family: $font-family !important;
+      color: $heightlightColor !important;
+      font-weight: 500;
+      width: 50%;
+      text-transform: none;
+    }
+  }
+}
+
+.submitBtn_feedBack {
   height: 50px;
   background-color: $heightlightColor !important;
   color: $BtnFontColor !important;
 }
 
-.ReleseBtn{
+.ReleseBtn {
   height: 50px;
   background-color: rgb(238, 54, 54) !important;
   color: $BtnFontColor !important;
