@@ -153,6 +153,11 @@ const WishlistPage = () => {
     }
   };
 
+  const handlePrint = () => {
+    // Implement print functionality here
+    console.log("Print functionality not implemented yet.");
+  }
+
   const allSelected = WishlistItems?.length > 0 && WishlistItems?.every(item => item.isSelected);
 
   return (
@@ -176,6 +181,7 @@ const WishlistPage = () => {
                   handleOpenDialog={handleOpenDialog}
                   handleSelectItem={() => handleSelectItem(item)}
                   handleWishToCart={handleWishToCart}
+                  handlePrint={handlePrint}
                 />
               ))}
             </Box>
