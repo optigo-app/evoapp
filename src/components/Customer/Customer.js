@@ -47,9 +47,16 @@ const Customer = () => {
   const [stopped, setStopped] = useState({});
   const [endCustomnerInfo, setEndCustomerInfo] = useState();
   const [loading, setLoading] = useState(false);
+  const [customerEnd, setCustomerEnd] = useState(false);
   const [openFeedback, setOpenFeedBack] = React.useState(false);
-  const handleOpenFeedBack = () => setOpenFeedBack(true);
+  const [open, setOpen] = useState(false);
+
   const handleCloseFeedBack = () => setOpenFeedBack(false);
+
+  const toggleDrawer = (newOpen) => () => {
+    setOpen(newOpen);
+  };
+
   const navigate = useNavigate();
 
   const GetCustomerData = async () => {
@@ -166,60 +173,98 @@ const Customer = () => {
   const handleStop = async (customer) => {
     setOpen(true);
     setEndCustomerInfo(customer);
-    // const Device_Token = sessionStorage.getItem("device_token");
-    // const body = {
-    //   Mode: "EndSession",
-    //   Token: `"${Device_Token}"`,
-    //   ReqData: JSON.stringify([
-    //     {
-    //       ForEvt: "EndSession",
-    //       DeviceToken: Device_Token,
-    //       CustomerId: customer?.CustomerId,
-    //       IsVisitor: customer?.IsVisitor,
-    //       AppId: 3,
-    //     },
-    //   ]),
-    // };
-
-    // const response = await CallApi(body);
-    // if (response?.DT[0]?.stat == 1) {
-    //   setStopped((prev) => ({ ...prev, [customer?.CustomerId]: true }));
-    //   showToast({
-    //     message: "Customer Session End",
-    //     bgColor: "#4caf50",
-    //     fontColor: "#fff",
-    //     duration: 5000,
-    //   });
-    // } else {
-    // }
   };
 
-  const handleExitCustomer = async () => {
+  const handleExitCustomer = async (customer) => {
     const Device_Token = sessionStorage.getItem("device_token");
-    const body = {
-      Mode: "EndSession",
-      Token: `"${Device_Token}"`,
-      ReqData: JSON.stringify([
-        {
-          ForEvt: "EndSession",
-          DeviceToken: Device_Token,
-          CustomerId: endCustomnerInfo?.CustomerId,
-          IsVisitor: endCustomnerInfo?.IsVisitor,
-          AppId: 3,
-        },
-      ]),
-    };
+    if (customerEnd) {
+      const body = {
+        Mode: "EndSession",
+        Token: `"${Device_Token}"`,
+        ReqData: JSON.stringify([
+          {
+            ForEvt: "EndSession",
+            DeviceToken: Device_Token,
+            CustomerId: customer?.CustomerId,
+            IsVisitor: customer?.IsVisitor,
+            AppId: 3,
+          },
+        ]),
+      };
 
-    const response = await CallApi(body);
-    if (response?.DT[0]?.stat == 1) {
-      setStopped((prev) => ({ ...prev, [endCustomnerInfo?.CustomerId]: true }));
-      showToast({
-        message: "Customer Session End",
-        bgColor: "#4caf50",
-        fontColor: "#fff",
-        duration: 5000,
-      });
+      const response = await CallApi(body);
+      if (response?.DT[0]?.stat == 1) {
+        setStopped((prev) => ({ ...prev, [customer?.CustomerId]: true }));
+        showToast({
+          message: "Customer Session End",
+          bgColor: "#4caf50",
+          fontColor: "#fff",
+          duration: 5000,
+        });
+      }
+      setOpenFeedBack(false);
+      setOpen(false);
     } else {
+      const endSessionBody = {
+        Mode: "EndSession",
+        Token: `"${Device_Token}"`,
+        ReqData: JSON.stringify([
+          {
+            ForEvt: "EndSession",
+            DeviceToken: Device_Token,
+            CustomerId: endCustomnerInfo?.CustomerId,
+            IsVisitor: endCustomnerInfo?.IsVisitor,
+            AppId: 3,
+          },
+        ]),
+      };
+
+      const endSessionResponse = await CallApi(endSessionBody);
+
+      if (endSessionResponse?.DT[0]?.stat == 1) {
+        setStopped((prev) => ({
+          ...prev,
+          [endCustomnerInfo?.CustomerId]: true,
+        }));
+        showToast({
+          message: "Customer Session End",
+          bgColor: "#4caf50",
+          fontColor: "#fff",
+          duration: 3000,
+        });
+
+        // Step 2: Now call ExitCustomer
+        const exitBody = {
+          Mode: "ExitCustomer",
+          Token: `"${Device_Token}"`,
+          ReqData: JSON.stringify([
+            {
+              ForEvt: "ExitCustomer",
+              DeviceToken: Device_Token,
+              CustomerId: endCustomnerInfo?.CustomerId,
+              IsVisitor: endCustomnerInfo?.IsVisitor,
+              AppId: 3,
+            },
+          ]),
+        };
+
+        const exitResponse = await CallApi(exitBody);
+
+        if (exitResponse?.DT[0]?.stat == 1) {
+          setStopped((prev) => ({
+            ...prev,
+            [endCustomnerInfo?.CustomerId]: true,
+          }));
+          showToast({
+            message: "Customer Exit Completed",
+            bgColor: "#4caf50",
+            fontColor: "#fff",
+            duration: 5000,
+          });
+        }
+        setOpenFeedBack(false);
+        setOpen(false);
+      }
     }
   };
 
@@ -272,12 +317,6 @@ const Customer = () => {
     }
 
     return null;
-  };
-
-  const [open, setOpen] = useState(false);
-
-  const toggleDrawer = (newOpen) => () => {
-    setOpen(newOpen);
   };
 
   const isAnyRunning = mainData.some(
@@ -345,30 +384,17 @@ const Customer = () => {
             >
               Cancel
             </Button>
-            <Button variant="contained">Save & End Customer</Button>
+            <Button
+              variant="contained"
+              onClick={() => handleExitCustomer(endCustomnerInfo)}
+            >
+              {customerEnd ? "Save & End Customer" : "Save & Relese Customer"}
+            </Button>
           </Box>
         </Box>
       </Modal>
 
       <Drawer anchor="bottom" open={open} onClose={toggleDrawer(false)}>
-        {/* <Box
-          sx={{
-            height: 200,
-            padding: 2,
-            backgroundColor: "#f0f0f0",
-          }}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-evenly",
-          }}
-        >
-          <Button className="submitBtn_feedBack">Submit Feedback</Button>
-          <Button className="ReleseBtn" onClick={handleExitCustomer}>
-            Relese Customer
-          </Button>
-        </Box> */}
-
         <Box className="Customer_bottom_button">
           <Stack
             direction="row"
@@ -376,10 +402,22 @@ const Customer = () => {
             justifyContent="center"
             className="action-buttons"
           >
-            <Button variant="outlined" onClick={() => setOpenFeedBack(true)}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setOpenFeedBack(true);
+                setCustomerEnd(false);
+              }}
+            >
               Relese Customer
             </Button>
-            <Button variant="outlined" onClick={() => setOpenFeedBack(true)}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setOpenFeedBack(true);
+                setCustomerEnd(true);
+              }}
+            >
               End Customer
             </Button>
           </Stack>
@@ -408,44 +446,61 @@ const Customer = () => {
         </div>
       </div>
 
-      <div className="CustomerContainer">
-        <div className="CustomerSearch">
-          <div className="search-box">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Filter By Customer Name"
-            />
-            {search && (
-              <AiOutlineCloseCircle
-                className="clear-icon"
-                onClick={handleClearSearch}
+      {filteredData?.length !== 0 ? (
+        <div className="CustomerContainer">
+          <div className="CustomerSearch">
+            <div className="search-box">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Filter By Customer Name"
               />
-            )}
+              {search && (
+                <AiOutlineCloseCircle
+                  className="clear-icon"
+                  onClick={handleClearSearch}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="CustomerList">
+            {filteredData.map((e, i) => (
+              <Button
+                key={i}
+                className="customercard_button"
+                onClick={() => handleClickStatus(e)}
+              >
+                <div className="card-header">
+                  <div>
+                    <h5>{`${e.firstname} ${e.lastname}`}</h5>
+                    <p className="text-muted">{e.email}</p>
+                    <p className="text-muted">{e.contactNumber}</p>
+                  </div>
+                  <div className="status-badge-container">
+                    {renderStatus(e)}
+                  </div>
+                </div>
+              </Button>
+            ))}
           </div>
         </div>
-
-        <div className="CustomerList">
-          {filteredData.map((e, i) => (
-            <Button
-              key={i}
-              className="customercard_button"
-              onClick={() => handleClickStatus(e)}
-            >
-              <div className="card-header">
-                <div>
-                  <h5>{`${e.firstname} ${e.lastname}`}</h5>
-                  <p className="text-muted">{e.email}</p>
-                  <p className="text-muted">{e.contactNumber}</p>
-                </div>
-                <div className="status-badge-container">{renderStatus(e)}</div>
-              </div>
-            </Button>
-          ))}
+      ) : (
+        <div
+          style={{
+            height: "80vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <h6 class="MuiTypography-root MuiTypography-h6 css-32t4mj-MuiTypography-root">
+            No Customer Available{" "}
+          </h6>
         </div>
-      </div>
+      )}
     </div>
   );
 };

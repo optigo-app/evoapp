@@ -26,6 +26,7 @@ import { Percent } from "lucide-react";
 import { CallApi } from "../../../API/CallApi/CallApi";
 import DiscountModal from "./DiscountModal";
 import PlaceHolderImg from "../../../assests/placeHolderImg.svg";
+import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp } from "react-icons/md";
 
 const Scanner = () => {
   const [scannedData, setScannedData] = useState([]);
@@ -589,7 +590,7 @@ const Scanner = () => {
                         <p style={{ margin: "0px" }}>{data.Category}</p>
                         <div style={{ fontSize: "1.5rem" }}>
                           {isExpanded ? (
-                            <ArrowUp
+                            <MdKeyboardDoubleArrowUp
                               style={{
                                 height: "20px",
                                 width: "20px",
@@ -598,7 +599,7 @@ const Scanner = () => {
                               }}
                             />
                           ) : (
-                            <ArrowDown
+                            <MdKeyboardDoubleArrowDown
                               style={{
                                 height: "20px",
                                 width: "20px",
