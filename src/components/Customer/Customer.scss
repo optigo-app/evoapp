@@ -1,32 +1,64 @@
 @import "../../Variables.scss";
 
 .CustomerMain {
-  padding-top: 60px;
   font-family: Arial, sans-serif;
-
   .Header_main {
-    position: fixed;
-    top: 0;
     width: 100%;
     height: 55px;
-    // background: linear-gradient(75deg, #792467 0%, #6b409f 36%, #5d5ad2 100%);
-    // color: white;
     display: flex;
     align-items: center;
-    z-index: 1000;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+    background: linear-gradient(to right, #b2069b, #3909c2);
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px,
+      rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
 
     .header-container {
       width: 100%;
-      padding: 0 15px;
+      padding: 0 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
+    .AddCustomer_Btn {
+      height: 36px;
+      width: 40px;
+      border-radius: 6px;
+      font-weight: bold;
+      box-shadow: none;
+      // background-color: #b15bbe;
+      background-color: #2196f3;
+      min-width: 10px !important;
+      padding: 0px !important;
+      margin: 0px !important;
+      border-radius: 50px !important;
+    }
+  }
+
+  .Customer_Title_container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    // border-bottom: 1px solid #ccc;
+    padding: 10px;
+    // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative; // default
+    background-color: white;
+    // margin-top: 2px;
+
+    &.fixed {
+      position: fixed;
+      top: 0; // fixed at viewport top once header scrolls away
+      left: 0;
+      right: 0;
+      z-index: 999;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
     .header_title {
       font-size: 20px;
       font-weight: bold;
+      font-family: $font-family;
       margin: 0;
     }
 
@@ -42,6 +74,35 @@
       padding: 0px !important;
       margin: 0px !important;
       border-radius: 50px !important;
+    }
+
+    .CustomerSearch {
+      width: 100%;
+      .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        input {
+          flex: 1;
+          padding: 8px 10px;
+          border: none;
+          border-radius: 6px;
+          font-size: 16px;
+          height: 30px;
+          background-color: #e6e4e4;
+          font-family: $font-family;
+          outline: none;
+        }
+
+        .clear-icon {
+          position: absolute;
+          right: 12px;
+          font-size: 20px;
+          color: #999;
+          cursor: pointer;
+        }
+      }
     }
   }
 
@@ -146,14 +207,84 @@
   }
 }
 
-.submitBtn_feedBack{
+.Customer_bottom_button {
+  height: 50px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+
+  .action-buttons {
+    padding: 0 15px;
+    margin-bottom: 8px;
+    display: flex;
+
+    button {
+      margin-top: 8px;
+      width: 50%;
+      color: $titleColor !important;
+      border: 1px solid #d3d3d3 !important;
+      border-radius: 8px !important;
+      text-transform: none;
+      font-family: $font-family !important;
+    }
+  }
+
+  .footer-divider {
+    margin: 8px 0;
+  }
+
+  .text-buttons {
+    display: flex;
+    gap: 12px;
+    padding: 0 15px;
+
+    button {
+      font-family: $font-family !important;
+      color: $heightlightColor !important;
+      font-weight: 500;
+      width: 50%;
+      text-transform: none;
+    }
+  }
+}
+
+.submitBtn_feedBack {
   height: 50px;
   background-color: $heightlightColor !important;
   color: $BtnFontColor !important;
 }
 
-.ReleseBtn{
+.ReleseBtn {
   height: 50px;
   background-color: rgb(238, 54, 54) !important;
   color: $BtnFontColor !important;
+}
+
+.header_top_profile {
+  padding: 10px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  border-bottom: 1px solid lightgray;
+}
+
+.HeaderMenu_accordion {
+  --Paper-shadow: none !important;
+  position: unset !important;
+  .MuiButtonBase-root {
+    min-height: 40px !important;
+  }
+  .MuiAccordionSummary-content {
+    margin: 0px !important;
+  }
+}
+
+.HeaderMenu_Without_Sub {
+  font-size: 13px !important;
+  font-weight: 600 !important;
 }

@@ -10,7 +10,7 @@ const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
 const JobScanPage = lazy(() => import("./components/JobScanPage/JobScanPage"));
 
 function App() {
-  //http://localhost:3000/?&device_token=QI0UDSA040V7T7R3  
+  //  http://localhost:3000/?&device_token=QI0UDSA040V7T7R3
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const device_token = queryParams.get("device_token");

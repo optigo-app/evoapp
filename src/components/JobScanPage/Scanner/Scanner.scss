@@ -162,35 +162,60 @@
     font-family: $font-family;
     margin-bottom: 100px;
 
-      .scanner_List_moreview {
-        display: flex;
-        align-items: center;
-        background-color: #ebe7e7;
-        gap: 7px;
-        height: 30px;
-        border-radius: 5px;
-        padding: 5px 10px;
-        min-width: 90px;
-        justify-content: center;
-        p {
-          font-weight: 600;
-        }
-      }
-      .scanner_List_moreview svg {
-        transition: all 0.2s ease;
-        cursor: pointer;
-      }
-
-      .info_main_section{
-        font-size: 15px;
-        margin: 5px 0px;
-        color: rgb(152, 141, 141);
-      }
-
-      .info_main_section_span{
-        font-size: 18px;
+    .scanner_List_moreview {
+      display: flex;
+      align-items: center;
+      background-color: #ebe7e7;
+      gap: 7px;
+      height: 30px;
+      border-radius: 5px;
+      padding: 5px 10px;
+      width: 26%;
+      justify-content: center;
+      p {
         font-weight: 600;
       }
+    }
+    .scanner_List_moreview svg {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .desc_metal_line {
+      color: $titleColor;
+      font-family: $font-family;
+      font-size: 15px;
+    }
+
+    .showData_price_title {
+      color: $titleColor;
+      font-family: $font-family;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 5px 0px;
+    }
+
+    .showData_price_deatil {
+      color: $heightlightColor;
+      font-family: $font-family;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 5px 0px;
+    }
+
+    .info_main_section {
+      font-size: 14px;
+      margin: 2px 0px;
+      color: $titleColor;
+      font-family: $font-family;
+    }
+
+    .info_main_section_span {
+      font-size: 17px;
+      font-weight: 600;
+      font-family: $font-family;
+      color: $titleColor;
+    }
 
     &.collapsed {
       cursor: pointer;
@@ -233,12 +258,6 @@
       }
 
       .body {
-        p {
-          margin: 0.25rem 0;
-          font-size: 15px;
-          color: gray;
-        }
-
         .info_main_section {
           display: flex;
           justify-content: space-between;
@@ -267,7 +286,7 @@
         height: 30px;
         border-radius: 5px;
         padding: 5px 10px;
-        min-width: 90px;
+        width: 26%;
         justify-content: center;
         p {
           font-weight: 600;
@@ -333,14 +352,13 @@
 
   .expand-container {
     overflow: hidden;
-    max-height: 0;
     opacity: 0;
     transition: max-height 0.4s ease, opacity 0.4s ease;
   }
 
   .expand-container.expanded {
-    max-height: 1000px; /* Large enough to hold the content */
     opacity: 1;
+    margin-bottom: 100px;
   }
 }
 

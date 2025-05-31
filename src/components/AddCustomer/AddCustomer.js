@@ -303,7 +303,10 @@ const AddCustomer = () => {
           <div className="result-section">
             <h4>Available Customer</h4>
 
-            <Button className="customercard_button" onClick={() => handleNaviagte(foundCustomer)}>
+            <Button
+              className="customercard_button"
+              onClick={() => handleNaviagte(foundCustomer)}
+            >
               <div className="card-header">
                 <div>
                   <h5>
@@ -314,6 +317,11 @@ const AddCustomer = () => {
                   </p>
                   <p className="text-muted">Mobile: {foundCustomer.mobileno}</p>
                 </div>
+              </div>
+              <div>
+                <p style={{ fontSize: "12px", color: "#b5aeae" }}>
+                  Click To Select
+                </p>
               </div>
             </Button>
           </div>
