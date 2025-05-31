@@ -95,17 +95,12 @@
         border-radius: 50%;
         background-color: transparent;
         transition: all 0.3s ease;
-
-        &:hover {
-          background-color: $heightlightColor;
-          color: #fff;
-          cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        &:active {
-          transform: scale(0.95);
-        }
+      }
+      .btn-active {
+        background-color: $heightlightColor;
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
     }
   }
