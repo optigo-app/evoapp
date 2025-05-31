@@ -85,7 +85,7 @@ const DiscountModal = ({
           IsVisitor: activeDetail?.IsVisitor,
           DiscountOnId: hasDiscount
             ? directPriceInput !== ""
-              ? 1 // default to flat if direct input
+              ? 1 
               : discountType === "flat"
               ? 1
               : 0
@@ -133,10 +133,11 @@ const DiscountModal = ({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 360,
+          width: '80%',
           bgcolor: "background.paper",
           borderRadius: 2,
           boxShadow: 24,
+          outline: 'none',
           p: 3,
         }}
       >
@@ -150,7 +151,6 @@ const DiscountModal = ({
           <strong>Original Price:</strong> ₹{originalPrice}
         </Typography>
 
-        {/* Direct Price Input */}
         <TextField
           label="Enter Final Price Directly (₹)"
           type="number"
@@ -166,7 +166,6 @@ const DiscountModal = ({
           sx={{ my: 2 }}
         />
 
-        {/* Discount Type Toggle */}
         <ToggleButtonGroup
           value={discountType}
           exclusive
@@ -183,7 +182,6 @@ const DiscountModal = ({
           <ToggleButton value="percentage">Percentage</ToggleButton>
         </ToggleButtonGroup>
 
-        {/* Discount Value */}
         <TextField
           label={discountType === "flat" ? "Discount (₹)" : "Discount (%)"}
           type="number"

@@ -25,7 +25,7 @@ import LoadingBackdrop from "../../Utils/LoadingBackdrop";
 import { AlignJustify, CirclePlus, CircleUser } from "lucide-react";
 import { showToast } from "../../Utils/Tostify/ToastManager";
 import CustomAvatar from "../../Utils/avatar";
-import logo from "../../assests/Admin app logo (4).png";
+import logo from "../../assests/Evo sale app (1).png";
 
 const formatSecondsToTime = (seconds) => {
   const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -520,7 +520,7 @@ const Customer = () => {
               justifyContent: "center",
             }}
           >
-            <img src={logo} style={{ maxWidth: "60px" }} />
+            <img src={logo} style={{ maxWidth: "70px" }} />
           </div>
           <div
             style={{

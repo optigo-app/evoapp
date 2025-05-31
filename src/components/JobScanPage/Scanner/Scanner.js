@@ -234,6 +234,8 @@ const Scanner = () => {
     const Device_Token = sessionStorage.getItem("device_token");
     const current = data ? detailItem : activeDetail;
 
+    console.log('current',current);
+    
     try {
       if (!current) return;
 
@@ -279,8 +281,8 @@ const Scanner = () => {
               JobNo: current.JobNo,
               CustomerId: activeCustomer.CustomerId || 0,
               IsVisitor: activeCustomer.IsVisitor || 0,
-              DiscountOnId: 0,
-              Discount: 0,
+              DiscountOnId: current?.discountType == "flat" ? 1 : 0,
+              Discount: current?.discountValue ?? 0,
             },
           ]),
         };
@@ -362,7 +364,7 @@ const Scanner = () => {
             <img
               src={activeDetail?.image}
               onError={(e) => (e.target.src = PlaceHolderImg)}
-              style={{ width: "100%" }}
+              style={{ width: "100%", minHeight: "300px" }}
             />
           </div>
           <div className="body">
@@ -387,6 +389,7 @@ const Scanner = () => {
                     fontSize: "20px",
                     fontWeight: 600,
                   }}
+                  className="showData_price_deatil"
                 >
                   {" "}
                   ₹{activeDetail.discountedPrice}
@@ -669,6 +672,7 @@ const Scanner = () => {
                                 fontSize: "20px",
                                 fontWeight: 600,
                               }}
+                              className="showData_price_deatil"
                             >
                               {" "}
                               ₹{data.discountedPrice}
