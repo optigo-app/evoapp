@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Customer.scss";
 import {
   Button,
@@ -11,13 +11,21 @@ import {
   Select,
   InputLabel,
   MenuItem,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  List,
+  Divider,
+  Accordion,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineCloseCircle, AiOutlineLock } from "react-icons/ai";
 import { CallApi } from "../../API/CallApi/CallApi";
 import LoadingBackdrop from "../../Utils/LoadingBackdrop";
-import { CirclePlus, CircleUser } from "lucide-react";
+import { AlignJustify, CirclePlus, CircleUser } from "lucide-react";
 import { showToast } from "../../Utils/Tostify/ToastManager";
+import CustomAvatar from "../../Utils/avatar";
+import logo from "../../assests/Admin app logo (4).png";
 
 const formatSecondsToTime = (seconds) => {
   const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -50,11 +58,14 @@ const Customer = () => {
   const [customerEnd, setCustomerEnd] = useState(false);
   const [openFeedback, setOpenFeedBack] = React.useState(false);
   const [open, setOpen] = useState(false);
-
+  const [openMenu, setOpenMenu] = useState(false);
+  const [tabsFixed, setTabsFixed] = useState(false);
+  const headerRef = useRef(null);
+  const [allProfileData, setAllProfileData] = useState();
   const handleCloseFeedBack = () => setOpenFeedBack(false);
 
   const toggleDrawer = (newOpen) => () => {
-    setOpen(newOpen);
+    setOpenMenu(newOpen);
   };
 
   const navigate = useNavigate();
@@ -335,6 +346,62 @@ const Customer = () => {
     navigate("/AddCustomer");
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!headerRef.current) return;
+      const headerBottom = headerRef.current.getBoundingClientRect().bottom;
+      setTabsFixed(headerBottom <= 0);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const storedProfileData = sessionStorage.getItem("profileData");
+    if (storedProfileData) {
+      setAllProfileData(JSON.parse(storedProfileData));
+    }
+  }, [open]);
+
+  const DrawerList = (
+    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+      <div className="header_top_profile">
+        <CustomAvatar
+          skin="light"
+          color="success"
+          variant="rounded"
+          sx={{ width: 42, height: 42, borderRadius: 50 }}
+          src={
+            allProfileData?.ImagePath ||
+            "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
+          }
+        ></CustomAvatar>
+        <div>
+          <p style={{ margin: "0px", fontWeight: 600, fontSize: "14px" }}>
+            {allProfileData?.firstname} {allProfileData?.lastname}
+          </p>
+          <p style={{ margin: "-2px 0px 0px 0px", fontSize: "12px" }}>
+            {allProfileData?.userid}
+          </p>
+        </div>
+      </div>
+      <Accordion className="HeaderMenu_accordion">
+        <ListItemButton>
+          <Typography className="HeaderMenu_Without_Sub">Support</Typography>
+        </ListItemButton>
+      </Accordion>
+
+      <Accordion className="HeaderMenu_accordion">
+        <ListItemButton>
+          <Typography className="HeaderMenu_Without_Sub">
+            Privacy Policy
+          </Typography>
+        </ListItemButton>
+      </Accordion>
+    </Box>
+  );
+
   return (
     <div className="CustomerMain">
       <LoadingBackdrop isLoading={loading} />
@@ -394,6 +461,10 @@ const Customer = () => {
         </Box>
       </Modal>
 
+      <Drawer open={openMenu} onClose={() => setOpenMenu(false)}>
+        {DrawerList}
+      </Drawer>
+
       <Drawer anchor="bottom" open={open} onClose={toggleDrawer(false)}>
         <Box className="Customer_bottom_button">
           <Stack
@@ -424,17 +495,35 @@ const Customer = () => {
         </Box>
       </Drawer>
 
-      <div className="Header_main">
+      <div className="Header_main" ref={headerRef}>
         <div className="header-container">
-          <p className="header_title">Customer</p>
-          <div style={{ display: "flex", gap: "15px" }}>
+          <div style={{ width: "28%" }}>
             <Button
               className="AddCustomer_Btn"
-              onClick={() => navigate("/Profile")}
+              onClick={() => setOpenMenu(true)}
               variant="contained"
+              style={{ backgroundColor: "transparent", color: "white" }}
             >
-              <CircleUser />
+              <AlignJustify />
             </Button>
+          </div>
+          <div
+            style={{
+              width: "33.33%",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <img src={logo} style={{ maxWidth: "60px" }} />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              gap: "15px",
+              width: "33.33%",
+              justifyContent: "flex-end",
+            }}
+          >
             <Button
               className="AddCustomer_Btn"
               onClick={handleNaviagte}
@@ -442,30 +531,51 @@ const Customer = () => {
             >
               <CirclePlus />
             </Button>
+            <Button
+              className="AddCustomer_Btn"
+              onClick={() => navigate("/Profile")}
+              variant="contained"
+            >
+              <CircleUser />
+            </Button>
           </div>
         </div>
       </div>
 
+      {/* <div className={`Customer_Title_container ${tabsFixed ? "fixed" : ""}`}>
+        <p className="header_title">Customer</p>
+        <div style={{ display: "flex", gap: "15px" }}>
+          <Button
+            className="AddCustomer_Btn"
+            onClick={handleNaviagte}
+            variant="contained"
+          >
+            <CirclePlus />
+          </Button>
+        </div>
+      </div> */}
+      <div className={`Customer_Title_container ${tabsFixed ? "fixed" : ""}`}>
+        <div className="CustomerSearch">
+          <div className="search-box">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Filter By Customer Name"
+            />
+            {search && (
+              <AiOutlineCloseCircle
+                className="clear-icon"
+                onClick={handleClearSearch}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+      
       {filteredData?.length !== 0 ? (
         <div className="CustomerContainer">
-          <div className="CustomerSearch">
-            <div className="search-box">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Filter By Customer Name"
-              />
-              {search && (
-                <AiOutlineCloseCircle
-                  className="clear-icon"
-                  onClick={handleClearSearch}
-                />
-              )}
-            </div>
-          </div>
-
           <div className="CustomerList">
             {filteredData.map((e, i) => (
               <Button

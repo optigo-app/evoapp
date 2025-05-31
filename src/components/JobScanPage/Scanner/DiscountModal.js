@@ -23,7 +23,6 @@ const DiscountModal = ({
   const [discountValue, setDiscountValue] = useState("");
   const [directPriceInput, setDirectPriceInput] = useState("");
   const [calculatedPrice, setCalculatedPrice] = useState(activeDetail?.price || 0);
-
   const originalPrice = activeDetail?.price || 0;
 
   useEffect(() => {
@@ -81,7 +80,7 @@ const DiscountModal = ({
           ForEvt: "AddToCart",
           DeviceToken: Device_Token,
           AppId: 3,
-          JobNo: activeDetail?.jobNumber,
+          JobNo: activeDetail?.JobNo,
           CustomerId: activeDetail?.CustomerId,
           IsVisitor: activeDetail?.IsVisitor,
           DiscountOnId: hasDiscount

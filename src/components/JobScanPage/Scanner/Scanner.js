@@ -26,7 +26,10 @@ import { Percent } from "lucide-react";
 import { CallApi } from "../../../API/CallApi/CallApi";
 import DiscountModal from "./DiscountModal";
 import PlaceHolderImg from "../../../assests/placeHolderImg.svg";
-import { MdKeyboardDoubleArrowDown, MdKeyboardDoubleArrowUp } from "react-icons/md";
+import {
+  MdKeyboardDoubleArrowDown,
+  MdKeyboardDoubleArrowUp,
+} from "react-icons/md";
 
 const Scanner = () => {
   const [scannedData, setScannedData] = useState([]);
@@ -147,7 +150,6 @@ const Scanner = () => {
   const toggleWishlist = async (detailItem, data) => {
     const Device_Token = sessionStorage.getItem("device_token");
     const current = data ? detailItem : activeDetail;
-
     try {
       if (!current) return;
       if (current.isInWishList) {
@@ -158,7 +160,7 @@ const Scanner = () => {
             {
               ForEvt: "RemoveFromWishList",
               DeviceToken: Device_Token,
-              JobNo: current.jobNumber,
+              JobNo: current.JobNo,
               AppId: 3,
               CartWishId: current.WishListId || 0,
               IsRemoveAll: 0,
@@ -190,7 +192,7 @@ const Scanner = () => {
               ForEvt: "AddToWishList",
               DeviceToken: Device_Token,
               AppId: 3,
-              JobNo: current.jobNumber,
+              JobNo: current.JobNo,
               CustomerId: activeCustomer?.CustomerId || 0,
               IsWishList: 1,
               IsVisitor: activeCustomer?.IsVisitor || 0,
@@ -245,7 +247,7 @@ const Scanner = () => {
               DeviceToken: Device_Token,
               AppId: 3,
               CartWishId: current.CartListId,
-              JobNo: current.jobNumber,
+              JobNo: current.JobNo,
               IsRemoveAll: 0,
               CustomerId: activeCustomer.CustomerId || 0,
               IsVisitor: activeCustomer.IsVisitor || 0,
@@ -274,7 +276,7 @@ const Scanner = () => {
               ForEvt: "AddToCart",
               DeviceToken: Device_Token,
               AppId: 3,
-              JobNo: current.jobNumber,
+              JobNo: current.JobNo,
               CustomerId: activeCustomer.CustomerId || 0,
               IsVisitor: activeCustomer.IsVisitor || 0,
               DiscountOnId: 0,
@@ -345,10 +347,17 @@ const Scanner = () => {
       <div className="top-detail-card_Big expanded">
         <div style={{ padding: "5px" }}>
           <div className="header">
-            <span>
-              {activeDetail.JobNo} ({activeDetail?.designNo})
-            </span>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span>
+                {activeDetail.designNo} ({activeDetail?.JobNo})
+              </span>
+              <span>{activeDetail.Category}</span>
+            </div>
+            <div>
+              <span>₹{activeDetail.price}</span>
+            </div>
           </div>
+
           <div>
             <img
               src={activeDetail?.image}
@@ -393,36 +402,39 @@ const Scanner = () => {
             >
               <div style={{ display: "flex" }}>
                 <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">GW : </p>
+                  <p className="info_main_section">GWT : </p>
                   <span className="info_main_section_span">
-                    {activeDetail.GrossWeight} Grms
+                    {activeDetail.GrossWeight}{" "}
+                    <span style={{ fontSize: "14px" }}>Grms</span>
                   </span>
                 </div>
                 <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">NetW :</p>
+                  <p className="info_main_section">NWT :</p>
                   <span className="info_main_section_span">
-                    {activeDetail.netWeight} Grms
+                    {activeDetail.netWeight}{" "}
+                    <span style={{ fontSize: "14px" }}>Grms</span>
                   </span>
                 </div>
                 <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">Diamond: </p>
+                  <p className="info_main_section">Dia. WT: </p>
                   <span className="info_main_section_span">
-                    ₹{activeDetail.DiamondWtP}
+                    {activeDetail.DiamondWtP}{" "}
+                    <span style={{ fontSize: "14px" }}> Ct</span>
                   </span>
                 </div>
               </div>
 
               <div style={{ display: "flex" }}>
                 <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">CS W/P : </p>
+                  <p className="info_main_section">CS WT : </p>
                   <span className="info_main_section_span">
-                    ₹{activeDetail.colorStoneWtP}
+                    {activeDetail.colorStoneWtP}
                   </span>
                 </div>
                 <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">MiscWtP: </p>
+                  <p className="info_main_section">Misc: </p>
                   <span className="info_main_section_span">
-                    ₹{activeDetail.MiscWtP}
+                    {activeDetail.MiscWtP}
                   </span>
                 </div>
               </div>
@@ -577,7 +589,7 @@ const Scanner = () => {
                         }}
                       >
                         <h4 style={{ margin: "5px 2px" }}>
-                          {data.jobNumber}({data?.designNo})
+                          {data.designNo}({data?.JobNo})
                         </h4>
                         <h4 style={{ margin: "5px 2px" }}>₹{data.price}</h4>
                       </div>
@@ -681,36 +693,39 @@ const Scanner = () => {
                         >
                           <div style={{ display: "flex" }}>
                             <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">GW : </p>
+                              <p className="info_main_section">GWT : </p>
                               <span className="info_main_section_span">
-                                {data.GrossWeight} Grms
+                                {data.GrossWeight}{" "}
+                                <span style={{ fontSize: "14px" }}>Grms</span>
                               </span>
                             </div>
                             <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">NetW :</p>
+                              <p className="info_main_section">NWT :</p>
                               <span className="info_main_section_span">
-                                {data.netWeight} Grms
+                                {data.netWeight}{" "}
+                                <span style={{ fontSize: "14px" }}>Grms</span>
                               </span>
                             </div>
                             <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">Diamond: </p>
+                              <p className="info_main_section">Dia. WT: </p>
                               <span className="info_main_section_span">
-                                ₹{data.DiamondWtP}
+                                {data.DiamondWtP}
+                                <span style={{ fontSize: "14px" }}> Ct</span>
                               </span>
                             </div>
                           </div>
 
                           <div style={{ display: "flex" }}>
                             <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">CS W/P : </p>
+                              <p className="info_main_section">CS WT : </p>
                               <span className="info_main_section_span">
-                                ₹{data.colorStoneWtP}
+                                {data.colorStoneWtP}
                               </span>
                             </div>
                             <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">MiscWtP: </p>
+                              <p className="info_main_section">Misc: </p>
                               <span className="info_main_section_span">
-                                ₹{data.MiscWtP}
+                                {data.MiscWtP}
                               </span>
                             </div>
                           </div>
