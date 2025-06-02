@@ -86,11 +86,11 @@
       }
 
       &.active {
-        color: #1976d2;
+        color: $heightlightColor;
         font-weight: 600;
 
         svg {
-          color: #1976d2;
+          color: $heightlightColor;
         }
       }
     }

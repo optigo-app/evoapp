@@ -10,6 +10,7 @@ import {
   Stack,
   Divider,
 } from "@mui/material";
+import { CircleX } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const DiscountModal = ({
@@ -22,7 +23,9 @@ const DiscountModal = ({
   const [discountType, setDiscountType] = useState("flat");
   const [discountValue, setDiscountValue] = useState("");
   const [directPriceInput, setDirectPriceInput] = useState("");
-  const [calculatedPrice, setCalculatedPrice] = useState(activeDetail?.price || 0);
+  const [calculatedPrice, setCalculatedPrice] = useState(
+    activeDetail?.price || 0
+  );
   const originalPrice = activeDetail?.price || 0;
 
   useEffect(() => {
@@ -85,7 +88,7 @@ const DiscountModal = ({
           IsVisitor: activeDetail?.IsVisitor,
           DiscountOnId: hasDiscount
             ? directPriceInput !== ""
-              ? 1 
+              ? 1
               : discountType === "flat"
               ? 1
               : 0
@@ -133,14 +136,20 @@ const DiscountModal = ({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: '80%',
+          width: "80%",
           bgcolor: "background.paper",
           borderRadius: 2,
           boxShadow: 24,
-          outline: 'none',
+          outline: "none",
           p: 3,
         }}
       >
+        <div
+          style={{ position: "absolute", right: "10px", top: "10px" }}
+          onClick={() => setDiscountModalOpen(false)}
+        >
+          <CircleX style={{ color: "#5e08b6" }} />
+        </div>
         <Typography variant="h6" gutterBottom>
           Apply Discount
         </Typography>
@@ -205,17 +214,29 @@ const DiscountModal = ({
         <Divider sx={{ my: 2 }} />
 
         <Stack direction="row" spacing={1} justifyContent="flex-end">
-          <Button
+          {/* <Button
             variant="outlined"
             color="error"
             onClick={() => setDiscountModalOpen(false)}
           >
             Cancel
-          </Button>
-          <Button variant="contained" color="info" onClick={handleSaveOnly}>
+          </Button> */}
+          <Button
+            style={{
+              backgroundColor: "rgb(149 51 250)",
+              color: "white",
+            }}
+            onClick={handleSaveOnly}
+          >
             Save
           </Button>
-          <Button variant="contained" color="success" onClick={handleApplyDiscount}>
+          <Button
+            onClick={handleApplyDiscount}
+            style={{
+              backgroundColor: "#5e08b6",
+              color: "white",
+            }}
+          >
             Add to Cart
           </Button>
         </Stack>
