@@ -25,6 +25,7 @@ const NotificationToast = ({
       style={{
         backgroundColor: bgColor,
         color: fontColor,
+        width: '60%',
         ...animationStyle,
       }}
     >
