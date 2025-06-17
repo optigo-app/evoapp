@@ -4,6 +4,8 @@ import LoadingBackdrop from "./Utils/LoadingBackdrop";
 import Profile from "./components/ProfilePage/Profile";
 import { ToastContainer } from "./Utils/Tostify/ToastManager";
 import OrderSuccess from "./Page/OrderSucess/OrderSuccess";
+import Support from "./components/Support/Support";
+import PrivacyPolicy from "./components/PrivacyPolicy/PrivacyPolicy";
 
 const Customer = lazy(() => import("./components/Customer/Customer"));
 const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
@@ -35,6 +37,8 @@ function App() {
           <Route path="/JobScanPage" element={<JobScanPage />} />
           <Route path="/Profile" element={<Profile />} />
           <Route path="/orderSuccess" element={<OrderSuccess />} />
+          <Route path="/Support" element={<Support />} />
+          <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

@@ -386,13 +386,13 @@ const Customer = () => {
           </p>
         </div>
       </div>
-      <Accordion className="HeaderMenu_accordion">
+      <Accordion className="HeaderMenu_accordion" onClick={() => navigate('/support')}>
         <ListItemButton>
           <Typography className="HeaderMenu_Without_Sub">Support</Typography>
         </ListItemButton>
       </Accordion>
 
-      <Accordion className="HeaderMenu_accordion">
+      <Accordion className="HeaderMenu_accordion" onClick={() => navigate('/PrivacyPolicy')}>
         <ListItemButton>
           <Typography className="HeaderMenu_Without_Sub">
             Privacy Policy
