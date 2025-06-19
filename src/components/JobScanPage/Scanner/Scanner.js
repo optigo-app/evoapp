@@ -15,6 +15,7 @@ import {
   ArrowDown,
   ArrowUp,
   Keyboard,
+  Printer,
   ScanLine,
   ShoppingBag,
   Tally3,
@@ -40,6 +41,7 @@ const Scanner = () => {
   const [error, setError] = useState(null);
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [discountProductData, setDiscoutProductData] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   const activeCustomer = JSON.parse(
     sessionStorage.getItem("curruntActiveCustomer")
@@ -52,28 +54,10 @@ const Scanner = () => {
       setScannedData(parsed);
       if (parsed.length > 0) setActiveDetail(parsed[0]);
     }
-
-    if (
-      typeof navigator !== "undefined" &&
-      navigator.mediaDevices?.getUserMedia
-    ) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
-          console.log("Camera permission granted");
-          stream.getTracks().forEach((track) => track.stop());
-        })
-        .catch((err) => {
-          console.error("Camera permission denied", err);
-          setError("Camera permission denied. Please allow camera access.");
-        });
-    } else {
-      console.warn("Media devices are not supported on this browser.");
-      setError("Camera access is not supported in this environment.");
-    }
   }, []);
 
   const addScan = async (jobNumber) => {
+    setIsLoading(true);
     try {
       const Device_Token = sessionStorage.getItem("device_token");
       const body = {
@@ -83,8 +67,9 @@ const Scanner = () => {
       };
       const response = await CallApi(body);
       const jobData = response?.DT[0];
-      console.log("job scan response data", response);
+
       if (!jobData) {
+        setIsLoading(false);
         setError("Invalid Job Number or No Data Found.");
         return;
       }
@@ -104,14 +89,16 @@ const Scanner = () => {
         CartListId: jobData.CartListId,
         WishListId: jobData.WishListId,
         Category: jobData?.Category,
-        DiamondWtP: `${jobData?.DiaWt}${
-          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs + "pcs" : ""
+        DiamondWtP: `
+        ${jobData?.DiaWt !== 0 ? +jobData.DiaWt + "ct" : ""}${
+          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs + "pc" : ""
         }`,
-        colorStoneWtP: `${jobData?.CsWt}${
-          jobData?.CsPcs !== 0 ? " / " + jobData.CsPcs + "pcs" : ""
+        colorStoneWtP: `
+        ${jobData?.CsWt !== 0 ? +jobData.CsWt + "ct" : ""}${
+          jobData?.CsPcs !== 0 ? " / " + jobData.CsPcs + "pc" : ""
         }`,
-        MiscWtP: `${jobData?.DiaWt}${
-          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs : ""
+        MiscWtP: `${jobData?.DiaWt !== 0 ? +jobData.DiaWt + "gm" : ""}${
+          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs + "pc" : ""
         }`,
         MetalTypeTitle: `${
           jobData?.MetalPurity +
@@ -138,6 +125,7 @@ const Scanner = () => {
       setError(null);
     } catch (err) {
       console.error("Error during scan", err);
+      setIsLoading(false);
       showToast({
         message: "Invalid Job",
         bgColor: "#f13f3f",
@@ -234,8 +222,8 @@ const Scanner = () => {
     const Device_Token = sessionStorage.getItem("device_token");
     const current = data ? detailItem : activeDetail;
 
-    console.log('current',current);
-    
+    console.log("current", current);
+
     try {
       if (!current) return;
 
@@ -356,89 +344,92 @@ const Scanner = () => {
               <span>{activeDetail.Category}</span>
             </div>
             <div>
-              <span>₹{activeDetail.price}</span>
+              <span className="showData_price_deatil">
+                ₹{activeDetail.price}
+              </span>
             </div>
           </div>
 
-          <div>
-            <img
-              src={activeDetail?.image}
-              onError={(e) => (e.target.src = PlaceHolderImg)}
-              style={{ width: "100%", minHeight: "300px" }}
-            />
-          </div>
-          <div className="body">
-            <div>
-              <p className="showData_price_title">Actual Price</p>
-              <p className="showData_price_deatil"> ₹{activeDetail.price}</p>
+          <div style={{ display: "flex" }}>
+            <div style={{ width: "35%" }}>
+              <img
+                src={activeDetail?.image}
+                onError={(e) => (e.target.src = PlaceHolderImg)}
+                style={{ width: "100%", height: "100%" }}
+              />
             </div>
-            {activeDetail?.discountedPrice && (
-              <div>
-                <p
-                  style={{
-                    margin: "5px 0px",
-                    color: "#988d8d",
-                    fontSize: "15px",
-                  }}
-                >
-                  Discounted Price
-                </p>
-                <p
-                  style={{
-                    margin: "5px 0px",
-                    fontSize: "20px",
-                    fontWeight: 600,
-                  }}
-                  className="showData_price_deatil"
-                >
-                  {" "}
-                  ₹{activeDetail.discountedPrice}
-                </p>
-              </div>
-            )}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-              }}
-            >
-              <div style={{ display: "flex" }}>
-                <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">GWT : </p>
-                  <span className="info_main_section_span">
-                    {activeDetail.GrossWeight}{" "}
-                    <span style={{ fontSize: "14px" }}>Grms</span>
-                  </span>
+            <div className="body" style={{ width: "65%" }}>
+              {/* <div>
+                <p className="showData_price_title">Actual Price</p>
+                <p className="showData_price_deatil"> ₹{activeDetail.price}</p>
+              </div> */}
+              {activeDetail?.discountedPrice && (
+                <div>
+                  <p
+                    style={{
+                      margin: "5px 0px",
+                      color: "#988d8d",
+                      fontSize: "15px",
+                    }}
+                  >
+                    Discounted Price
+                  </p>
+                  <p
+                    style={{
+                      margin: "5px 0px",
+                      fontSize: "20px",
+                      fontWeight: 600,
+                    }}
+                    className="showData_price_deatil"
+                  >
+                    {" "}
+                    ₹{activeDetail.discountedPrice}
+                  </p>
                 </div>
-                <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">NWT :</p>
-                  <span className="info_main_section_span">
-                    {activeDetail.netWeight}{" "}
-                    <span style={{ fontSize: "14px" }}>Grms</span>
-                  </span>
+              )}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                <div style={{ display: "flex" }}>
+                  <div style={{ width: "40%" }}>
+                    <p className="info_main_section">Dia. WT: </p>
+                    <span className="info_main_section_span">
+                      {activeDetail.DiamondWtP}{" "}
+                    </span>
+                  </div>
+                  <div style={{ width: "30%" }}>
+                    <p className="info_main_section">GWT : </p>
+                    <span className="info_main_section_span">
+                      {activeDetail.GrossWeight}{" "}
+                      <span style={{ fontSize: "14px" }}>gm</span>
+                    </span>
+                  </div>
+                  <div style={{ width: "30%" }}>
+                    <p className="info_main_section">NWT :</p>
+                    <span className="info_main_section_span">
+                      {activeDetail.netWeight}{" "}
+                      <span style={{ fontSize: "14px" }}>gm</span>
+                    </span>
+                  </div>
                 </div>
-                <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">Dia. WT: </p>
-                  <span className="info_main_section_span">
-                    {activeDetail.DiamondWtP}{" "}
-                    <span style={{ fontSize: "14px" }}> Ct</span>
-                  </span>
-                </div>
-              </div>
 
-              <div style={{ display: "flex" }}>
-                <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">CS WT : </p>
-                  <span className="info_main_section_span">
-                    {activeDetail.colorStoneWtP}
-                  </span>
-                </div>
-                <div style={{ width: "33.33%" }}>
-                  <p className="info_main_section">Misc: </p>
-                  <span className="info_main_section_span">
-                    {activeDetail.MiscWtP}
-                  </span>
+                <div style={{ display: "flex" }}>
+                  <div style={{ width: "40%" }}>
+                    <p className="info_main_section">CS WT : </p>
+                    <span className="info_main_section_span">
+                      {activeDetail.colorStoneWtP}
+                    </span>
+                  </div>
+                  <div style={{ width: "40%" }}>
+                    <p className="info_main_section">Misc: </p>
+                    <span className="info_main_section_span">
+                      {activeDetail.MiscWtP}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -459,7 +450,6 @@ const Scanner = () => {
                 fill={activeDetail.isInWishList ? "#ff3366" : "none"}
                 color={activeDetail.isInWishList ? "#ff3366" : "black"}
               />
-              <p>Wishlist</p>
             </div>
 
             <div
@@ -470,7 +460,6 @@ const Scanner = () => {
                 fill={activeDetail.isInCartList ? "#4caf50" : "none"}
                 color={activeDetail.isInCartList ? "#4caf50" : "black"}
               />
-              <p>Cart</p>
             </div>
 
             <div
@@ -481,7 +470,10 @@ const Scanner = () => {
               }}
             >
               <Percent />
-              <p>Discount</p>
+            </div>
+
+            <div className="scanner_List_moreview">
+              <Printer />
             </div>
           </div>
         </div>
@@ -501,8 +493,9 @@ const Scanner = () => {
         updateScannedAndSession={updateScannedAndSession}
         showToast={showToast}
       />
-      <p className="ProductScanTitle">Product Scanner</p>
-
+      {scannedData?.length !== 0 && (
+        <p className="ProductScanTitle">Product Scanner</p>
+      )}
       {mode === "qr" ? (
         <div className="qr-scanner-box">
           <QrReader
@@ -550,7 +543,7 @@ const Scanner = () => {
         mode != "AllScanItem" &&
         (isExpanded ? renderExpandedTop() : renderCollapsedTop())}
 
-      {scannedData.length !== 0 && mode === "AllScanItem" && (
+      {scannedData.length !== 0 && mode === "AllScanItem" ? (
         <div className={`expand-container ${isExpanded ? "expanded" : ""}`}>
           {scannedData.map((data, idx) => {
             const isExpanded = expandedItems.includes(idx);
@@ -594,7 +587,12 @@ const Scanner = () => {
                         <h4 style={{ margin: "5px 2px" }}>
                           {data.designNo}({data?.JobNo})
                         </h4>
-                        <h4 style={{ margin: "5px 2px" }}>₹{data.price}</h4>
+                        <h4
+                          className="showData_price_deatil"
+                          style={{ margin: "5px 2px" }}
+                        >
+                          ₹{data.price}
+                        </h4>
                       </div>
                       <div
                         style={{
@@ -628,161 +626,180 @@ const Scanner = () => {
                     </div>
                   </div>
 
-                  {isExpanded && (
-                    <div
-                      style={{
-                        padding: "5px",
-                        borderTop: "1px solid rgb(221 221 221 / 42%)",
-                      }}
-                    >
-                      <div>
-                        <img
-                          src={data?.image}
-                          onError={(e) => (e.target.src = PlaceHolderImg)}
-                          style={{
-                            width: "100%",
-                            objectFit: "contain",
-                            minHeight: "300px",
-                          }}
-                        />
-                      </div>
-
-                      <div className="body">
-                        <div>
-                          <p className="showData_price_title">Actual Price</p>
-                          <p className="showData_price_deatil">
-                            {" "}
-                            ₹{data.price}
-                          </p>
-                        </div>
-                        {data?.discountedPrice && (
-                          <div>
-                            <p
+                  <div
+                    className={`expand-wrapper ${isExpanded ? "expanded" : ""}`}
+                  >
+                    {isExpanded && (
+                      <div
+                        style={{
+                          padding: "5px",
+                          borderTop: "1px solid rgb(221 221 221 / 42%)",
+                        }}
+                      >
+                        <div style={{ display: "flex" }}>
+                          <div style={{ width: "35%" }}>
+                            <img
+                              src={data?.image}
+                              onError={(e) => (e.target.src = PlaceHolderImg)}
                               style={{
-                                margin: "5px 0px",
-                                color: "#988d8d",
-                                fontSize: "15px",
+                                width: "100%",
+                                objectFit: "contain",
+                                height: "100%",
                               }}
-                            >
-                              Discounted Price
-                            </p>
-                            <p
-                              style={{
-                                margin: "5px 0px",
-                                fontSize: "20px",
-                                fontWeight: 600,
-                              }}
-                              className="showData_price_deatil"
-                            >
-                              {" "}
-                              ₹{data.discountedPrice}
-                            </p>
+                            />
                           </div>
-                        )}
-                        <p
-                          className="desc_metal_line"
-                          style={{
-                            fontWeight: 600,
-                            margin: "15px 0px 10px 0px ",
-                          }}
-                        >
-                          Metal : {data?.MetalTypeTitle}
-                        </p>
+                          <div className="body" style={{ width: "65%" }}>
+                            {/* <div>
+                              <p className="showData_price_title">
+                                Actual Price
+                              </p>
+                              <p className="showData_price_deatil">
+                                {" "}
+                                ₹{data.price}
+                              </p>
+                            </div> */}
+                            {data?.discountedPrice && (
+                              <div>
+                                <p
+                                  style={{
+                                    margin: "5px 0px",
+                                    color: "#988d8d",
+                                    fontSize: "15px",
+                                  }}
+                                >
+                                  Discounted Price
+                                </p>
+                                <p
+                                  style={{
+                                    margin: "5px 0px",
+                                    fontSize: "20px",
+                                    fontWeight: 600,
+                                  }}
+                                  className="showData_price_deatil"
+                                >
+                                  {" "}
+                                  ₹{data.discountedPrice}
+                                </p>
+                              </div>
+                            )}
+                            <p
+                              className="desc_metal_line"
+                              style={{
+                                fontWeight: 600,
+                                margin: "0px 0px 5px 0px ",
+                              }}
+                            >
+                              Metal : {data?.MetalTypeTitle}
+                            </p>
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "10px",
+                              }}
+                            >
+                              <div style={{ display: "flex" }}>
+                                <div style={{ width: "40%" }}>
+                                  <p className="info_main_section">Dia. WT: </p>
+                                  <span className="info_main_section_span">
+                                    {data.DiamondWtP}
+                                  </span>
+                                </div>
+                                <div style={{ width: "30%" }}>
+                                  <p className="info_main_section">GWT : </p>
+                                  <span className="info_main_section_span">
+                                    {data.GrossWeight}{" "}
+                                    <span style={{ fontSize: "14px" }}>gm</span>
+                                  </span>
+                                </div>
+                                <div style={{ width: "30%" }}>
+                                  <p className="info_main_section">NWT :</p>
+                                  <span className="info_main_section_span">
+                                    {data.netWeight}{" "}
+                                    <span style={{ fontSize: "14px" }}>gm</span>
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div style={{ display: "flex" }}>
+                                <div style={{ width: "40%" }}>
+                                  <p className="info_main_section">CS WT : </p>
+                                  <span className="info_main_section_span">
+                                    {data.colorStoneWtP}
+                                  </span>
+                                </div>
+                                <div style={{ width: "40%" }}>
+                                  <p className="info_main_section">Misc: </p>
+                                  <span className="info_main_section_span">
+                                    {data.MiscWtP}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                         <div
                           style={{
                             display: "flex",
-                            flexDirection: "column",
-                            gap: "10px",
+                            justifyContent: "space-around",
+                            marginTop: "10px",
                           }}
                         >
-                          <div style={{ display: "flex" }}>
-                            <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">GWT : </p>
-                              <span className="info_main_section_span">
-                                {data.GrossWeight}{" "}
-                                <span style={{ fontSize: "14px" }}>Grms</span>
-                              </span>
-                            </div>
-                            <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">NWT :</p>
-                              <span className="info_main_section_span">
-                                {data.netWeight}{" "}
-                                <span style={{ fontSize: "14px" }}>Grms</span>
-                              </span>
-                            </div>
-                            <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">Dia. WT: </p>
-                              <span className="info_main_section_span">
-                                {data.DiamondWtP}
-                                <span style={{ fontSize: "14px" }}> Ct</span>
-                              </span>
-                            </div>
+                          <div
+                            className="scanner_List_moreview"
+                            onClick={() => toggleWishlist(data, true)}
+                          >
+                            <Heart
+                              fill={data.isInWishList ? "#ff3366" : "none"}
+                              color={data.isInWishList ? "#ff3366" : "black"}
+                            />
                           </div>
 
-                          <div style={{ display: "flex" }}>
-                            <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">CS WT : </p>
-                              <span className="info_main_section_span">
-                                {data.colorStoneWtP}
-                              </span>
-                            </div>
-                            <div style={{ width: "33.33%" }}>
-                              <p className="info_main_section">Misc: </p>
-                              <span className="info_main_section_span">
-                                {data.MiscWtP}
-                              </span>
-                            </div>
+                          <div
+                            className="scanner_List_moreview"
+                            onClick={() => toggleCart(data, true)}
+                          >
+                            <ShoppingCart
+                              fill={data.isInCartList ? "#4caf50" : "none"}
+                              color={data.isInCartList ? "#4caf50" : "black"}
+                            />
+                          </div>
+
+                          <div
+                            className="scanner_List_moreview"
+                            onClick={() => {
+                              setDiscountModalOpen(true);
+                              setDiscoutProductData(data);
+                            }}
+                          >
+                            <Percent />
+                          </div>
+
+                          <div className="scanner_List_moreview">
+                            <Printer />
                           </div>
                         </div>
                       </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-around",
-                          marginTop: "10px",
-                        }}
-                      >
-                        <div
-                          className="scanner_List_moreview"
-                          onClick={() => toggleWishlist(data, true)}
-                        >
-                          <Heart
-                            fill={data.isInWishList ? "#ff3366" : "none"}
-                            color={data.isInWishList ? "#ff3366" : "black"}
-                          />
-                          <p>Wishlist</p>
-                        </div>
-
-                        <div
-                          className="scanner_List_moreview"
-                          onClick={() => toggleCart(data, true)}
-                        >
-                          <ShoppingCart
-                            fill={data.isInCartList ? "#4caf50" : "none"}
-                            color={data.isInCartList ? "#4caf50" : "black"}
-                          />
-                          <p>Cart</p>
-                        </div>
-
-                        <div
-                          className="scanner_List_moreview"
-                          onClick={() => {
-                            setDiscountModalOpen(true);
-                            setDiscoutProductData(data);
-                          }}
-                        >
-                          <Percent />
-                          <p>Discount</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
+      ) : (
+        mode === "AllScanItem" && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "70vh",
+            }}
+          >
+            <p>No Product Scanned</p>
+          </div>
+        )
       )}
 
       <Box className="JobScannerPage">

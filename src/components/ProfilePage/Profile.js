@@ -162,12 +162,12 @@ const Profile = () => {
   }, []);
 
   const handleLogoutConfirm = () => {
+    navigate("/logout", { replace: true });
     setOpenLogoutDialog(false);
-    sessionStorage.removeItem();
+    sessionStorage.clear();
     Cookies.remove("device_token");
     Cookies.remove("token");
     Cookies.remove("SV");
-    navigate("/logout", { replace: true });
   };
 
   const handleLogoutCancel = () => {
@@ -175,10 +175,10 @@ const Profile = () => {
   };
 
   const HandleDeleteAccount = async () => {
+    window.history.pushState({}, "", "/account-delete");
     sessionStorage.clear();
     window.location.reload();
     // navigate("/account-delete", { replace: true });
-    window.history.pushState({}, "", "/account-delete");
   };
 
   const HandleDeleteAccountOpen = () => {

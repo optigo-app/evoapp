@@ -37,7 +37,7 @@
       flex: 1;
       border-radius: 4px;
       border: 1px solid #ccc;
-      height: 35px;
+      height: 40px;
       padding: 5px;
       font-size: 17px;
     }
@@ -169,13 +169,15 @@
       gap: 7px;
       height: 30px;
       border-radius: 5px;
-      padding: 5px 10px;
-      width: 26%;
+      padding: 0px 3px 0px 3px;
       justify-content: center;
+      width: 20%;
       p {
         font-weight: 600;
+        font-size: 15px;
       }
     }
+
     .scanner_List_moreview svg {
       transition: all 0.2s ease;
       cursor: pointer;
@@ -204,14 +206,14 @@
     }
 
     .info_main_section {
-      font-size: 14px;
-      margin: 2px 0px;
+      font-size: 13px;
+      margin: 0px;
       color: $titleColor;
       font-family: $font-family;
     }
 
     .info_main_section_span {
-      font-size: 17px;
+      font-size: 14px;
       font-weight: 600;
       font-family: $font-family;
       color: $titleColor;
@@ -266,7 +268,7 @@
         .info_main_section_span {
           color: rgb(24 23 23 / 86%);
           font-weight: 600;
-          font-size: 17px !important;
+          font-size: 14px !important;
         }
 
         .weights {
@@ -276,25 +278,6 @@
           color: #00a2e1;
           border-top: 1px solid rgb(247 236 236);
         }
-      }
-
-      .scanner_List_moreview {
-        display: flex;
-        align-items: center;
-        background-color: #ebe7e7;
-        gap: 7px;
-        height: 30px;
-        border-radius: 5px;
-        padding: 5px 10px;
-        width: 26%;
-        justify-content: center;
-        p {
-          font-weight: 600;
-        }
-      }
-      .scanner_List_moreview svg {
-        transition: all 0.2s ease;
-        cursor: pointer;
       }
     }
   }
@@ -415,4 +398,16 @@
       }
     }
   }
+}
+
+.expand-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 1s ease, opacity 1s ease;
+}
+
+.expand-wrapper.expanded {
+  max-height: 1000px;
+  opacity: 1;
 }

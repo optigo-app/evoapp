@@ -1,12 +1,14 @@
 import axios from "axios";
 
-// const APIURL = (window.location.hostname === 'localhost'
-//     || window.location.hostname === 'zen'
-//     || window.location.hostname === 'fgstore.web') ? 'http://api.optigoapps.com/ReactStore/ReactStore.aspx' : 'http://api.optigoapps.com/ReactStore/ReactStore.aspx';
+const APIURL = (window.location.hostname === 'localhost'
+    || window.location.hostname === 'nzen'
+  ) ? 'http://nzen/jo/ExpressApp/EvoApp.aspx' : 'https://view.optigoapps.com/ExpressApp/EvoApp.aspx';
 
 // const APIURL = "https://api.optigoapps.com/ReactStore/ReactStore.aspx";
 // const APIURL = "https://livenx.optigoapps.com/api/report";
-const APIURL = "http://nzen/jo/ExpressApp/EvoApp.aspx";
+// const APIURL = "http://nzen/jo/ExpressApp/EvoApp.aspx";
+
+
 
 export const CommonAPI = async (body) => {
   try {

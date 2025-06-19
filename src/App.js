@@ -6,13 +6,14 @@ import { ToastContainer } from "./Utils/Tostify/ToastManager";
 import OrderSuccess from "./Page/OrderSucess/OrderSuccess";
 import Support from "./components/Support/Support";
 import PrivacyPolicy from "./components/PrivacyPolicy/PrivacyPolicy";
+import Register from "./components/Register/Register";
 
 const Customer = lazy(() => import("./components/Customer/Customer"));
 const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
 const JobScanPage = lazy(() => import("./components/JobScanPage/JobScanPage"));
 
 function App() {
-  //  http://localhost:3000/?&device_token=QI0UDSA040V7T7R3
+  //  http://localhost:3000/?&device_token=63J1UX1513PBL6KM
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const device_token = queryParams.get("device_token");
@@ -39,6 +40,7 @@ function App() {
           <Route path="/orderSuccess" element={<OrderSuccess />} />
           <Route path="/Support" element={<Support />} />
           <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

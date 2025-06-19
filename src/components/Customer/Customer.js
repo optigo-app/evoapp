@@ -25,7 +25,7 @@ import LoadingBackdrop from "../../Utils/LoadingBackdrop";
 import { AlignJustify, CirclePlus, CircleUser } from "lucide-react";
 import { showToast } from "../../Utils/Tostify/ToastManager";
 import CustomAvatar from "../../Utils/avatar";
-import logo from "../../assests/Evo sale app (1).png";
+import logo from "../../assests/80-40.png";
 
 const formatSecondsToTime = (seconds) => {
   const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -129,7 +129,18 @@ const Customer = () => {
   };
 
   const filteredData = result.length > 0 ? result : mainData;
+
   const handleClickStatus = async (customer) => {
+     if (customer?.IsLockTimer == 1) {
+      showToast({
+        message: "Allready In Session",
+        bgColor: "#f44336",
+        fontColor: "#fff",
+        duration: 3000,
+      });
+      return;
+    }
+    
     const isOtherRunning = mainData.some(
       (cust) =>
         cust.CustomerId !== customer.CustomerId &&
@@ -384,15 +395,24 @@ const Customer = () => {
           <p style={{ margin: "-2px 0px 0px 0px", fontSize: "12px" }}>
             {allProfileData?.userid}
           </p>
+              <p style={{ margin: "-2px 0px 0px 0px", fontSize: "12px" }}>
+            {allProfileData?.CompanyCode}
+          </p>
         </div>
       </div>
-      <Accordion className="HeaderMenu_accordion" onClick={() => navigate('/support')}>
+      <Accordion
+        className="HeaderMenu_accordion"
+        onClick={() => navigate("/support")}
+      >
         <ListItemButton>
           <Typography className="HeaderMenu_Without_Sub">Support</Typography>
         </ListItemButton>
       </Accordion>
 
-      <Accordion className="HeaderMenu_accordion" onClick={() => navigate('/PrivacyPolicy')}>
+      <Accordion
+        className="HeaderMenu_accordion"
+        onClick={() => navigate("/PrivacyPolicy")}
+      >
         <ListItemButton>
           <Typography className="HeaderMenu_Without_Sub">
             Privacy Policy
@@ -454,11 +474,11 @@ const Customer = () => {
             <Button
               variant="contained"
               onClick={() => handleExitCustomer(endCustomnerInfo)}
-              style={{ 
-                backgroundColor: '',
-                fontSize: '12px',
-                margin: '0px',
-                padding: '8px'
+              style={{
+                backgroundColor: "",
+                fontSize: "12px",
+                margin: "0px",
+                padding: "8px",
               }}
             >
               {customerEnd ? "Save & End Customer" : "Save & Relese Customer"}
@@ -494,6 +514,7 @@ const Customer = () => {
                 setOpenFeedBack(true);
                 setCustomerEnd(true);
               }}
+              style={{margin: '0px'}}
             >
               End Customer
             </Button>
@@ -537,13 +558,13 @@ const Customer = () => {
             >
               <CirclePlus />
             </Button>
-            <Button
+            {/* <Button
               className="AddCustomer_Btn"
               onClick={() => navigate("/Profile")}
               variant="contained"
             >
               <CircleUser />
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
@@ -579,44 +600,45 @@ const Customer = () => {
           </div>
         </div>
       </div>
-      
-      {filteredData?.length !== 0 ? (
-        <div className="CustomerContainer">
-          <div className="CustomerList">
-            {filteredData.map((e, i) => (
-              <Button
-                key={i}
-                className="customercard_button"
-                onClick={() => handleClickStatus(e)}
-              >
-                <div className="card-header">
-                  <div>
-                    <h5>{`${e.firstname} ${e.lastname}`}</h5>
-                    <p className="text-muted">{e.email}</p>
-                    <p className="text-muted">{e.contactNumber}</p>
+
+      {!loading &&
+        (filteredData?.length !== 0 ? (
+          <div className="CustomerContainer">
+            <div className="CustomerList">
+              {filteredData.map((e, i) => (
+                <Button
+                  key={i}
+                  className="customercard_button"
+                  onClick={() => handleClickStatus(e)}
+                >
+                  <div className="card-header">
+                    <div>
+                      <h5>{`${e.firstname} ${e.lastname}`}</h5>
+                      <p className="text-muted">{e.email}</p>
+                      <p className="text-muted">{e.contactNumber}</p>
+                    </div>
+                    <div className="status-badge-container">
+                      {renderStatus(e)}
+                    </div>
                   </div>
-                  <div className="status-badge-container">
-                    {renderStatus(e)}
-                  </div>
-                </div>
-              </Button>
-            ))}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div
-          style={{
-            height: "80vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <h6 class="MuiTypography-root MuiTypography-h6 css-32t4mj-MuiTypography-root">
-            No Customer Available{" "}
-          </h6>
-        </div>
-      )}
+        ) : (
+          <div
+            style={{
+              height: "80vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <h6 class="MuiTypography-root MuiTypography-h6 css-32t4mj-MuiTypography-root">
+              No Customer Available{" "}
+            </h6>
+          </div>
+        ))}
     </div>
   );
 };
