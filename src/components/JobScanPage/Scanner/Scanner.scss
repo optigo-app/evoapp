@@ -160,23 +160,52 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     font-family: $font-family;
-    margin-bottom: 100px;
+    margin-bottom: 200px;
 
     .scanner_List_moreview {
       display: flex;
       align-items: center;
       background-color: #ebe7e7;
       gap: 7px;
-      height: 30px;
       border-radius: 5px;
-      padding: 0px 3px 0px 3px;
+      padding: 7px;
+      border-radius: 20px;
       justify-content: center;
-      width: 20%;
       p {
         font-weight: 600;
         font-size: 15px;
       }
     }
+
+    //   .actions {
+    //   margin-top: 8px;
+    //   display: flex;
+    //   gap: 15px;
+
+    //   .MuiIconButton-root {
+    //     padding: 0 !important;
+    //   }
+
+    //   .btn {
+    //     width: 22px;
+    //     height: 22px;
+    //     padding: 5px;
+    //     display: flex;
+    //     align-items: center;
+    //     justify-content: center;
+    //     color: $text2ndColor;
+    //     box-shadow: rgba(99, 99, 99, 0.1) 0px 2px 8px 0px;
+    //     border-radius: 50%;
+    //     background-color: transparent;
+    //     transition: all 0.3s ease;
+    //   }
+    //   .btn-active {
+    //     background-color: $heightlightColor;
+    //     color: #fff;
+    //     cursor: pointer;
+    //     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    //   }
+    // }
 
     .scanner_List_moreview svg {
       transition: all 0.2s ease;
@@ -200,9 +229,20 @@
     .showData_price_deatil {
       color: $heightlightColor;
       font-family: $font-family;
-      font-size: 20px;
+      font-size: 15px;
       font-weight: 600;
       margin: 5px 0px;
+    }
+
+    .showData_price_deatil_withdiscount {
+      color: #808080;
+      font-family: $font-family;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0px;
+      text-decoration: line-through;
+      display: flex;
+      justify-content: flex-end;
     }
 
     .info_main_section {
@@ -410,4 +450,14 @@
 .expand-wrapper.expanded {
   max-height: 1000px;
   opacity: 1;
+}
+
+#printSection {
+  display: none;
+}
+
+@media print {
+  #printSection {
+    display: block !important;
+  }
 }

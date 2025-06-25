@@ -71,33 +71,34 @@ const JobScanPage = () => {
       <Box className="CartHeader_main" ref={headerRef}>
         <Stack className="header-container">
           <div>
-          <p
-            style={{
-              fontSize: "20px",
-              fontWeight: "bold",
-              color: "white",
-              margin: '0px'
-            }}
-          >
-            {curruntActiveCustomer?.firstname} {curruntActiveCustomer?.lastname}
-            {/* {activeTab == "scan"
+            <p
+              style={{
+                fontSize: "20px",
+                fontWeight: "bold",
+                color: "white",
+                margin: "0px",
+              }}
+            >
+              {curruntActiveCustomer?.firstname}{" "}
+              {curruntActiveCustomer?.lastname}
+              {/* {activeTab == "scan"
               ? "Scan Job"
               : activeTab == "wishlist"
               ? "WishList"
               : activeTab == "cart"
               ? "Cart List"
               : "Notes"} */}
-          </p>
-          <p
-            style={{
-              fontSize: "10px",
-              fontWeight: "bold",
-              color: "white",
-              margin: '0px'
-            }}
-          >
-            {curruntActiveCustomer?.CompanyName}
-          </p>
+            </p>
+            <p
+              style={{
+                fontSize: "10px",
+                fontWeight: "bold",
+                color: "white",
+                margin: "0px",
+              }}
+            >
+              {curruntActiveCustomer?.CompanyName}
+            </p>
           </div>
 
           {/* <Typography

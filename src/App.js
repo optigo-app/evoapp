@@ -7,6 +7,7 @@ import OrderSuccess from "./Page/OrderSucess/OrderSuccess";
 import Support from "./components/Support/Support";
 import PrivacyPolicy from "./components/PrivacyPolicy/PrivacyPolicy";
 import Register from "./components/Register/Register";
+import FeedBack from "./components/FeedBack/FeedBack";
 
 const Customer = lazy(() => import("./components/Customer/Customer"));
 const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
@@ -41,6 +42,7 @@ function App() {
           <Route path="/Support" element={<Support />} />
           <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/feedback" element={<FeedBack />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

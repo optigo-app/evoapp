@@ -319,7 +319,7 @@ const AddCustomer = () => {
                 </div>
               </div>
               <div>
-                <p style={{ fontSize: "12px", color: "#b5aeae" }}>
+                <p style={{ fontSize: "10px", color: "#b5aeae" }}>
                   Click To Select
                 </p>
               </div>

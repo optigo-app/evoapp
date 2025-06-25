@@ -27,6 +27,7 @@ const DiscountModal = ({
     activeDetail?.price || 0
   );
   const originalPrice = activeDetail?.price || 0;
+  const curruntActiveCustomer = JSON.parse(sessionStorage.getItem('curruntActiveCustomer'));
 
   useEffect(() => {
     if (directPriceInput !== "") {
@@ -84,8 +85,8 @@ const DiscountModal = ({
           DeviceToken: Device_Token,
           AppId: 3,
           JobNo: activeDetail?.JobNo,
-          CustomerId: activeDetail?.CustomerId,
-          IsVisitor: activeDetail?.IsVisitor,
+          CustomerId: curruntActiveCustomer?.CustomerId,
+          IsVisitor: curruntActiveCustomer?.IsVisitor,
           DiscountOnId: hasDiscount
             ? directPriceInput !== ""
               ? 1
@@ -97,7 +98,6 @@ const DiscountModal = ({
         },
       ]),
     };
-
     try {
       await CallApi(body);
 

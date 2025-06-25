@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
 import "./Scanner.scss";
 import {
@@ -10,6 +10,7 @@ import {
   TextField,
   ToggleButton,
   ToggleButtonGroup,
+  IconButton,
 } from "@mui/material";
 import {
   ArrowDown,
@@ -31,6 +32,11 @@ import {
   MdKeyboardDoubleArrowDown,
   MdKeyboardDoubleArrowUp,
 } from "react-icons/md";
+import Webcam from "react-webcam";
+import jsQR from "jsqr";
+import LoadingBackdrop from "../../../Utils/LoadingBackdrop";
+import html2pdf from "html2pdf.js";
+import PritnModel from "./PritnModel/PritnModel";
 
 const Scanner = () => {
   const [scannedData, setScannedData] = useState([]);
@@ -42,10 +48,11 @@ const Scanner = () => {
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [discountProductData, setDiscoutProductData] = useState();
   const [isLoading, setIsLoading] = useState(false);
-
+  const [printInfo, setPrintInfo] = useState();
   const activeCustomer = JSON.parse(
     sessionStorage.getItem("curruntActiveCustomer")
   );
+  const printRef = useRef(null);
 
   useEffect(() => {
     const savedScans = sessionStorage.getItem("AllScanJobData");
@@ -56,8 +63,70 @@ const Scanner = () => {
     }
   }, []);
 
+  const webcamRef = useRef(null);
+  const [qrData, setQrData] = useState(null);
+  const [scannedOnce, setScannedOnce] = useState(false);
+  const [permissionGranted, setPermissionGranted] = useState(null);
+
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        stream.getTracks().forEach((track) => track.stop());
+        setPermissionGranted(true);
+      })
+      .catch((err) => {
+        console.error("Camera access denied:", err);
+        setPermissionGranted(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!permissionGranted || scannedOnce) return;
+    const interval = setInterval(() => {
+      scan();
+    }, 700);
+    return () => clearInterval(interval);
+  }, [permissionGranted, scannedOnce]);
+
+  const scan = () => {
+    const video = webcamRef.current?.video;
+    if (!video || video.readyState !== 4 || scannedOnce) return;
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+    const code = jsQR(imageData.data, canvas.width, canvas.height);
+    if (code?.data) {
+      const jobNo = code.data.trim();
+      if (jobNo.length > 3) {
+        setScannedOnce(true); // lock scanning
+        setIsLoading(true); // show loader if needed
+        setQrData(jobNo); // display scanned text
+        addScan(jobNo); // run API call
+      }
+    }
+  };
+
+  const retryPermission = () => {
+    setPermissionGranted(null);
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        stream.getTracks().forEach((track) => track.stop());
+        setPermissionGranted(true);
+      })
+      .catch(() => {
+        setPermissionGranted(false);
+      });
+  };
+
   const addScan = async (jobNumber) => {
-    setIsLoading(true);
     try {
       const Device_Token = sessionStorage.getItem("device_token");
       const body = {
@@ -67,12 +136,14 @@ const Scanner = () => {
       };
       const response = await CallApi(body);
       const jobData = response?.DT[0];
-
+      setIsLoading(false);
       if (!jobData) {
         setIsLoading(false);
         setError("Invalid Job Number or No Data Found.");
         return;
       }
+
+      console.log("jobDatajobDatajobDatajobData", jobData);
 
       const formatted = {
         JobNo: jobData.JobNo,
@@ -124,14 +195,19 @@ const Scanner = () => {
       sessionStorage.setItem("AllScanJobData", JSON.stringify(updatedData));
       setError(null);
     } catch (err) {
-      console.error("Error during scan", err);
       setIsLoading(false);
+      console.error("Error during scan", err);
       showToast({
         message: "Invalid Job",
         bgColor: "#f13f3f",
         fontColor: "#fff",
         duration: 5000,
       });
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => {
+        setScannedOnce(false);
+      }, 1500);
     }
   };
 
@@ -221,9 +297,6 @@ const Scanner = () => {
   const toggleCart = async (detailItem, data) => {
     const Device_Token = sessionStorage.getItem("device_token");
     const current = data ? detailItem : activeDetail;
-
-    console.log("current", current);
-
     try {
       if (!current) return;
 
@@ -304,7 +377,7 @@ const Scanner = () => {
 
   const updateScannedAndSession = (updatedItem) => {
     const updatedList = scannedData.map((item) =>
-      item.jobNumber === updatedItem.jobNumber ? updatedItem : item
+      item.JobNo === updatedItem.JobNo ? updatedItem : item
     );
     setScannedData(updatedList);
     setActiveDetail(updatedItem);
@@ -317,6 +390,70 @@ const Scanner = () => {
       setManualInput("");
     }
   };
+
+  const handlePrint = (data, allData) => {
+    const savedScans = JSON.parse(sessionStorage.getItem("AllScanJobData"));
+    const matchedArray = savedScans.filter((item) => item.JobNo === data);
+    if (allData) {
+      setPrintInfo(savedScans);
+    } else {
+      setPrintInfo(matchedArray);
+    }
+    const element = document.getElementById("printSection");
+    element.style.display = "block";
+    const opt = {
+      margin: [5, 5, 5, 5],
+      filename: "estimate.pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: [250, 297], orientation: "portrait" },
+    };
+
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .outputPdf("blob")
+      .then((blob) => {
+        const fileName = "estimate.pdf";
+        element.style.display = "none";
+        if (window.flutter_inappwebview) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64data = reader.result.split(",")[1];
+            window.flutter_inappwebview.callHandler(
+              "downloadPDF",
+              base64data,
+              fileName
+            );
+          };
+          reader.readAsDataURL(blob);
+        } else {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+      });
+  };
+
+  //  const handleShare = async () => {
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share({
+  //         title: "temon",
+  //         text: `Check out this product: Temp`,
+  //         url: window.location.href, // or product-specific URL
+  //       });
+  //       console.log('Shared successfully');
+  //     } catch (error) {
+  //       console.error('Error sharing:', error);
+  //     }
+  //   } else {
+  //     alert('Share not supported on this browser');
+  //   }
+  // };
 
   const renderCollapsedTop = () =>
     activeDetail && (
@@ -344,13 +481,36 @@ const Scanner = () => {
               <span>{activeDetail.Category}</span>
             </div>
             <div>
-              <span className="showData_price_deatil">
-                ₹{activeDetail.price}
+              <span
+                className={
+                  activeDetail?.discountedPrice
+                    ? "showData_price_deatil_withdiscount"
+                    : "showData_price_deatil"
+                }
+              >
+                ₹ {activeDetail.price}
               </span>
+              {activeDetail?.discountedPrice && (
+                <div>
+                  <p
+                    style={{
+                      margin: "0px",
+                      fontSize: "15px",
+                      fontWeight: 600,
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
+                    className="showData_price_deatil"
+                  >
+                    {" "}
+                    ₹ {activeDetail.discountedPrice}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          <div style={{ display: "flex" }}>
+          <div style={{ display: "flex", gap: "5px" }}>
             <div style={{ width: "35%" }}>
               <img
                 src={activeDetail?.image}
@@ -363,30 +523,7 @@ const Scanner = () => {
                 <p className="showData_price_title">Actual Price</p>
                 <p className="showData_price_deatil"> ₹{activeDetail.price}</p>
               </div> */}
-              {activeDetail?.discountedPrice && (
-                <div>
-                  <p
-                    style={{
-                      margin: "5px 0px",
-                      color: "#988d8d",
-                      fontSize: "15px",
-                    }}
-                  >
-                    Discounted Price
-                  </p>
-                  <p
-                    style={{
-                      margin: "5px 0px",
-                      fontSize: "20px",
-                      fontWeight: 600,
-                    }}
-                    className="showData_price_deatil"
-                  >
-                    {" "}
-                    ₹{activeDetail.discountedPrice}
-                  </p>
-                </div>
-              )}
+
               <div
                 style={{
                   display: "flex",
@@ -442,15 +579,20 @@ const Scanner = () => {
               marginTop: "10px",
             }}
           >
-            <div
-              className="scanner_List_moreview"
-              onClick={() => toggleWishlist("", false)}
-            >
+            <div className="scanner_List_moreview">
               <Heart
                 fill={activeDetail.isInWishList ? "#ff3366" : "none"}
                 color={activeDetail.isInWishList ? "#ff3366" : "black"}
               />
             </div>
+
+            {/* <IconButton onClick={() => toggleWishlist("", false)}>
+              <ShoppingCart
+                className={`btn ${
+                  activeDetail.isInWishList ? "btn-active" : ""
+                }`}
+              />
+            </IconButton> */}
 
             <div
               className="scanner_List_moreview"
@@ -472,7 +614,10 @@ const Scanner = () => {
               <Percent />
             </div>
 
-            <div className="scanner_List_moreview">
+            <div
+              className="scanner_List_moreview"
+              onClick={() => handlePrint(activeDetail?.JobNo, false)}
+            >
               <Printer />
             </div>
           </div>
@@ -481,11 +626,9 @@ const Scanner = () => {
     );
 
   const [expandedItems, setExpandedItems] = useState([]);
-
-  console.log("scannedDatascannedData", scannedData);
-
   return (
     <div className="scanner-container">
+      <LoadingBackdrop isLoading={isLoading} />
       <DiscountModal
         discountModalOpen={discountModalOpen}
         setDiscountModalOpen={setDiscountModalOpen}
@@ -493,12 +636,45 @@ const Scanner = () => {
         updateScannedAndSession={updateScannedAndSession}
         showToast={showToast}
       />
-      {scannedData?.length !== 0 && (
+      {/* {scannedData?.length !== 0 && (
         <p className="ProductScanTitle">Product Scanner</p>
-      )}
+      )} */}
       {mode === "qr" ? (
         <div className="qr-scanner-box">
-          <QrReader
+          {permissionGranted === null && (
+            <p>🔄 Checking camera permission...</p>
+          )}
+          {permissionGranted === false && (
+            <div>
+              <p style={{ color: "red" }}>❌ Camera permission denied.</p>
+              <button onClick={retryPermission} className="btn btn-primary">
+                Retry
+              </button>
+            </div>
+          )}
+          {permissionGranted && (
+            <>
+              <Webcam
+                ref={webcamRef}
+                audio={false}
+                videoConstraints={{ facingMode: "environment" }}
+                screenshotFormat="image/jpeg"
+                style={{
+                  width: "100%",
+                  maxHeight: "300px",
+                  borderRadius: 10,
+                  objectFit: "cover",
+                }}
+              />
+              {/* {isLoading && <p style={{ color: "#3498db" }}>🔍 Scanning...</p>}
+              {qrData && (
+                <p style={{ color: "green", marginTop: 10 }}>
+                  ✅ Scanned: <strong>{qrData}</strong>
+                </p>
+              )} */}
+            </>
+          )}
+          {/* <QrReader
             constraints={{ facingMode: "environment" }}
             scanDelay={100}
             onResult={(result, error) => {
@@ -514,7 +690,7 @@ const Scanner = () => {
             }}
             videoStyle={{ width: "100%", borderRadius: 8 }}
             style={{ width: "100%" }}
-          />
+          /> */}
         </div>
       ) : mode == "AllScanItem" ? (
         <div></div>
@@ -584,43 +760,70 @@ const Scanner = () => {
                           justifyContent: "space-between",
                         }}
                       >
-                        <h4 style={{ margin: "5px 2px" }}>
-                          {data.designNo}({data?.JobNo})
-                        </h4>
-                        <h4
-                          className="showData_price_deatil"
-                          style={{ margin: "5px 2px" }}
-                        >
-                          ₹{data.price}
-                        </h4>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <p style={{ margin: "0px" }}>{data.Category}</p>
-                        <div style={{ fontSize: "1.5rem" }}>
-                          {isExpanded ? (
-                            <MdKeyboardDoubleArrowUp
-                              style={{
-                                height: "20px",
-                                width: "20px",
-                                borderRadius: "50px",
-                                color: "#b3b2b2",
-                              }}
-                            />
-                          ) : (
-                            <MdKeyboardDoubleArrowDown
-                              style={{
-                                height: "20px",
-                                width: "20px",
-                                borderRadius: "50px",
-                                color: "#b3b2b2",
-                              }}
-                            />
+                        <div>
+                          <h4 style={{ margin: "5px 2px" }}>
+                            {data.designNo}({data?.JobNo})
+                          </h4>
+
+                          <p style={{ margin: "0px" }}>{data.Category}</p>
+                        </div>
+
+                        <div>
+                          <h4
+                            className={
+                              data?.discountedPrice
+                                ? "showData_price_deatil_withdiscount"
+                                : "showData_price_deatil"
+                            }
+                          >
+                            ₹ {data.price}
+                          </h4>
+
+                          {data?.discountedPrice && (
+                            <div>
+                              <p
+                                style={{
+                                  margin: "0px",
+                                  fontSize: "15px",
+                                  fontWeight: 600,
+                                  display: "flex",
+                                  justifyContent: "flex-end",
+                                }}
+                                className="showData_price_deatil"
+                              >
+                                {" "}
+                                ₹ {data.discountedPrice}
+                              </p>
+                            </div>
                           )}
+
+                          <div
+                            style={{
+                              fontSize: "1.5rem",
+                              display: "flex",
+                              justifyContent: "flex-end",
+                            }}
+                          >
+                            {isExpanded ? (
+                              <MdKeyboardDoubleArrowUp
+                                style={{
+                                  height: "20px",
+                                  width: "20px",
+                                  borderRadius: "50px",
+                                  color: "#b3b2b2",
+                                }}
+                              />
+                            ) : (
+                              <MdKeyboardDoubleArrowDown
+                                style={{
+                                  height: "20px",
+                                  width: "20px",
+                                  borderRadius: "50px",
+                                  color: "#b3b2b2",
+                                }}
+                              />
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -636,7 +839,7 @@ const Scanner = () => {
                           borderTop: "1px solid rgb(221 221 221 / 42%)",
                         }}
                       >
-                        <div style={{ display: "flex" }}>
+                        <div style={{ display: "flex", gap: "5px" }}>
                           <div style={{ width: "35%" }}>
                             <img
                               src={data?.image}
@@ -658,30 +861,7 @@ const Scanner = () => {
                                 ₹{data.price}
                               </p>
                             </div> */}
-                            {data?.discountedPrice && (
-                              <div>
-                                <p
-                                  style={{
-                                    margin: "5px 0px",
-                                    color: "#988d8d",
-                                    fontSize: "15px",
-                                  }}
-                                >
-                                  Discounted Price
-                                </p>
-                                <p
-                                  style={{
-                                    margin: "5px 0px",
-                                    fontSize: "20px",
-                                    fontWeight: 600,
-                                  }}
-                                  className="showData_price_deatil"
-                                >
-                                  {" "}
-                                  ₹{data.discountedPrice}
-                                </p>
-                              </div>
-                            )}
+
                             <p
                               className="desc_metal_line"
                               style={{
@@ -775,7 +955,10 @@ const Scanner = () => {
                             <Percent />
                           </div>
 
-                          <div className="scanner_List_moreview">
+                          <div
+                            className="scanner_List_moreview"
+                            onClick={() => handlePrint(data?.JobNo, false)}
+                          >
                             <Printer />
                           </div>
                         </div>
@@ -783,6 +966,20 @@ const Scanner = () => {
                     )}
                   </div>
                 </div>
+                <Button
+                  style={{
+                    position: "fixed",
+                    bottom: "80px",
+                    right: "30px",
+                    backgroundColor: "rgb(128 7 171)",
+                    color: "white",
+                    padding: "10px",
+                    borderRadius: "60px",
+                  }}
+                  onClick={() => handlePrint("", true)}
+                >
+                  <Printer />
+                </Button>
               </div>
             );
           })}
@@ -832,6 +1029,15 @@ const Scanner = () => {
           </Button>
         </Stack>
       </Box>
+
+      <div
+        id="printSection"
+        className="printDesign"
+        ref={printRef}
+        style={{ width: "100%" }}
+      >
+        <PritnModel activeDetail={printInfo} />
+      </div>
     </div>
   );
 };

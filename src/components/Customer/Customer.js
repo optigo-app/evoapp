@@ -17,15 +17,26 @@ import {
   List,
   Divider,
   Accordion,
+  Dialog,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { AiOutlineCloseCircle, AiOutlineLock } from "react-icons/ai";
+import {
+  AiOutlineClockCircle,
+  AiOutlineCloseCircle,
+  AiOutlineDown,
+  AiOutlineLock,
+  AiOutlineRight,
+  AiOutlineUp,
+} from "react-icons/ai";
 import { CallApi } from "../../API/CallApi/CallApi";
 import LoadingBackdrop from "../../Utils/LoadingBackdrop";
-import { AlignJustify, CirclePlus, CircleUser } from "lucide-react";
+import { AlignJustify, CirclePlus, CircleUser, Plus } from "lucide-react";
 import { showToast } from "../../Utils/Tostify/ToastManager";
 import CustomAvatar from "../../Utils/avatar";
 import logo from "../../assests/80-40.png";
+import Cookies from "js-cookie";
 
 const formatSecondsToTime = (seconds) => {
   const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -47,6 +58,22 @@ const style = {
   maxHeight: "90vh",
   overflowY: "auto",
 };
+
+const styleEndBox = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "90%",
+  height: "auto",
+  bgcolor: "background.paper",
+  borderRadius: "8px",
+  boxShadow: 24,
+  p: 3,
+  maxHeight: "90vh",
+  overflowY: "auto",
+};
+
 const Customer = () => {
   const [mainData, setMainData] = useState([]);
   const [result, setResult] = useState([]);
@@ -54,18 +81,63 @@ const Customer = () => {
   const [timers, setTimers] = useState({});
   const [stopped, setStopped] = useState({});
   const [endCustomnerInfo, setEndCustomerInfo] = useState();
+  const [endReleseCust, setEndReleseCust] = useState();
   const [loading, setLoading] = useState(false);
   const [customerEnd, setCustomerEnd] = useState(false);
-  const [openFeedback, setOpenFeedBack] = React.useState(false);
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [tabsFixed, setTabsFixed] = useState(false);
   const headerRef = useRef(null);
   const [allProfileData, setAllProfileData] = useState();
-  const handleCloseFeedBack = () => setOpenFeedBack(false);
+  const [expandedCustomerId, setExpandedCustomerId] = useState(null);
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  const GetProfileData = async () => {
+    const Device_Token = sessionStorage.getItem("device_token");
+
+    const body = {
+      Mode: "GetProfileData",
+      Token: `"${Device_Token}"`,
+      ReqData: JSON.stringify([
+        {
+          ForEvt: "GetProfileData",
+          DeviceToken: Device_Token,
+          AppId: 3,
+        },
+      ]),
+    };
+
+    const response = await CallApi(body);
+    if (response?.DT) {
+      sessionStorage.setItem("profileData", JSON.stringify(response.DT[0]));
+      setAllProfileData(response.DT[0]);
+    }
+  };
+
+  useEffect(() => {
+    const storedProfileData = sessionStorage.getItem("profileData");
+    if (storedProfileData) {
+      setAllProfileData(JSON.parse(storedProfileData));
+    } else {
+      GetProfileData();
+    }
+  }, []);
+
+  const toggleExpand = (id) => {
+    setExpandedCustomerId((prev) => (prev === id ? null : id));
+  };
 
   const toggleDrawer = (newOpen) => () => {
     setOpenMenu(newOpen);
+  };
+
+  const HandleDeleteAccountOpen = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
   };
 
   const navigate = useNavigate();
@@ -131,7 +203,7 @@ const Customer = () => {
   const filteredData = result.length > 0 ? result : mainData;
 
   const handleClickStatus = async (customer) => {
-     if (customer?.IsLockTimer == 1) {
+    if (customer?.IsLockTimer == 1) {
       showToast({
         message: "Allready In Session",
         bgColor: "#f44336",
@@ -140,7 +212,7 @@ const Customer = () => {
       });
       return;
     }
-    
+
     const isOtherRunning = mainData.some(
       (cust) =>
         cust.CustomerId !== customer.CustomerId &&
@@ -197,9 +269,9 @@ const Customer = () => {
     setEndCustomerInfo(customer);
   };
 
-  const handleExitCustomer = async (customer) => {
+  const handleExitCustomer = async (customer , endCustomer) => {
     const Device_Token = sessionStorage.getItem("device_token");
-    if (customerEnd) {
+    if (endCustomer) {
       const body = {
         Mode: "EndSession",
         Token: `"${Device_Token}"`,
@@ -223,8 +295,8 @@ const Customer = () => {
           fontColor: "#fff",
           duration: 5000,
         });
+        navigate("/feedback");
       }
-      setOpenFeedBack(false);
       setOpen(false);
     } else {
       const endSessionBody = {
@@ -255,7 +327,6 @@ const Customer = () => {
           duration: 3000,
         });
 
-        // Step 2: Now call ExitCustomer
         const exitBody = {
           Mode: "ExitCustomer",
           Token: `"${Device_Token}"`,
@@ -283,62 +354,11 @@ const Customer = () => {
             fontColor: "#fff",
             duration: 5000,
           });
+          navigate("/feedback");
         }
-        setOpenFeedBack(false);
         setOpen(false);
       }
     }
-  };
-
-  const renderStatus = (cust) => {
-    if (cust.IsLockTimer === 0) {
-      return <span className="status-badge available">Available</span>;
-    }
-
-    if (cust.IsLockTimer === 1) {
-      return (
-        <span className="status-badge in-session">
-          <AiOutlineLock style={{ marginRight: "5px" }} />
-          In Session
-        </span>
-      );
-    }
-
-    if (cust.IsLockTimer === 2) {
-      const seconds = timers[cust.CustomerId] ?? 0;
-      return (
-        <span
-          className="status-badge active-timer"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-          }}
-        >
-          <div>
-            {formatSecondsToTime(seconds)}
-            {!stopped[cust.CustomerId] && (
-              <Button
-                size="small"
-                style={{
-                  marginLeft: "10px",
-                  backgroundColor: "red",
-                  color: "white",
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStop(cust);
-                }}
-              >
-                End
-              </Button>
-            )}
-          </div>
-        </span>
-      );
-    }
-
-    return null;
   };
 
   const isAnyRunning = mainData.some(
@@ -373,7 +393,11 @@ const Customer = () => {
     if (storedProfileData) {
       setAllProfileData(JSON.parse(storedProfileData));
     }
-  }, [open]);
+  }, []);
+
+  const handleLogoutClick = () => {
+    setOpenLogoutDialog(true);
+  };
 
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
@@ -395,7 +419,7 @@ const Customer = () => {
           <p style={{ margin: "-2px 0px 0px 0px", fontSize: "12px" }}>
             {allProfileData?.userid}
           </p>
-              <p style={{ margin: "-2px 0px 0px 0px", fontSize: "12px" }}>
+          <p style={{ margin: "-2px 0px 0px 0px", fontSize: "12px" }}>
             {allProfileData?.CompanyCode}
           </p>
         </div>
@@ -419,108 +443,182 @@ const Customer = () => {
           </Typography>
         </ListItemButton>
       </Accordion>
+
+      <div>
+        <p
+          onClick={handleLogoutClick}
+          style={{
+            margin: "15px",
+            textDecoration: "underline",
+            color: "blue",
+            fontSize: "14px",
+            fontWeight: 600,
+          }}
+        >
+          Logout
+        </p>
+      </div>
+
+      <div>
+        <p
+          onClick={HandleDeleteAccountOpen}
+          style={{
+            margin: "15px",
+            textDecoration: "underline",
+            color: "blue",
+            fontSize: "14px",
+            fontWeight: 600,
+          }}
+        >
+          Delete My Account
+        </p>
+      </div>
     </Box>
   );
+
+  const handleLogoutConfirm = () => {
+    navigate("/logout", { replace: true });
+    setOpenLogoutDialog(false);
+    sessionStorage.clear();
+    Cookies.remove("device_token");
+    Cookies.remove("token");
+    Cookies.remove("SV");
+  };
+
+  const handleLogoutCancel = () => {
+    setOpenLogoutDialog(false);
+  };
+
+  const HandleDeleteAccount = async () => {
+    window.history.pushState({}, "", "/account-delete");
+    sessionStorage.clear();
+    window.location.reload();
+    // navigate("/account-delete", { replace: true });
+  };
 
   return (
     <div className="CustomerMain">
       <LoadingBackdrop isLoading={loading} />
-      <Modal
-        open={openFeedback}
-        onClose={handleCloseFeedBack}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Give Feedback
-          </Typography>
-
-          <FormControl fullWidth sx={{ mt: 2 }}>
-            <InputLabel id="feedback-select-label">Service</InputLabel>
-            <Select labelId="feedback-select-label" label="Feedback">
-              <MenuItem value="good">Good</MenuItem>
-              <MenuItem value="average">Average</MenuItem>
-              <MenuItem value="bad">Bad</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth sx={{ mt: 2 }}>
-            <InputLabel id="feedback-select-label">Support</InputLabel>
-            <Select labelId="feedback-select-label" label="Feedback">
-              <MenuItem value="good">Good</MenuItem>
-              <MenuItem value="average">Average</MenuItem>
-              <MenuItem value="bad">Bad</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth sx={{ mt: 2 }}>
-            <InputLabel id="feedback-select-label">Help</InputLabel>
-            <Select labelId="feedback-select-label" label="Feedback">
-              <MenuItem value="good">Good</MenuItem>
-              <MenuItem value="average">Average</MenuItem>
-              <MenuItem value="bad">Bad</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-            <Button
-              variant="outlined"
-              sx={{ mr: 1 }}
-              onClick={handleCloseFeedBack}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => handleExitCustomer(endCustomnerInfo)}
-              style={{
-                backgroundColor: "",
-                fontSize: "12px",
-                margin: "0px",
-                padding: "8px",
-              }}
-            >
-              {customerEnd ? "Save & End Customer" : "Save & Relese Customer"}
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
       <Drawer open={openMenu} onClose={() => setOpenMenu(false)}>
         {DrawerList}
       </Drawer>
 
-      <Drawer anchor="bottom" open={open} onClose={() => setOpen(false)}>
-        <Box className="Customer_bottom_button">
+      <Dialog
+        open={openLogoutDialog}
+        onClose={handleLogoutCancel}
+        aria-labelledby="logout-confirmation-dialog"
+      >
+        <DialogTitle id="logout-confirmation-dialog">
+          Are you sure you want to logout?
+        </DialogTitle>
+        <DialogActions style={{ display: "flex", justifyContent: "center" }}>
+          <Button
+            onClick={handleLogoutCancel}
+            className="Account_delete_button"
+          >
+            No
+          </Button>
+          <Button
+            onClick={handleLogoutConfirm}
+            className="Account_delete_button"
+            autoFocus
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={styleEndBox}>
+          <div>
+            <p
+              style={{
+                textAlign: "center",
+                fontWeight: 600,
+                fontSize: "20px",
+                paddingBottom: "8px",
+              }}
+            >
+              {endReleseCust == "releseCustomer"
+                ? "Exit Customer"
+                : "End Session"}
+            </p>
+          </div>
+          <div>
+            <p style={{ textAlign: "center" }}>
+              {endReleseCust == "releseCustomer"
+                ? "Confirm exit? Customer will be removed from list.”"
+                : "Do you want to end this customer’s session? Customer stays in available inlist"}
+            </p>
+          </div>
           <Stack
             direction="row"
             spacing={2}
             justifyContent="center"
             className="action-buttons"
+            style={{ display: "flex", gap: "5px", margin: "15px 0px 0px 0px" }}
           >
             <Button
               variant="outlined"
               onClick={() => {
-                setOpenFeedBack(true);
-                setCustomerEnd(false);
+                setOpen(false);
               }}
+              style={{ width: "50%", margin: "0px", fontSize: "12px" }}
             >
-              Relese Customer
+              Cancel
             </Button>
             <Button
               variant="outlined"
-              onClick={() => {
-                setOpenFeedBack(true);
-                setCustomerEnd(true);
+              style={{
+                width: "50%",
+                margin: "0px",
+                fontSize: "12px",
+                padding: "0px",
+                backgroundColor: "#932e99",
+                color: "white",
+                border: "none",
               }}
-              style={{margin: '0px'}}
+              onClick={() => {
+                if (endReleseCust === "releseCustomer") {
+                  handleExitCustomer(endCustomnerInfo , false);
+                  setCustomerEnd(false);
+                } else {
+                  setCustomerEnd(true);
+                  handleExitCustomer(endCustomnerInfo , true);
+                }
+              }}
             >
-              End Customer
+              {endReleseCust == "releseCustomer"
+                ? "Yes, Exit Customer"
+                : "Yes, End Session"}
             </Button>
           </Stack>
         </Box>
-      </Drawer>
+      </Modal>
+
+      <Dialog open={openDeleteDialog} onClose={handleDeleteCancel}>
+        <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
+        <DialogActions style={{ display: "flex", justifyContent: "center" }}>
+          <Button
+            onClick={handleDeleteCancel}
+            className="Account_delete_button"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={HandleDeleteAccount}
+            autoFocus
+            className="Account_delete_button"
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <div className="Header_main" ref={headerRef}>
         <div className="header-container">
@@ -556,7 +654,7 @@ const Customer = () => {
               onClick={handleNaviagte}
               variant="contained"
             >
-              <CirclePlus />
+              <Plus />
             </Button>
             {/* <Button
               className="AddCustomer_Btn"
@@ -605,24 +703,154 @@ const Customer = () => {
         (filteredData?.length !== 0 ? (
           <div className="CustomerContainer">
             <div className="CustomerList">
-              {filteredData.map((e, i) => (
-                <Button
-                  key={i}
-                  className="customercard_button"
-                  onClick={() => handleClickStatus(e)}
-                >
-                  <div className="card-header">
-                    <div>
-                      <h5>{`${e.firstname} ${e.lastname}`}</h5>
-                      <p className="text-muted">{e.email}</p>
-                      <p className="text-muted">{e.contactNumber}</p>
+              {filteredData.map((cust, i) => {
+                const isExpanded = expandedCustomerId === cust.CustomerId;
+                return (
+                  <Button
+                    key={i}
+                    className="customercard_button"
+                    onClick={() => {
+                      console.log("custcustcust", cust);
+                      if (cust.IsLockTimer === 0 || cust.IsLockTimer === 2) {
+                        toggleExpand(cust.CustomerId);
+                      } else {
+                        handleClickStatus(cust);
+                      }
+                    }}
+                    style={{
+                      backgroundColor: cust.IsLockTimer === 2 && "#e4f0df",
+                    }}
+                  >
+                    <div className="card-header">
+                      <div>
+                        <h5>{`${cust.firstname} ${cust.lastname}`}</h5>
+                        <p className="text-muted">{cust.contactNumber}</p>
+                      </div>
+
+                      <div className="status-badge-container">
+                        {cust.IsLockTimer === 0 && (
+                          <div className="status-row">
+                            <span className="dot available" />
+                          </div>
+                        )}
+
+                        {cust.IsLockTimer === 1 && (
+                          <span className="status-badge in-session">
+                            <AiOutlineLock style={{ marginRight: "5px" }} />
+                            In Session
+                          </span>
+                        )}
+
+                        {cust.IsLockTimer === 2 && (
+                          <div
+                            className="status-row"
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "flex-end",
+                            }}
+                          >
+                            <span
+                              className="expand-icon"
+                              onClick={() => handleClickStatus(cust)}
+                              style={{
+                                padding: "0px",
+                                borderRadius: "3px",
+                                width: "30px",
+                                display: "flex",
+                                justifyContent: "flex-end",
+                              }}
+                            >
+                              <AiOutlineRight color="black" />
+                            </span>
+                            <span className="timer-text">
+                              <AiOutlineClockCircle />
+                              {formatSecondsToTime(
+                                timers[cust.CustomerId] ?? 0
+                              )}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="status-badge-container">
-                      {renderStatus(e)}
+
+                    <div
+                      className={`expand-wrapper ${isExpanded ? "show" : ""}`}
+                    >
+                      {cust.IsLockTimer === 0 && (
+                        <div className="expand-actions">
+                          <Button
+                            size="small"
+                            danger
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStop(cust);
+                            }}
+                            style={{
+                              color: "red",
+                              textDecoration: "underline",
+                            }}
+                          >
+                            Remove Customer
+                          </Button>
+
+                          <Button
+                            size="small"
+                            type="primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClickStatus(cust);
+                            }}
+                            style={{
+                              color: "#8d07a7",
+                              textDecoration: "underline",
+                            }}
+                          >
+                            Start Session
+                          </Button>
+                        </div>
+                      )}
+
+                      {cust.IsLockTimer === 2 && (
+                        <div className="expand-actions">
+                          <Button
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStop(cust);
+                              setEndReleseCust("releseCustomer");
+                            }}
+                            style={{
+                              color: "red",
+                              textDecoration: "underline",
+                            }}
+                          >
+                            Remove Customer
+                          </Button>
+
+                          {!stopped[cust.CustomerId] && (
+                            <Button
+                              size="small"
+                              danger
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStop(cust);
+                                setEndReleseCust("endCustomer");
+                              }}
+                              style={{
+                                color: "#e22929",
+                                textDecoration: "underline",
+                              }}
+                            >
+                              End Customer
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </Button>
-              ))}
+                  </Button>
+                );
+              })}
             </div>
           </div>
         ) : (
