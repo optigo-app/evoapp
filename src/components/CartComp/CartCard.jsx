@@ -30,24 +30,24 @@ const CartCard = ({ cartItem, handleOpenDialog }) => {
 
           <Box className="price-section">
             <Typography className="old-price">
-              ₹{parseFloat(cartItem?.Amount).toFixed(2).toLocaleString()}
+            ₹{parseFloat(cartItem?.Amount).toFixed(2).toLocaleString()}
             </Typography>
             <Typography className="new-price">
-              ₹{parseFloat(cartItem?.FinalAmount).toFixed(2).toLocaleString()}
+            ₹{parseFloat(cartItem?.FinalAmount).toFixed(2).toLocaleString()}
             </Typography>
           </Box>
-
           <Box className="extra-price-details">
             {parseFloat(cartItem?.DiscountAmount) > 0 && (
               <Typography className="discount-amount">
-                Discount: ₹{parseFloat(cartItem?.DiscountAmount).toFixed(2).toLocaleString()}
+                Discount:  ₹{parseFloat(cartItem?.DiscountAmount).toFixed(2).toLocaleString()}
               </Typography>
             )}
-            <Typography className="tax-amount">
-              Tax: ₹{parseFloat(cartItem?.TotalTaxAmount).toFixed(2).toLocaleString()}
-            </Typography>
+            {parseFloat(cartItem?.TotalTaxAmount) > 0 && (
+              <Typography className="tax-amount">
+                Tax:  ₹{parseFloat(cartItem?.TotalTaxAmount).toFixed(2).toLocaleString()}
+              </Typography>
+            )}
           </Box>
-
           <Box className="actions">
             <IconButton onClick={() => handleOpenDialog(cartItem, 'single')}>
               <Trash2 className="btn" />

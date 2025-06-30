@@ -42,18 +42,18 @@ const WishlistCard = ({
               ₹{parseFloat(wishlistItems?.FinalAmount).toFixed(2).toLocaleString()}
             </Typography>
           </Box>
-
           <Box className="extra-price-details">
             {parseFloat(wishlistItems?.DiscountAmount) > 0 && (
               <Typography className="discount-amount">
                 Discount: ₹{parseFloat(wishlistItems?.DiscountAmount).toFixed(2).toLocaleString()}
               </Typography>
             )}
-            <Typography className="tax-amount">
-              Tax: ₹{parseFloat(wishlistItems?.TotalTaxAmount).toFixed(2).toLocaleString()}
-            </Typography>
+            {parseFloat(wishlistItems?.TotalTaxAmount) > 0 && (
+              <Typography className="tax-amount">
+                Tax: ₹{parseFloat(wishlistItems?.TotalTaxAmount).toFixed(2).toLocaleString()}
+              </Typography>
+            )}
           </Box>
-
           <Box className="actions">
             <IconButton onClick={() => handleWishToCart(wishlistItems)}>
               <ShoppingCart
