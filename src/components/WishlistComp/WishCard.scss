@@ -46,7 +46,7 @@
     }
 
     .product-title {
-      font-weight: 500;
+      font-weight: 600;
       margin: 4px 0;
       font-family: $font-family;
       line-height: 1.2;
@@ -62,15 +62,27 @@
       .old-price {
         text-decoration: line-through;
         color: $placeholderColor;
-        font-family: $font-family;
         font-size: 14px;
       }
 
       .new-price {
         color: $heightlightColor;
         font-weight: 600;
-        font-family: $font-family;
         font-size: 15px;
+      }
+    }
+
+    .extra-price-details {
+      margin-top: 4px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      .discount-amount,
+      .tax-amount {
+        font-size: 12px;
+        color: $text2ndColor;
+        font-weight: normal;
       }
     }
 
@@ -95,12 +107,17 @@
         border-radius: 50%;
         background-color: transparent;
         transition: all 0.3s ease;
-      }
-      .btn-active {
-        background-color: $heightlightColor;
-        color: #fff;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        &.btn-active {
+          background-color: $heightlightColor;
+          color: #fff;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
       }
     }
   }
