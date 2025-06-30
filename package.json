@@ -1,7 +1,6 @@
 {
   "name": "evoapp",
   "version": "0.1.0",
-  "homepage": "/evo",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.14.0",

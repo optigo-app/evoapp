@@ -30,7 +30,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter basename="/evo">
+    <BrowserRouter>
       <ToastContainer />
       <Suspense fallback={<LoadingBackdrop />}>
         <Routes>

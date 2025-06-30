@@ -641,7 +641,7 @@ const Customer = () => {
 
       <div className="Header_main" ref={headerRef}>
         <div className="header-container">
-          <div style={{ width: "28%" }}>
+          <div style={{ width: "33%" }}>
             <Button
               className="AddCustomer_Btn"
               onClick={() => setOpenMenu(true)}
@@ -666,6 +666,7 @@ const Customer = () => {
               gap: "3px",
               width: "33.33%",
               justifyContent: "flex-end",
+              paddingRight: '7px'
             }}
           >
             <Button

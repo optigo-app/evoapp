@@ -438,7 +438,14 @@ const Scanner = () => {
       html2canvas: { scale: 2 },
       jsPDF: {
         unit: "mm",
-        format: [250, allData ? savedScans?.length >= 2 ?  savedScans?.length * 130 : 250 : 250],
+        format: [
+          250,
+          allData
+            ? savedScans?.length >= 2
+              ? savedScans?.length * 130
+              : 250
+            : 250,
+        ],
         orientation: "portrait",
       },
     };
@@ -502,6 +509,8 @@ const Scanner = () => {
         <div className="right">Tap to open</div>
       </div>
     );
+
+  console.log("activeDetail", activeDetail);
 
   const renderExpandedTop = () =>
     activeDetail && (
@@ -613,7 +622,10 @@ const Scanner = () => {
               marginTop: "10px",
             }}
           >
-            <Button className="scanner_List_moreview" onClick={() => toggleWishlist("", false)}>
+            <Button
+              className="scanner_List_moreview"
+              onClick={() => toggleWishlist("", false)}
+            >
               <Heart
                 fill={activeDetail.isInWishList ? "#ff3366" : "none"}
                 color={activeDetail.isInWishList ? "#ff3366" : "black"}
@@ -643,7 +655,10 @@ const Scanner = () => {
                 setDiscoutProductData(activeDetail);
               }}
             >
-              <Percent />
+              <Percent
+                fill={activeDetail.discountType ? "#4caf50" : "none"}
+                color={activeDetail.discountType ? "#4caf50" : "black"}
+              />
             </Button>
 
             <Button
@@ -982,7 +997,10 @@ const Scanner = () => {
                               setDiscoutProductData(data);
                             }}
                           >
-                            <Percent />
+                            <Percent
+                              fill={data.discountType ? "#4caf50" : "none"}
+                              color={data.discountType ? "#4caf50" : "black"}
+                            />
                           </Button>
 
                           <Button
