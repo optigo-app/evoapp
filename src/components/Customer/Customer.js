@@ -269,7 +269,7 @@ const Customer = () => {
     setEndCustomerInfo(customer);
   };
 
-  const handleExitCustomer = async (customer , endCustomer) => {
+  const handleExitCustomer = async (customer, endCustomer) => {
     const Device_Token = sessionStorage.getItem("device_token");
     if (endCustomer) {
       const body = {
@@ -295,6 +295,7 @@ const Customer = () => {
           fontColor: "#fff",
           duration: 5000,
         });
+        sessionStorage.removeItem("AllScanJobData");
         navigate("/feedback");
       }
       setOpen(false);
@@ -344,6 +345,7 @@ const Customer = () => {
         const exitResponse = await CallApi(exitBody);
 
         if (exitResponse?.DT[0]?.stat == 1) {
+          sessionStorage.removeItem("AllScanJobData");
           setStopped((prev) => ({
             ...prev,
             [endCustomnerInfo?.CustomerId]: true,
@@ -585,11 +587,11 @@ const Customer = () => {
               }}
               onClick={() => {
                 if (endReleseCust === "releseCustomer") {
-                  handleExitCustomer(endCustomnerInfo , false);
+                  handleExitCustomer(endCustomnerInfo, false);
                   setCustomerEnd(false);
                 } else {
                   setCustomerEnd(true);
-                  handleExitCustomer(endCustomnerInfo , true);
+                  handleExitCustomer(endCustomnerInfo, true);
                 }
               }}
             >

@@ -10,7 +10,7 @@ import {
   Link,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { House } from "lucide-react";
+import { House, X } from "lucide-react";
 import LoadingBackdrop from "../../Utils/LoadingBackdrop";
 import { showToast } from "../../Utils/Tostify/ToastManager";
 import { CallApi } from "../../API/CallApi/CallApi";
@@ -333,7 +333,26 @@ const AddCustomer = () => {
           style={{ outline: "none" }}
         >
           <Box className="addCustomer_modalbox">
-            <h3>Add New Customer</h3>
+            <p style={{ fontSize: "19px", fontWeight: 600 }}>
+              Add New Customer
+            </p>
+            <Button
+              onClick={() => setOpenModal(false)}
+              style={{
+                position: "absolute",
+                right: "15px",
+                top: "10px",
+                color: "black",
+                margin: "0px",
+                padding: "0px",
+                minWidth: "25px",
+                height: "25px",
+                border: '1px solid black',
+                borderRadius: '20px'
+              }}
+            >
+              <X />
+            </Button>
 
             <TextField
               fullWidth
