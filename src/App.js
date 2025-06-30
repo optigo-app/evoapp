@@ -14,7 +14,7 @@ const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
 const JobScanPage = lazy(() => import("./components/JobScanPage/JobScanPage"));
 
 function App() {
-  //  http://localhost:3000/?&device_token=63J1UX1513PBL6KM
+  //  http://localhost:3000/?&device_token=63J1UX1513PBL6KM 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const device_token = queryParams.get("device_token");
@@ -30,7 +30,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/evo">
       <ToastContainer />
       <Suspense fallback={<LoadingBackdrop />}>
         <Routes>
@@ -48,7 +48,6 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default App;
 
 // basename="/evo"

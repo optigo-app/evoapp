@@ -29,6 +29,8 @@ const PritnModel = ({ activeDetail }) => {
   );
   totals.finalAmount = totals.totalTaxAmount + totals.totalPrice;
 
+  console.log('totalstotals', totals);
+  
   return (
     <div className="printModelMain">
       <div

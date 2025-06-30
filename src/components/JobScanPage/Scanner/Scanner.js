@@ -72,43 +72,62 @@ const Scanner = () => {
     navigator.mediaDevices
       .getUserMedia({ video: true })
       .then((stream) => {
-        stream.getTracks().forEach((track) => track.stop());
+        stream.getTracks().forEach((t) => t.stop());
         setPermissionGranted(true);
       })
-      .catch((err) => {
-        console.error("Camera access denied:", err);
-        setPermissionGranted(false);
-      });
+      .catch(() => setPermissionGranted(false));
   }, []);
 
   useEffect(() => {
     if (!permissionGranted || scannedOnce) return;
-    const interval = setInterval(() => {
-      scan();
-    }, 700);
-    return () => clearInterval(interval);
+    const id = setInterval(scan, 700);
+    return () => clearInterval(id);
   }, [permissionGranted, scannedOnce]);
+
+  const BOX = 220;
 
   const scan = () => {
     const video = webcamRef.current?.video;
     if (!video || video.readyState !== 4 || scannedOnce) return;
 
+    const vW = video.videoWidth;
+    const vH = video.videoHeight;
+
+    /* work in device-pixel pixels so cropping is exact */
+    const boxSize = BOX * window.devicePixelRatio;
+    const startX = Math.round((vW - boxSize) / 2);
+    const startY = Math.round((vH - boxSize) / 2);
+
+    /* draw only the region of interest */
     const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = boxSize;
+    canvas.height = boxSize;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(
+      video,
+      startX,
+      startY,
+      boxSize,
+      boxSize, // src (video) rect
+      0,
+      0,
+      boxSize,
+      boxSize // dst (canvas) rect
+    );
 
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const t0 = performance.now();
+    const imageData = ctx.getImageData(0, 0, boxSize, boxSize);
+    const code = jsQR(imageData.data, boxSize, boxSize, {
+      inversionAttempts: "attemptBoth",
+    });
+    const dt = (performance.now() - t0).toFixed(1);
 
-    const code = jsQR(imageData.data, canvas.width, canvas.height);
     if (code?.data) {
       const jobNo = code.data.trim();
       if (jobNo.length > 3) {
-        setScannedOnce(true); // lock scanning
-        setIsLoading(true); // show loader if needed
-        setQrData(jobNo); // display scanned text
-        addScan(jobNo); // run API call
+        setScannedOnce(true);
+        setIsLoading(true);
+        addScan(jobNo);
       }
     }
   };
@@ -117,16 +136,26 @@ const Scanner = () => {
     setPermissionGranted(null);
     navigator.mediaDevices
       .getUserMedia({ video: true })
-      .then((stream) => {
-        stream.getTracks().forEach((track) => track.stop());
+      .then((s) => {
+        s.getTracks().forEach((t) => t.stop());
         setPermissionGranted(true);
       })
-      .catch(() => {
-        setPermissionGranted(false);
-      });
+      .catch(() => setPermissionGranted(false));
   };
 
   const addScan = async (jobNumber) => {
+    const alreadyScanned = scannedData.some((item) => item.JobNo === jobNumber);
+    if (alreadyScanned) {
+      showToast({
+        message: "Job already scanned",
+        bgColor: "#f1c40f",
+        fontColor: "#000",
+        duration: 4000,
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const Device_Token = sessionStorage.getItem("device_token");
       const body = {
@@ -393,12 +422,13 @@ const Scanner = () => {
 
   const handlePrint = (data, allData) => {
     const savedScans = JSON.parse(sessionStorage.getItem("AllScanJobData"));
-    const matchedArray = savedScans.filter((item) => item.JobNo === data);
+    const matchedArray = savedScans?.filter((item) => item.JobNo === data);
     if (allData) {
       setPrintInfo(savedScans);
     } else {
       setPrintInfo(matchedArray);
     }
+
     const element = document.getElementById("printSection");
     element.style.display = "block";
     const opt = {
@@ -406,7 +436,11 @@ const Scanner = () => {
       filename: "estimate.pdf",
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: "mm", format: [250, 297], orientation: "portrait" },
+      jsPDF: {
+        unit: "mm",
+        format: [250, allData ? savedScans?.length >= 2 ?  savedScans?.length * 130 : 250 : 250],
+        orientation: "portrait",
+      },
     };
 
     html2pdf()
@@ -579,13 +613,12 @@ const Scanner = () => {
               marginTop: "10px",
             }}
           >
-            <div className="scanner_List_moreview">
+            <Button className="scanner_List_moreview" onClick={() => toggleWishlist("", false)}>
               <Heart
                 fill={activeDetail.isInWishList ? "#ff3366" : "none"}
                 color={activeDetail.isInWishList ? "#ff3366" : "black"}
               />
-            </div>
-
+            </Button>
             {/* <IconButton onClick={() => toggleWishlist("", false)}>
               <ShoppingCart
                 className={`btn ${
@@ -593,8 +626,7 @@ const Scanner = () => {
                 }`}
               />
             </IconButton> */}
-
-            <div
+            <Button
               className="scanner_List_moreview"
               onClick={() => toggleCart("", false)}
             >
@@ -602,9 +634,9 @@ const Scanner = () => {
                 fill={activeDetail.isInCartList ? "#4caf50" : "none"}
                 color={activeDetail.isInCartList ? "#4caf50" : "black"}
               />
-            </div>
+            </Button>
 
-            <div
+            <Button
               className="scanner_List_moreview"
               onClick={() => {
                 setDiscountModalOpen(true);
@@ -612,14 +644,14 @@ const Scanner = () => {
               }}
             >
               <Percent />
-            </div>
+            </Button>
 
-            <div
+            <Button
               className="scanner_List_moreview"
               onClick={() => handlePrint(activeDetail?.JobNo, false)}
             >
               <Printer />
-            </div>
+            </Button>
           </div>
         </div>
       </div>
@@ -636,61 +668,59 @@ const Scanner = () => {
         updateScannedAndSession={updateScannedAndSession}
         showToast={showToast}
       />
+
       {/* {scannedData?.length !== 0 && (
         <p className="ProductScanTitle">Product Scanner</p>
       )} */}
+
       {mode === "qr" ? (
-        <div className="qr-scanner-box">
+        <div className="scanner-wrapper" style={{ "--box": `${BOX}px` }}>
           {permissionGranted === null && (
-            <p>🔄 Checking camera permission...</p>
+            <p className="status">🔄 Checking camera…</p>
           )}
           {permissionGranted === false && (
-            <div>
-              <p style={{ color: "red" }}>❌ Camera permission denied.</p>
-              <button onClick={retryPermission} className="btn btn-primary">
-                Retry
-              </button>
-            </div>
+            <p className="status">
+              ❌ Camera permission denied.{" "}
+              <button onClick={retryPermission}>Retry</button>
+            </p>
           )}
+
           {permissionGranted && (
-            <>
+            <div className="camera-container camera-45">
               <Webcam
                 ref={webcamRef}
                 audio={false}
-                videoConstraints={{ facingMode: "environment" }}
+                playsInline
+                muted={true}
+                className="camera-feed"
                 screenshotFormat="image/jpeg"
-                style={{
-                  width: "100%",
-                  maxHeight: "300px",
-                  borderRadius: 10,
-                  objectFit: "cover",
+                videoConstraints={{
+                  facingMode: "environment",
+                  width: { ideal: 1280 },
+                  height: { ideal: 720 },
+                  advanced: [{ zoom: 1.5 }], // 👈 try zoom level 2x
                 }}
               />
-              {/* {isLoading && <p style={{ color: "#3498db" }}>🔍 Scanning...</p>}
-              {qrData && (
-                <p style={{ color: "green", marginTop: 10 }}>
-                  ✅ Scanned: <strong>{qrData}</strong>
-                </p>
-              )} */}
-            </>
+              <div className="overlay">
+                <div className="ov top" />
+                <div className="ov bottom" />
+                <div className="ov left" />
+                <div className="ov right" />
+                <div className="scanner-box" />
+              </div>
+            </div>
           )}
-          {/* <QrReader
-            constraints={{ facingMode: "environment" }}
-            scanDelay={100}
-            onResult={(result, error) => {
-              if (result) {
-                const jobNumber = result?.text || "";
-                if (jobNumber.length > 3) {
-                  addScan(jobNumber);
-                }
-              }
-              if (error) {
-                console.error("QR Scan Error:", error);
-              }
-            }}
-            videoStyle={{ width: "100%", borderRadius: 8 }}
-            style={{ width: "100%" }}
-          /> */}
+
+          {/* feedback below the camera */}
+          {/* {isLoading && <p className="status">Scanning…</p>} */}
+          {error && (
+            <p className="status" style={{ color: "#ff6961" }}>
+              {error}
+            </p>
+          )}
+          {/* <h1 className="status">
+            Last scan: <strong>{activeDetail?.JobNo}</strong>
+          </h1> */}
         </div>
       ) : mode == "AllScanItem" ? (
         <div></div>
@@ -925,7 +955,7 @@ const Scanner = () => {
                             marginTop: "10px",
                           }}
                         >
-                          <div
+                          <Button
                             className="scanner_List_moreview"
                             onClick={() => toggleWishlist(data, true)}
                           >
@@ -933,9 +963,9 @@ const Scanner = () => {
                               fill={data.isInWishList ? "#ff3366" : "none"}
                               color={data.isInWishList ? "#ff3366" : "black"}
                             />
-                          </div>
+                          </Button>
 
-                          <div
+                          <Button
                             className="scanner_List_moreview"
                             onClick={() => toggleCart(data, true)}
                           >
@@ -943,9 +973,9 @@ const Scanner = () => {
                               fill={data.isInCartList ? "#4caf50" : "none"}
                               color={data.isInCartList ? "#4caf50" : "black"}
                             />
-                          </div>
+                          </Button>
 
-                          <div
+                          <Button
                             className="scanner_List_moreview"
                             onClick={() => {
                               setDiscountModalOpen(true);
@@ -953,14 +983,14 @@ const Scanner = () => {
                             }}
                           >
                             <Percent />
-                          </div>
+                          </Button>
 
-                          <div
+                          <Button
                             className="scanner_List_moreview"
                             onClick={() => handlePrint(data?.JobNo, false)}
                           >
                             <Printer />
-                          </div>
+                          </Button>
                         </div>
                       </div>
                     )}
