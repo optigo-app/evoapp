@@ -286,7 +286,7 @@ const DiscountModal = ({
           >
             Save
           </Button>
-          <Button
+          {/* <Button
             onClick={handleApplyDiscount}
             style={{
               backgroundColor: "#5e08b6",
@@ -294,7 +294,7 @@ const DiscountModal = ({
             }}
           >
             Add to Cart
-          </Button>
+          </Button> */}
         </Stack>
       </Box>
     </Modal>
