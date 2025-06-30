@@ -32,7 +32,13 @@ import {
 } from "react-icons/ai";
 import { CallApi } from "../../API/CallApi/CallApi";
 import LoadingBackdrop from "../../Utils/LoadingBackdrop";
-import { AlignJustify, CirclePlus, CircleUser, Plus } from "lucide-react";
+import {
+  AlignJustify,
+  CirclePlus,
+  CircleUser,
+  Plus,
+  RotateCcw,
+} from "lucide-react";
 import { showToast } from "../../Utils/Tostify/ToastManager";
 import CustomAvatar from "../../Utils/avatar";
 import logo from "../../assests/80-40.png";
@@ -201,6 +207,17 @@ const Customer = () => {
   };
 
   const filteredData = result.length > 0 ? result : mainData;
+
+  useEffect(() => {
+    const runningCustomer = filteredData?.find(
+      (cust) => cust.IsLockTimer === 2
+    );
+    if (runningCustomer) {
+      setExpandedCustomerId(runningCustomer.CustomerId);
+    } else {
+      setExpandedCustomerId(null);
+    }
+  }, [filteredData]);
 
   const handleClickStatus = async (customer) => {
     if (customer?.IsLockTimer == 1) {
@@ -658,13 +675,13 @@ const Customer = () => {
             >
               <Plus />
             </Button>
-            {/* <Button
-              className="AddCustomer_Btn"
-              onClick={() => navigate("/Profile")}
+            <Button
+              className="AddCustomer_refresh_Btn"
+              onClick={GetCustomerData}
               variant="contained"
             >
-              <CircleUser />
-            </Button> */}
+              <RotateCcw />
+            </Button>
           </div>
         </div>
       </div>

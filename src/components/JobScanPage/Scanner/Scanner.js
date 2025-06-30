@@ -613,7 +613,7 @@ const Scanner = () => {
               marginTop: "10px",
             }}
           >
-            <Button className="scanner_List_moreview">
+            <Button className="scanner_List_moreview" onClick={() => toggleWishlist("", false)}>
               <Heart
                 fill={activeDetail.isInWishList ? "#ff3366" : "none"}
                 color={activeDetail.isInWishList ? "#ff3366" : "black"}
