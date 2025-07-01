@@ -3,9 +3,6 @@ import "./PritnModel.scss";
 
 const PritnModel = ({ activeDetail }) => {
   console.log("activeDetail", activeDetail);
-  const productPrintInfo = JSON.parse(
-    sessionStorage.getItem("productPrintInfo")
-  );
   const userInfo = JSON.parse(sessionStorage.getItem("profileData"));
   const today = new Date();
   const formattedDate = today
@@ -40,13 +37,12 @@ const PritnModel = ({ activeDetail }) => {
           alignItems: "center",
         }}
       >
-        <p className="P_toptitle">{productPrintInfo?.companyname}</p>
+        <p className="P_toptitle">{userInfo?.CompanyFullName}</p>
         <p className="p_address">
-          {productPrintInfo?.addressline1} {productPrintInfo?.addressline2}{" "}
-          {productPrintInfo?.addressline3}
+          {userInfo?.CompanyAddress} {userInfo?.CompanyAddress2}{" "}
         </p>
-        <p className="p_city">{productPrintInfo?.city}</p>
-        <p className="p_gst">{productPrintInfo?.GSTNo}</p>
+        <p className="p_city">{userInfo?.CompanyCity}-{userInfo?.CompanyPinCode}</p>
+        <p className="p_gst">{userInfo?.GSTNo}</p>
         <p className="p_estimate">Estimate</p>
       </div>
       <div className="info_section_main">
@@ -85,7 +81,7 @@ const PritnModel = ({ activeDetail }) => {
           }}
         >
           <p className="p_info_title">Phone Number:</p>
-          <p className="p_info_value">{userInfo?.MobileNo}</p>
+          <p className="p_info_value">{userInfo?.CompanyTellNo}</p>
         </div>
       </div>
 
@@ -194,7 +190,7 @@ const PritnModel = ({ activeDetail }) => {
               borderBottom: "1px solid lightgray",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "13px" }}>Total</p>
+            <p style={{ margin: "2px", fontSize: "11px" }}>Total</p>
             <p
               style={{
                 margin: "2px",
@@ -214,7 +210,7 @@ const PritnModel = ({ activeDetail }) => {
               borderBottom: "1px solid lightgray",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "13px" }}>New Tax</p>
+            <p style={{ margin: "2px", fontSize: "11px" }}>New Tax</p>
             <p
               style={{
                 margin: "2px",
@@ -234,7 +230,7 @@ const PritnModel = ({ activeDetail }) => {
               borderBottom: "1px solid lightgray",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "13px" }}>Final Amount</p>
+            <p style={{ margin: "2px", fontSize: "11px" }}>Final Amount</p>
             <p
               style={{
                 margin: "2px",

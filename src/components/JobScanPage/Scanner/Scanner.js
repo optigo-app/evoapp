@@ -289,8 +289,8 @@ const Scanner = () => {
               CustomerId: activeCustomer?.CustomerId || 0,
               IsWishList: 1,
               IsVisitor: activeCustomer?.IsVisitor || 0,
-              DiscountOnId: 0,
-              Discount: 0,
+              DiscountOnId: current?.discountType == "flat" ? 1 : 0,
+              Discount: current?.discountValue ?? 0,
             },
           ]),
         };
@@ -531,7 +531,7 @@ const Scanner = () => {
                     : "showData_price_deatil"
                 }
               >
-                ₹ {activeDetail.price}
+                ₹ {activeDetail.price?.toFixed(2)}
               </span>
               {activeDetail?.discountedPrice && (
                 <div>
@@ -651,8 +651,24 @@ const Scanner = () => {
             <Button
               className="scanner_List_moreview"
               onClick={() => {
-                setDiscountModalOpen(true);
-                setDiscoutProductData(activeDetail);
+                if (activeDetail.isInCartList) {
+                  showToast({
+                    message: "Discount applied. Item added to cart.",
+                    bgColor: "red",
+                    fontColor: "#fff",
+                    duration: 4000,
+                  });
+                } else if (activeDetail.isInWishList) {
+                  showToast({
+                    message: "Discount applied. Item added to wishlist.",
+                    bgColor: "red",
+                    fontColor: "#fff",
+                    duration: 4000,
+                  });
+                } else {
+                  setDiscountModalOpen(true);
+                  setDiscoutProductData(activeDetail);
+                }
               }}
             >
               <Percent
@@ -821,7 +837,7 @@ const Scanner = () => {
                                 : "showData_price_deatil"
                             }
                           >
-                            ₹ {data.price}
+                            ₹ {data.price?.toFixed(2)}
                           </h4>
 
                           {data?.discountedPrice && (

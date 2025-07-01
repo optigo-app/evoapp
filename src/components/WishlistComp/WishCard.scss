@@ -65,10 +65,26 @@
         font-size: 14px;
       }
 
+      .old-price-withoutdiscount{
+        color: $placeholderColor;
+        font-size: 14px;
+      }
+
       .new-price {
         color: $heightlightColor;
         font-weight: 600;
         font-size: 15px;
+      }
+
+      .newprice_save{
+        font-weight: 600;
+        color: green;
+        font-size: 12px;
+      }
+       .tax-amount {
+        font-size: 11px;
+        color: $text2ndColor;
+        font-weight: normal;
       }
     }
 

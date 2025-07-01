@@ -89,7 +89,6 @@ const Customer = () => {
   const [endCustomnerInfo, setEndCustomerInfo] = useState();
   const [endReleseCust, setEndReleseCust] = useState();
   const [loading, setLoading] = useState(false);
-  const [customerEnd, setCustomerEnd] = useState(false);
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [tabsFixed, setTabsFixed] = useState(false);
@@ -98,6 +97,7 @@ const Customer = () => {
   const [expandedCustomerId, setExpandedCustomerId] = useState(null);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const navigate = useNavigate();
 
   const GetProfileData = async () => {
     const Device_Token = sessionStorage.getItem("device_token");
@@ -115,38 +115,11 @@ const Customer = () => {
     };
 
     const response = await CallApi(body);
-    if (response?.DT) {
+    if (response?.DT[0]?.stat == 1) {
       sessionStorage.setItem("profileData", JSON.stringify(response.DT[0]));
       setAllProfileData(response.DT[0]);
     }
   };
-
-  useEffect(() => {
-    const storedProfileData = sessionStorage.getItem("profileData");
-    if (storedProfileData) {
-      setAllProfileData(JSON.parse(storedProfileData));
-    } else {
-      GetProfileData();
-    }
-  }, []);
-
-  const toggleExpand = (id) => {
-    setExpandedCustomerId((prev) => (prev === id ? null : id));
-  };
-
-  const toggleDrawer = (newOpen) => () => {
-    setOpenMenu(newOpen);
-  };
-
-  const HandleDeleteAccountOpen = () => {
-    setOpenDeleteDialog(true);
-  };
-
-  const handleDeleteCancel = () => {
-    setOpenDeleteDialog(false);
-  };
-
-  const navigate = useNavigate();
 
   const GetCustomerData = async () => {
     setLoading(true);
@@ -167,6 +140,13 @@ const Customer = () => {
     const response = await CallApi(body);
     setMainData(response?.DT || []);
     setLoading(false);
+
+    const storedProfileData = sessionStorage.getItem("profileData");
+    if (storedProfileData) {
+      setAllProfileData(JSON.parse(storedProfileData));
+    } else {
+      GetProfileData();
+    }
   };
 
   useEffect(() => {
@@ -191,6 +171,22 @@ const Customer = () => {
 
     return () => clearInterval(interval);
   }, [mainData, stopped]);
+
+  const toggleExpand = (id) => {
+    setExpandedCustomerId((prev) => (prev === id ? null : id));
+  };
+
+  const toggleDrawer = (newOpen) => () => {
+    setOpenMenu(newOpen);
+  };
+
+  const HandleDeleteAccountOpen = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -288,6 +284,7 @@ const Customer = () => {
 
   const handleExitCustomer = async (customer, endCustomer) => {
     const Device_Token = sessionStorage.getItem("device_token");
+    
     if (endCustomer) {
       const body = {
         Mode: "EndSession",
@@ -605,9 +602,7 @@ const Customer = () => {
               onClick={() => {
                 if (endReleseCust === "releseCustomer") {
                   handleExitCustomer(endCustomnerInfo, false);
-                  setCustomerEnd(false);
                 } else {
-                  setCustomerEnd(true);
                   handleExitCustomer(endCustomnerInfo, true);
                 }
               }}
@@ -666,7 +661,7 @@ const Customer = () => {
               gap: "3px",
               width: "33.33%",
               justifyContent: "flex-end",
-              paddingRight: '7px'
+              paddingRight: "7px",
             }}
           >
             <Button
@@ -774,7 +769,7 @@ const Customer = () => {
                               className="expand-icon"
                               onClick={() => handleClickStatus(cust)}
                               style={{
-                                padding: "0px",
+                                padding: "4px",
                                 borderRadius: "3px",
                                 width: "30px",
                                 display: "flex",
@@ -805,6 +800,7 @@ const Customer = () => {
                             onClick={(e) => {
                               e.stopPropagation();
                               handleStop(cust);
+                              setEndReleseCust("releseCustomer");
                             }}
                             style={{
                               color: "red",

@@ -2,8 +2,7 @@
 
 .Cart-card {
   border-radius: 8px !important;
-  box-shadow:
-    rgba(0, 0, 0, 0.01) 0px 0px 3px 0px,
+  box-shadow: rgba(0, 0, 0, 0.01) 0px 0px 3px 0px,
     rgba(27, 31, 35, 0.1) 0px 0px 0px 1px !important;
   padding: 10px;
   position: relative;
@@ -65,10 +64,27 @@
         font-size: 14px;
       }
 
+      .old-price-withoutdiscount {
+        color: $placeholderColor;
+        font-size: 14px;
+      }
+
       .new-price {
         color: $heightlightColor;
         font-weight: 600;
         font-size: 15px;
+      }
+
+      .tax-amount {
+        font-size: 11px;
+        color: $text2ndColor;
+        font-weight: normal;
+      }
+
+      .newprice_save {
+        font-weight: 600;
+        color: green;
+        font-size: 12px;
       }
     }
 

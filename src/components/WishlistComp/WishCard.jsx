@@ -12,6 +12,9 @@ const WishlistCard = ({
   handleWishToCart,
   handlePrint
 }) => {
+
+  console.log('wishlistItems', wishlistItems);
+
   return (
     <Card className="Wishlist-card">
       <Box className="card-content">
@@ -34,23 +37,30 @@ const WishlistCard = ({
             {wishlistItems?.TitalLine}
           </Typography>
 
+          {/* {wishlistItems?.Discount !== 0 && */}
           <Box className="price-section">
-            <Typography className="old-price">
+            <Typography className={wishlistItems?.Discount === 0 ? "old-price-withoutdiscount" : "old-price" }>
               ₹{parseFloat(wishlistItems?.Amount).toFixed(2).toLocaleString()}
             </Typography>
-            <Typography className="new-price">
-              ₹{parseFloat(wishlistItems?.FinalAmount).toFixed(2).toLocaleString()}
-            </Typography>
+            {wishlistItems?.Discount !== 0 && <Typography className="newprice_save">
+              Save ₹{parseFloat(wishlistItems?.DiscountAmount).toFixed(2).toLocaleString()}
+            </Typography>}
           </Box>
+          {/* } */}
           <Box className="extra-price-details">
             {parseFloat(wishlistItems?.DiscountAmount) > 0 && (
               <Typography className="discount-amount">
-                Discount: ₹{parseFloat(wishlistItems?.DiscountAmount).toFixed(2).toLocaleString()}
+                Offered Price: ₹{parseFloat(wishlistItems?.TaxbleAmount).toFixed(2).toLocaleString()}
               </Typography>
             )}
+          </Box>
+          <Box className="price-section">
+            <Typography className="new-price">
+              ₹{parseFloat(wishlistItems?.FinalAmount).toFixed(2).toLocaleString()}
+            </Typography>
             {parseFloat(wishlistItems?.TotalTaxAmount) > 0 && (
               <Typography className="tax-amount">
-                Tax: ₹{parseFloat(wishlistItems?.TotalTaxAmount).toFixed(2).toLocaleString()}
+                (Inc.Tax: ₹{parseFloat(wishlistItems?.TotalTaxAmount).toFixed(2).toLocaleString()})
               </Typography>
             )}
           </Box>

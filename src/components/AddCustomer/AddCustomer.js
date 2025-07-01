@@ -280,7 +280,7 @@ const AddCustomer = () => {
 
           <div style={{ marginTop: "30px" }}>
             <p style={{ margin: "0px", fontSize: "14px", fontWeight: 600 }}>
-              Pleese Enter Valid Mobile Or Email
+              Please Enter Valid Mobile Or Email
             </p>
             <TextField
               fullWidth

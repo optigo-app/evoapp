@@ -29,22 +29,27 @@ const CartCard = ({ cartItem, handleOpenDialog }) => {
           </Typography>
 
           <Box className="price-section">
-            <Typography className="old-price">
-            ₹{parseFloat(cartItem?.Amount).toFixed(2).toLocaleString()}
+            <Typography className={cartItem?.Discount === 0 ? "old-price-withoutdiscount" : "old-price"}>
+              ₹{parseFloat(cartItem?.Amount).toFixed(2).toLocaleString()}
             </Typography>
-            <Typography className="new-price">
-            ₹{parseFloat(cartItem?.FinalAmount).toFixed(2).toLocaleString()}
-            </Typography>
+            {cartItem?.Discount !== 0 && <Typography className="newprice_save">
+              Save ₹{parseFloat(cartItem?.DiscountAmount).toFixed(2).toLocaleString()}
+            </Typography>}
           </Box>
           <Box className="extra-price-details">
             {parseFloat(cartItem?.DiscountAmount) > 0 && (
               <Typography className="discount-amount">
-                Discount:  ₹{parseFloat(cartItem?.DiscountAmount).toFixed(2).toLocaleString()}
+                Offered Price: ₹{parseFloat(cartItem?.TaxbleAmount).toFixed(2).toLocaleString()}
               </Typography>
             )}
+          </Box>
+          <Box className="price-section">
+            <Typography className="new-price">
+              ₹{parseFloat(cartItem?.FinalAmount).toFixed(2).toLocaleString()}
+            </Typography>
             {parseFloat(cartItem?.TotalTaxAmount) > 0 && (
               <Typography className="tax-amount">
-                Tax:  ₹{parseFloat(cartItem?.TotalTaxAmount).toFixed(2).toLocaleString()}
+                (Inc.Tax: ₹{parseFloat(cartItem?.TotalTaxAmount).toFixed(2).toLocaleString()})
               </Typography>
             )}
           </Box>
