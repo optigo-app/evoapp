@@ -252,10 +252,11 @@
       margin: 0px;
       color: $titleColor;
       font-family: $font-family;
+      line-height: 14px;
     }
 
     .info_main_section_span {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
       font-family: $font-family;
       color: $titleColor;
@@ -305,12 +306,13 @@
         .info_main_section {
           display: flex;
           justify-content: space-between;
+          line-height: 14px;
         }
 
         .info_main_section_span {
           color: rgb(24 23 23 / 86%);
           font-weight: 600;
-          font-size: 14px !important;
+          font-size: 12px !important;
         }
 
         .weights {
@@ -467,7 +469,7 @@
 /* root container */
 .scanner-wrapper {
   width: 95vw;
-  background: #000;
+  // background: #000;
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -478,6 +480,11 @@
   margin: 12px 0;
   font-size: 0.95rem;
   text-align: center;
+  color: black;
+
+  button{
+    text-decoration: underline;
+  }
 }
 .camera-container {
   width: 100%;

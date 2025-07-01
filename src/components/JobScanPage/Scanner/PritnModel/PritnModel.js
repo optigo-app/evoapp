@@ -26,8 +26,8 @@ const PritnModel = ({ activeDetail }) => {
   );
   totals.finalAmount = totals.totalTaxAmount + totals.totalPrice;
 
-  console.log('totalstotals', totals);
-  
+  console.log("totalstotals", totals);
+
   return (
     <div className="printModelMain">
       <div
@@ -41,7 +41,9 @@ const PritnModel = ({ activeDetail }) => {
         <p className="p_address">
           {userInfo?.CompanyAddress} {userInfo?.CompanyAddress2}{" "}
         </p>
-        <p className="p_city">{userInfo?.CompanyCity}-{userInfo?.CompanyPinCode}</p>
+        <p className="p_city">
+          {userInfo?.CompanyCity}-{userInfo?.CompanyPinCode}
+        </p>
         <p className="p_gst">{userInfo?.GSTNo}</p>
         <p className="p_estimate">Estimate</p>
       </div>
@@ -118,7 +120,7 @@ const PritnModel = ({ activeDetail }) => {
                   <p className="deatil_value_p">{dataa?.netWeight}</p>
                 </div>
                 <div>
-                  <p className="deatil_totla_p">{dataa?.TotalNetWtPrice}</p>
+                  <p className="deatil_totla_p">{dataa?.TotalMetalCost}</p>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -127,7 +129,7 @@ const PritnModel = ({ activeDetail }) => {
                   <p className="deatil_value_p">{dataa?.DiamondWtP}</p>
                 </div>
                 <div>
-                  <p className="deatil_totla_p">{dataa?.TotalDiamondWtPrice}</p>
+                  <p className="deatil_totla_p">{dataa?.TotalDiamondCost}</p>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -136,18 +138,15 @@ const PritnModel = ({ activeDetail }) => {
                   <p className="deatil_value_p">{dataa?.colorStoneWtP}</p>
                 </div>
                 <div>
-                  <p className="deatil_totla_p">
-                    {dataa?.TotalColosrStoneWtPrice}
-                  </p>
+                  <p className="deatil_totla_p">{dataa?.TotalColorstoneCost}</p>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <div style={{ display: "flex" }}>
-                  <p className="deatilTitle_p">misc wt : </p>
-                  <p className="deatil_value_p">{dataa?.MiscWtP}</p>
+                  <p className="deatilTitle_p">misc wt </p>
                 </div>
                 <div>
-                  <p className="deatil_totla_p">{dataa?.TotalMiscWtPrice}</p>
+                  <p className="deatil_totla_p">{dataa?.TotalMiscCost}</p>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -156,7 +155,7 @@ const PritnModel = ({ activeDetail }) => {
                   <p className="deatil_value_p">{dataa?.MiscWtP}</p>
                 </div>
                 <div>
-                  <p className="deatil_totla_p">{dataa?.TotalMakingWtPrice}</p>
+                  <p className="deatil_totla_p">{dataa?.TotalMakingCost}</p>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -190,17 +189,17 @@ const PritnModel = ({ activeDetail }) => {
               borderBottom: "1px solid lightgray",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "11px" }}>Total</p>
+            <p style={{ margin: "2px", fontSize: "9.5px" }}>Total</p>
             <p
               style={{
                 margin: "2px",
                 minWidth: "120px",
                 display: "flex",
                 justifyContent: "flex-end",
-                fontSize: "11px",
+                fontSize: "10px",
               }}
             >
-              <b>{totals.totalPrice.toFixed(2)}</b>
+              <b>{totals.totalPrice}</b>
             </p>
           </div>
           <div
@@ -210,17 +209,17 @@ const PritnModel = ({ activeDetail }) => {
               borderBottom: "1px solid lightgray",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "11px" }}>New Tax</p>
+            <p style={{ margin: "2px", fontSize: "9.5px" }}>New Tax</p>
             <p
               style={{
                 margin: "2px",
                 minWidth: "120px",
                 display: "flex",
                 justifyContent: "flex-end",
-                fontSize: "11px",
+                fontSize: "10px",
               }}
             >
-              <b>{totals.totalTaxAmount.toFixed(2)}</b>
+              <b>{totals.totalTaxAmount}</b>
             </p>
           </div>
           <div
@@ -230,17 +229,17 @@ const PritnModel = ({ activeDetail }) => {
               borderBottom: "1px solid lightgray",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "11px" }}>Final Amount</p>
+            <p style={{ margin: "2px", fontSize: "9.5px" }}>Final Amount</p>
             <p
               style={{
                 margin: "2px",
                 minWidth: "120px",
                 display: "flex",
                 justifyContent: "flex-end",
-                fontSize: "11px",
+                fontSize: "10px",
               }}
             >
-              <b>{totals.finalAmount.toFixed(2)}</b>
+              <b>{totals.finalAmount}</b>
             </p>
           </div>
         </div>

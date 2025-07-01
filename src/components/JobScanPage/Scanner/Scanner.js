@@ -67,6 +67,7 @@ const Scanner = () => {
   const [qrData, setQrData] = useState(null);
   const [scannedOnce, setScannedOnce] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(null);
+  const [permissionGrantedChek, setPermissionGrantedChek] = useState(true);
 
   useEffect(() => {
     navigator.mediaDevices
@@ -74,8 +75,12 @@ const Scanner = () => {
       .then((stream) => {
         stream.getTracks().forEach((t) => t.stop());
         setPermissionGranted(true);
+        setPermissionGrantedChek(false);
       })
-      .catch(() => setPermissionGranted(false));
+      .catch(() => {
+        setPermissionGranted(false);
+        setPermissionGrantedChek(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -160,9 +165,19 @@ const Scanner = () => {
       const Device_Token = sessionStorage.getItem("device_token");
       const body = {
         Mode: "GetScanJobData",
-        Token: `"${Device_Token}"`,
-        ReqData: `[{"ForEvt":"GetScanJobData","DeviceToken":"${Device_Token}","AppId":"3","JobNo":"${jobNumber}"}]`,
+        Token: Device_Token,
+        ReqData: JSON.stringify([
+          {
+            ForEvt: "GetScanJobData",
+            DeviceToken: Device_Token,
+            AppId: 3,
+            JobNo: jobNumber,
+            CustomerId: activeCustomer?.CustomerId,
+            IsVisitor: 0,
+          },
+        ]),
       };
+
       const response = await CallApi(body);
       const jobData = response?.DT[0];
       setIsLoading(false);
@@ -177,8 +192,7 @@ const Scanner = () => {
       const formatted = {
         JobNo: jobData.JobNo,
         designNo: jobData.DesignNo,
-        price: jobData.Amount,
-        price: jobData.Amount,
+        price: (jobData.Amount)?.toFixed(0),
         metal: jobData.TotalMetalCost,
         diamoond: jobData.TotalDiamondCost,
         colorStone: jobData.TotalColorstoneCost,
@@ -189,17 +203,29 @@ const Scanner = () => {
         CartListId: jobData.CartListId,
         WishListId: jobData.WishListId,
         Category: jobData?.Category,
-        DiamondWtP: `
-        ${jobData?.DiaWt !== 0 ? +jobData.DiaWt + "ct" : ""}${
-          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs + "pc" : ""
-        }`,
-        colorStoneWtP: `
-        ${jobData?.CsWt !== 0 ? +jobData.CsWt + "ct" : ""}${
-          jobData?.CsPcs !== 0 ? " / " + jobData.CsPcs + "pc" : ""
-        }`,
-        MiscWtP: `${jobData?.DiaWt !== 0 ? +jobData.DiaWt + "gm" : ""}${
-          jobData?.DiaPcs !== 0 ? " / " + jobData.DiaPcs + "pc" : ""
-        }`,
+        TotalMetalCost: jobData?.TotalMetalCost?.toFixed(0),
+        TotalDiamondCost: jobData?.TotalDiamondCost?.toFixed(0),
+        TotalColorstoneCost: jobData?.TotalColorstoneCost?.toFixed(0),
+        TotalMiscCost: jobData?.TotalMiscCost?.toFixed(0),
+        TotalMakingCost: (jobData?.TotalMakingCost + jobData?.TotalDiamondhandlingCost + jobData?.TotalOtherCost)?.toFixed(0)  ,
+        DiamondWtP:
+          jobData?.DiaWt > 0 || jobData?.DiaPcs > 0
+            ? `${jobData.DiaWt > 0 ? jobData.DiaWt + "ct" : ""}${
+                jobData.DiaWt > 0 && jobData.DiaPcs > 0 ? " / " : ""
+              }${jobData.DiaPcs > 0 ? jobData.DiaPcs + "pc" : ""}`
+            : null,
+        colorStoneWtP:
+          jobData?.CsWt > 0 || jobData?.CsPcs > 0
+            ? `${jobData?.CsWt > 0 ? jobData.CsWt + "ct" : ""}${
+                jobData?.CsWt > 0 && jobData?.CsPcs > 0 ? " / " : ""
+              }${jobData?.CsPcs > 0 ? jobData.CsPcs + "pc" : ""}`
+            : null,
+        MiscWtP:
+          jobData?.MiscWt > 0 || jobData?.MiscPcs > 0
+            ? `${jobData?.MiscWt > 0 ? jobData.MiscWt + "gm" : ""}${
+                jobData?.MiscWt > 0 && jobData?.MiscPcs > 0 ? " / " : ""
+              }${jobData?.MiscPcs > 0 ? jobData.MiscPcs + "pc" : ""}`
+            : null,
         MetalTypeTitle: `${
           jobData?.MetalPurity +
           " " +
@@ -531,7 +557,7 @@ const Scanner = () => {
                     : "showData_price_deatil"
                 }
               >
-                ₹ {activeDetail.price?.toFixed(2)}
+                ₹ {activeDetail.price}
               </span>
               {activeDetail?.discountedPrice && (
                 <div>
@@ -575,12 +601,14 @@ const Scanner = () => {
                 }}
               >
                 <div style={{ display: "flex" }}>
-                  <div style={{ width: "40%" }}>
-                    <p className="info_main_section">Dia. WT: </p>
-                    <span className="info_main_section_span">
-                      {activeDetail.DiamondWtP}{" "}
-                    </span>
-                  </div>
+                  {activeDetail.DiamondWtP && (
+                    <div style={{ width: "40%" }}>
+                      <p className="info_main_section">Dia. WT: </p>
+                      <span className="info_main_section_span">
+                        {activeDetail.DiamondWtP}{" "}
+                      </span>
+                    </div>
+                  )}
                   <div style={{ width: "30%" }}>
                     <p className="info_main_section">GWT : </p>
                     <span className="info_main_section_span">
@@ -598,18 +626,22 @@ const Scanner = () => {
                 </div>
 
                 <div style={{ display: "flex" }}>
-                  <div style={{ width: "40%" }}>
-                    <p className="info_main_section">CS WT : </p>
-                    <span className="info_main_section_span">
-                      {activeDetail.colorStoneWtP}
-                    </span>
-                  </div>
-                  <div style={{ width: "40%" }}>
-                    <p className="info_main_section">Misc: </p>
-                    <span className="info_main_section_span">
-                      {activeDetail.MiscWtP}
-                    </span>
-                  </div>
+                  {activeDetail.colorStoneWtP && (
+                    <div style={{ width: "40%" }}>
+                      <p className="info_main_section">CS WT : </p>
+                      <span className="info_main_section_span">
+                        {activeDetail.colorStoneWtP}
+                      </span>
+                    </div>
+                  )}
+                  {activeDetail.MiscWtP && (
+                    <div style={{ width: "45%" }}>
+                      <p className="info_main_section">Misc: </p>
+                      <span className="info_main_section_span">
+                        {activeDetail.MiscWtP}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -707,7 +739,7 @@ const Scanner = () => {
       {mode === "qr" ? (
         <div className="scanner-wrapper" style={{ "--box": `${BOX}px` }}>
           {permissionGranted === null && (
-            <p className="status">🔄 Checking camera…</p>
+            <LoadingBackdrop isLoading={permissionGrantedChek} />
           )}
           {permissionGranted === false && (
             <p className="status">
@@ -837,7 +869,7 @@ const Scanner = () => {
                                 : "showData_price_deatil"
                             }
                           >
-                            ₹ {data.price?.toFixed(2)}
+                            ₹ {data.price}
                           </h4>
 
                           {data?.discountedPrice && (
@@ -940,12 +972,20 @@ const Scanner = () => {
                               }}
                             >
                               <div style={{ display: "flex" }}>
-                                <div style={{ width: "40%" }}>
-                                  <p className="info_main_section">Dia. WT: </p>
-                                  <span className="info_main_section_span">
-                                    {data.DiamondWtP}
-                                  </span>
-                                </div>
+                                {console.log(
+                                  "data.DiamondWtPdata.DiamondWtP",
+                                  data.DiamondWtP
+                                )}
+                                {data.DiamondWtP && (
+                                  <div style={{ width: "40%" }}>
+                                    <p className="info_main_section">
+                                      Dia. WT:{" "}
+                                    </p>
+                                    <span className="info_main_section_span">
+                                      {data.DiamondWtP}
+                                    </span>
+                                  </div>
+                                )}
                                 <div style={{ width: "30%" }}>
                                   <p className="info_main_section">GWT : </p>
                                   <span className="info_main_section_span">
@@ -963,18 +1003,24 @@ const Scanner = () => {
                               </div>
 
                               <div style={{ display: "flex" }}>
-                                <div style={{ width: "40%" }}>
-                                  <p className="info_main_section">CS WT : </p>
-                                  <span className="info_main_section_span">
-                                    {data.colorStoneWtP}
-                                  </span>
-                                </div>
-                                <div style={{ width: "40%" }}>
-                                  <p className="info_main_section">Misc: </p>
-                                  <span className="info_main_section_span">
-                                    {data.MiscWtP}
-                                  </span>
-                                </div>
+                                {data?.colorStoneWtP && (
+                                  <div style={{ width: "40%" }}>
+                                    <p className="info_main_section">
+                                      CS WT :{" "}
+                                    </p>
+                                    <span className="info_main_section_span">
+                                      {data.colorStoneWtP}
+                                    </span>
+                                  </div>
+                                )}
+                                {data?.MiscWtP && (
+                                  <div style={{ width: "45%" }}>
+                                    <p className="info_main_section">Misc: </p>
+                                    <span className="info_main_section_span">
+                                      {data.MiscWtP}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>

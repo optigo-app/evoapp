@@ -30,7 +30,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter >
       <ToastContainer />
       <Suspense fallback={<LoadingBackdrop />}>
         <Routes>
@@ -51,3 +51,4 @@ function App() {
 export default App;
 
 // basename="/evo"
+  // "homepage": "/evo",

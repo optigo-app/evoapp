@@ -40,27 +40,27 @@ const WishlistCard = ({
           {/* {wishlistItems?.Discount !== 0 && */}
           <Box className="price-section">
             <Typography className={wishlistItems?.Discount === 0 ? "old-price-withoutdiscount" : "old-price" }>
-              ₹{parseFloat(wishlistItems?.Amount).toFixed(2).toLocaleString()}
+              ₹{parseFloat(wishlistItems?.Amount).toFixed(0).toLocaleString()}
             </Typography>
             {wishlistItems?.Discount !== 0 && <Typography className="newprice_save">
-              Save ₹{parseFloat(wishlistItems?.DiscountAmount).toFixed(2).toLocaleString()}
+              Save ₹{parseFloat(wishlistItems?.DiscountAmount).toFixed(0).toLocaleString()}
             </Typography>}
           </Box>
           {/* } */}
           <Box className="extra-price-details">
             {parseFloat(wishlistItems?.DiscountAmount) > 0 && (
               <Typography className="discount-amount">
-                Offered Price: ₹{parseFloat(wishlistItems?.TaxbleAmount).toFixed(2).toLocaleString()}
+                Offered Price: ₹{parseFloat(wishlistItems?.TaxbleAmount).toFixed(0).toLocaleString()}
               </Typography>
             )}
           </Box>
           <Box className="price-section">
             <Typography className="new-price">
-              ₹{parseFloat(wishlistItems?.FinalAmount).toFixed(2).toLocaleString()}
+              ₹{parseFloat(wishlistItems?.FinalAmount).toFixed(0).toLocaleString()}
             </Typography>
             {parseFloat(wishlistItems?.TotalTaxAmount) > 0 && (
               <Typography className="tax-amount">
-                (Inc.Tax: ₹{parseFloat(wishlistItems?.TotalTaxAmount).toFixed(2).toLocaleString()})
+                (Inc.Tax: ₹{parseFloat(wishlistItems?.TotalTaxAmount).toFixed(0).toLocaleString()})
               </Typography>
             )}
           </Box>

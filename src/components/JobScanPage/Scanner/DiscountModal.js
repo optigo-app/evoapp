@@ -83,7 +83,7 @@ const DiscountModal = ({
       const diff = originalPrice - directPrice;
       if (diff >= 0) {
         setDiscountValue(diff);
-        setCalculatedPrice(directPrice.toFixed(2));
+        setCalculatedPrice(directPrice.toFixed(0));
       } else {
         setCalculatedPrice(originalPrice);
         setDiscountValue(0);
@@ -98,7 +98,7 @@ const DiscountModal = ({
         finalPrice = originalPrice - (originalPrice * discount) / 100;
       }
 
-      setCalculatedPrice(finalPrice > 0 ? finalPrice.toFixed(2) : 0);
+      setCalculatedPrice(finalPrice > 0 ? finalPrice.toFixed(0) : 0);
     }
   }, [discountValue, discountType, originalPrice, directPriceInput]);
 

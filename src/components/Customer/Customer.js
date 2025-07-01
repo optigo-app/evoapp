@@ -284,7 +284,7 @@ const Customer = () => {
 
   const handleExitCustomer = async (customer, endCustomer) => {
     const Device_Token = sessionStorage.getItem("device_token");
-    
+
     if (endCustomer) {
       const body = {
         Mode: "EndSession",
@@ -568,8 +568,8 @@ const Customer = () => {
           <div>
             <p style={{ textAlign: "center" }}>
               {endReleseCust == "releseCustomer"
-                ? "Confirm exit? Customer will be removed from list.”"
-                : "Do you want to end this customer’s session? Customer stays in available inlist"}
+                ? "Confirm exit? Customer will be removed from list."
+                : "Do you want to end this customer’s session? Customer stays in available in list."}
             </p>
           </div>
           <Stack
