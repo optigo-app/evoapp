@@ -1,8 +1,28 @@
 import React from "react";
 import "./PritnModel.scss";
+import { ToWords } from "to-words";
 
 const PritnModel = ({ activeDetail }) => {
-  console.log("activeDetail", activeDetail);
+  const toWords = new ToWords({
+    localeCode: "en-IN", // Indian English
+    converterOptions: {
+      currency: true, // treat number as money
+      ignoreDecimal: false, // keep paise
+      doNotAddOnly: false, // add “only” at the end
+      currencyOptions: {
+        // optional – override defaults
+        name: "Rupee",
+        plural: "Rupees",
+        symbol: "₹",
+        fractionalUnit: {
+          name: "Paise",
+          plural: "Paise",
+        },
+      },
+    },
+  });
+
+  console.log("activeDetailactiveDetail", activeDetail);
   const userInfo = JSON.parse(sessionStorage.getItem("profileData"));
   const today = new Date();
   const formattedDate = today
@@ -15,19 +35,18 @@ const PritnModel = ({ activeDetail }) => {
 
   const totals = (activeDetail || []).reduce(
     (acc, item) => {
-      acc.totalTaxAmount += item.taxAmount || 0;
-      acc.totalPrice += item.price || 0;
+      acc.totalTaxAmount += Number(item.taxAmount) || 0;
+      acc.totalPrice += Number(item.price) || 0;
+      acc.allTotalDiscount += Number(item.discountValue) || 0;
       return acc;
     },
     {
       totalTaxAmount: 0,
       totalPrice: 0,
+      allTotalDiscount: 0,
     }
   );
   totals.finalAmount = totals.totalTaxAmount + totals.totalPrice;
-
-  console.log("totalstotals", totals);
-
   return (
     <div className="printModelMain">
       <div
@@ -51,38 +70,29 @@ const PritnModel = ({ activeDetail }) => {
         <div
           style={{
             display: "flex",
-            borderBottom: "0.5px solid lightgray",
-            borderTop: "0.5px solid lightgray",
-            alignItems: "center",
-            padding: "3px",
-            gap: "5px",
+            justifyContent: "space-between",
+            padding: "0px 5px",
           }}
         >
-          <p className="p_info_title">Date :</p>
-          <p className="p_info_value">{formattedDate}</p>
+          <div style={{ display: "flex", gap: "2px" }}>
+            <p className="p_info_title">Customer name : </p>
+            <p className="p_info_value">
+              {userInfo?.firstname} {userInfo?.lastname}
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: "2px" }}>
+            <p className="p_info_title">Date : </p>
+            <p className="p_info_value">{formattedDate}</p>
+          </div>
         </div>
         <div
           style={{
             display: "flex",
-            borderBottom: "0.5px solid lightgray",
-            padding: "3px",
-            gap: "5px",
+            padding: "0px 5px",
+            gap: "2px",
           }}
         >
-          <p className="p_info_title">Customer Name:</p>
-          <p className="p_info_value">
-            {userInfo?.firstname} {userInfo?.lastname}
-          </p>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            padding: "3px",
-            borderBottom: "0.5px solid lightgray",
-            gap: "5px",
-          }}
-        >
-          <p className="p_info_title">Phone Number:</p>
+          <p className="p_info_title">Phone number : </p>
           <p className="p_info_value">{userInfo?.CompanyTellNo}</p>
         </div>
       </div>
@@ -91,22 +101,42 @@ const PritnModel = ({ activeDetail }) => {
         return (
           <div
             key={index}
-            style={{ borderBottom: "1px solid lightgray", padding: "5px" }}
+            style={{
+              borderBottom: "1px dotted black",
+              padding: "5px",
+              marginTop: "5px",
+            }}
           >
             <div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <p className="deatilTitle_p">Sr# : {index + 1}</p>
-                <p className="deatilTitle_p">Job# : {dataa?.JobNo}</p>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "2px" }}
+                >
+                  <p className="deatil_title_view">Job# : </p>
+                  <p style={{ fontSize: "8px", margin: "0px" }}>
+                    {dataa?.JobNo}
+                  </p>
+                </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  paddingBottom: "2px",
+                }}
+              >
                 <div style={{ display: "flex" }}>
-                  <p className="deatilTitle_p">Categoy : </p>
+                  <p className="deatilTitle_p">Category</p>
+                  <p className="deatilTitle_com">:</p>
                   <p style={{ fontSize: "8px", margin: "0px" }}>
                     {dataa?.Category}
                   </p>
                 </div>
-                <div style={{ display: "flex" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "2px" }}
+                >
                   <p className="deatil_title_view">Design# : </p>
                   <p style={{ fontSize: "8px", margin: "0px" }}>
                     {dataa?.designNo}
@@ -114,58 +144,133 @@ const PritnModel = ({ activeDetail }) => {
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "0px",
+                }}
+              >
                 <div style={{ display: "flex" }}>
-                  <p className="deatilTitle_p">net wt : </p>
+                  <p className="deatilTitle_p">Net wt</p>
+                  <p className="deatilTitle_com">:</p>
                   <p className="deatil_value_p">{dataa?.netWeight}</p>
                 </div>
                 <div>
-                  <p className="deatil_totla_p">{dataa?.TotalMetalCost}</p>
+                  <p className="deatil_totla_p">₹ {dataa?.TotalMetalCost}</p>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <div style={{ display: "flex" }}>
-                  <p className="deatilTitle_p">dia wt : </p>
-                  <p className="deatil_value_p">{dataa?.DiamondWtP}</p>
+                  <p className="deatilTitle_p">Dia wt</p>
+                  <p className="deatilTitle_com">:</p>
+                  <p className="deatil_value_p">
+                    {dataa?.DiamondWtP?.replace(/ct/gi, "")
+                      .replace(/pc/gi, "")
+                      .trim()}
+                  </p>
                 </div>
                 <div>
-                  <p className="deatil_totla_p">{dataa?.TotalDiamondCost}</p>
+                  <p className="deatil_totla_p">₹ {dataa?.TotalDiamondCost}</p>
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <div style={{ display: "flex" }}>
-                  <p className="deatilTitle_p">cs wt : </p>
-                  <p className="deatil_value_p">{dataa?.colorStoneWtP}</p>
-                </div>
-                <div>
-                  <p className="deatil_totla_p">{dataa?.TotalColorstoneCost}</p>
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ display: "flex" }}>
-                  <p className="deatilTitle_p">misc wt </p>
-                </div>
-                <div>
-                  <p className="deatil_totla_p">{dataa?.TotalMiscCost}</p>
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ display: "flex" }}>
-                  <p className="deatilTitle_p">making : </p>
-                  <p className="deatil_value_p">{dataa?.MiscWtP}</p>
-                </div>
-                <div>
-                  <p className="deatil_totla_p">{dataa?.TotalMakingCost}</p>
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ display: "flex" }}>
-                  <p className="deatilTitle_p">gross wt : </p>
-                  <p className="deatil_value_p">{dataa?.GrossWeight} gm</p>
+                  <p className="deatilTitle_p">CS wt</p>
+                  <p className="deatilTitle_com">:</p>
+                  <p className="deatil_value_p">
+                    {dataa?.colorStoneWtP
+                      ?.replace(/ct/gi, "")
+                      .replace(/pc/gi, "")
+                      .trim()}
+                  </p>
                 </div>
                 <div>
                   <p className="deatil_totla_p">
-                    <b>{dataa?.price}</b>
+                    ₹ {dataa?.TotalColorstoneCost}
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div style={{ display: "flex" }}>
+                  <p className="deatilTitle_p">Misc wt </p>
+                  <p className="deatilTitle_com">:</p>
+                  <p className="deatil_value_p">
+                    {dataa?.MiscWtP?.replace(/gm/gi, "")
+                      .replace(/pc/gi, "")
+                      .trim()}
+                  </p>
+                </div>
+                <div>
+                  <p className="deatil_totla_p">₹ {dataa?.TotalMiscCost}</p>
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div style={{ display: "flex" }}>
+                  <p className="deatilTitle_p">Making</p>
+                  <p className="deatilTitle_com">:</p>
+                </div>
+                <div>
+                  <p className="deatil_totla_p">₹ {dataa?.TotalMakingCost}</p>
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div style={{ display: "flex" }}>
+                  <p className="deatilTitle_p">Gross wt</p>
+                  <p className="deatilTitle_com">:</p>
+                  <p className="deatil_value_p">{dataa?.GrossWeight} gm</p>
+                </div>
+                <div>
+                  <p className="deatil_totla_p">₹ {dataa?.price}</p>
+                </div>
+              </div>
+
+              {dataa?.discountValue && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    width: "100%",
+                  }}
+                >
+                  <div style={{ display: "flex" }}>
+                    <p className="deatilTitle_p">Discount</p>
+                    <p
+                      className="deatil_totla_p"
+                      style={{
+                        minWidth: "85px",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      ₹ {dataa?.discountValue}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  width: "100%",
+                }}
+              >
+                <div style={{ display: "flex" }}>
+                  <p className="deatilTitle_p">Amount</p>
+                  <p
+                    className="deatil_totla_p"
+                    style={{
+                      minWidth: "35px",
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <b>
+                      ₹{" "}
+                      {dataa?.discountValue
+                        ? dataa?.price - dataa?.discountValue
+                        : dataa?.price}
+                    </b>
                   </p>
                 </div>
               </div>
@@ -186,60 +291,84 @@ const PritnModel = ({ activeDetail }) => {
             style={{
               display: "flex",
               justifyContent: "flex-end",
-              borderBottom: "1px solid lightgray",
+              borderBottom: "1px dotted black",
+              paddingBottom: "2px",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "9.5px" }}>Total</p>
-            <p
-              style={{
-                margin: "2px",
-                minWidth: "120px",
-                display: "flex",
-                justifyContent: "flex-end",
-                fontSize: "10px",
-              }}
-            >
-              <b>{totals.totalPrice}</b>
+            <p style={{ margin: "2px", fontSize: "8px" }}>
+              <b>Total Discount</b>
+            </p>
+            <p className="totalPriceValus">
+              <b>₹ {totals.allTotalDiscount}</b>
             </p>
           </div>
           <div
             style={{
               display: "flex",
               justifyContent: "flex-end",
-              borderBottom: "1px solid lightgray",
+              borderBottom: "1px dotted black",
+              paddingBottom: "2px",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "9.5px" }}>New Tax</p>
-            <p
-              style={{
-                margin: "2px",
-                minWidth: "120px",
-                display: "flex",
-                justifyContent: "flex-end",
-                fontSize: "10px",
-              }}
-            >
-              <b>{totals.totalTaxAmount}</b>
+            <p style={{ margin: "2px", fontSize: "8px" }}>
+              <b>Total Amount</b>
+            </p>
+            <p className="totalPriceValus">
+              <b>₹ {totals.totalPrice}</b>
             </p>
           </div>
           <div
             style={{
               display: "flex",
               justifyContent: "flex-end",
-              borderBottom: "1px solid lightgray",
+              borderBottom: "1px dotted black",
+              paddingBottom: "2px",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "9.5px" }}>Final Amount</p>
+            <p style={{ margin: "2px", fontSize: "8px" }}>
+              <b>Tax Amount</b>
+            </p>
+            <p className="totalPriceValus">
+              <b>₹ {totals.totalTaxAmount}</b>
+            </p>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              borderBottom: "1px dotted black",
+              paddingBottom: "2px",
+            }}
+          >
+            <p style={{ margin: "2px", fontSize: "8px" }}>
+              <b>Final Amount</b>
+            </p>
+            <p className="totalPriceValus">
+              <b>₹ {totals.finalAmount}</b>
+            </p>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              borderBottom: "1px dotted black",
+              paddingBottom: "2px",
+            }}
+          >
+            <p style={{ margin: "2px", fontSize: "8px", width: "12%" }}>
+              <b>In Word :</b>
+            </p>
             <p
               style={{
                 margin: "2px",
-                minWidth: "120px",
+                minWidth: "100px",
                 display: "flex",
                 justifyContent: "flex-end",
-                fontSize: "10px",
+                fontSize: "8px",
+                width: "88%",
               }}
             >
-              <b>{totals.finalAmount}</b>
+              <b>{toWords.convert(Number(totals.finalAmount))}</b>
             </p>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
 import "./Scanner.scss";
 import {
@@ -16,6 +16,7 @@ import {
   ArrowDown,
   ArrowUp,
   Keyboard,
+  Menu,
   Printer,
   ScanLine,
   ShoppingBag,
@@ -38,6 +39,10 @@ import LoadingBackdrop from "../../../Utils/LoadingBackdrop";
 import html2pdf from "html2pdf.js";
 import PritnModel from "./PritnModel/PritnModel";
 
+const CANVAS_SIDE = 400; // side‑length we’ll decode at (≤ BOX_PX * devicePixelRatio)
+const SCAN_INTERVAL = 200; // ms between decode attempts  (≈5 fps)
+const hasBarcodeAPI = "BarcodeDetector" in window;
+
 const Scanner = () => {
   const [scannedData, setScannedData] = useState([]);
   const [mode, setMode] = useState("qr");
@@ -54,20 +59,17 @@ const Scanner = () => {
   );
   const printRef = useRef(null);
 
-  useEffect(() => {
-    const savedScans = sessionStorage.getItem("AllScanJobData");
-    if (savedScans) {
-      const parsed = JSON.parse(savedScans);
-      setScannedData(parsed);
-      if (parsed.length > 0) setActiveDetail(parsed[0]);
-    }
-  }, []);
-
   const webcamRef = useRef(null);
-  const [qrData, setQrData] = useState(null);
-  const [scannedOnce, setScannedOnce] = useState(false);
+  const canvasRef = useRef(document.createElement("canvas"));
+  const trackRef = useRef(null);
+  const decodeTimerRef = useRef(null);
+  const detectorRef = useRef(
+    hasBarcodeAPI ? new window.BarcodeDetector({ formats: ["qr_code"] }) : null
+  );
   const [permissionGranted, setPermissionGranted] = useState(null);
-  const [permissionGrantedChek, setPermissionGrantedChek] = useState(true);
+  const [checkingPerm, setCheckingPerm] = useState(true);
+  const [zoomCap, setZoomCap] = useState(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   useEffect(() => {
     navigator.mediaDevices
@@ -75,67 +77,106 @@ const Scanner = () => {
       .then((stream) => {
         stream.getTracks().forEach((t) => t.stop());
         setPermissionGranted(true);
-        setPermissionGrantedChek(false);
       })
-      .catch(() => {
-        setPermissionGranted(false);
-        setPermissionGrantedChek(false);
-      });
+      .catch(() => setPermissionGranted(false))
+      .finally(() => setCheckingPerm(false));
   }, []);
 
+  // useEffect(() => {
+  //   const savedScans = sessionStorage.getItem("AllScanJobData");
+  //   if (savedScans) {
+  //     const parsed = JSON.parse(savedScans);
+  //     setScannedData(savedScans);
+  //     if (parsed.length > 0) setActiveDetail(parsed[0]);
+  //   }
+  // }, []);
+
   useEffect(() => {
-    if (!permissionGranted || scannedOnce) return;
-    const id = setInterval(scan, 700);
-    return () => clearInterval(id);
-  }, [permissionGranted, scannedOnce]);
+    const savedScans = sessionStorage.getItem("AllScanJobData");
+    if (savedScans) {
+      try {
+        const parsed = JSON.parse(savedScans);
+        // Crucial change: Set scannedData with the PARSED array, not the raw string
+        if (Array.isArray(parsed)) {
+          // Add a check to ensure it's actually an array
+          setScannedData(parsed);
+          if (parsed.length > 0) {
+            setActiveDetail(parsed[0]);
+          }
+        } else {
+          // Handle cases where sessionStorage might contain invalid data
+          console.error(
+            "Invalid data found in sessionStorage for AllScanJobData:",
+            parsed
+          );
+          setScannedData([]); // Reset to empty array if data is invalid
+        }
+      } catch (e) {
+        console.error("Error parsing AllScanJobData from sessionStorage:", e);
+        setScannedData([]); // Reset to empty array on parsing error
+      }
+    }
+  }, []);
+
+  const handleUserMedia = (stream) => {
+    const [track] = stream.getVideoTracks();
+    trackRef.current = track;
+    const caps = track.getCapabilities?.();
+    if (caps?.zoom) {
+      const { min, max, step = 0.1 } = caps.zoom;
+      setZoomCap({ min, max, step });
+      setZoomLevel(min ?? 1);
+      track.applyConstraints({ advanced: [{ zoom: min }] }).catch(() => {});
+    }
+    canvasRef.current.width = CANVAS_SIDE;
+    canvasRef.current.height = CANVAS_SIDE;
+    decodeTimerRef.current = setInterval(decodeFrame, SCAN_INTERVAL);
+  };
+
+  // const stopStream = () => {
+  //   clearInterval(decodeTimerRef.current);
+  //   trackRef.current?.stop();
+  // };
+
+  // const updateZoom = (delta) => {
+  //   if (!zoomCap) return; // CSS fallback: no HW zoom available
+  //   const { min, max, step } = zoomCap;
+  //   let next = Math.max(min, Math.min(max, +(zoomLevel + delta).toFixed(2)));
+  //   setZoomLevel(next);
+  //   trackRef.current
+  //     ?.applyConstraints({ advanced: [{ zoom: next }] })
+  //     .catch(() => {});
+  // };
 
   const BOX = 220;
 
-  const scan = () => {
+  const decodeFrame = useCallback(async () => {
     const video = webcamRef.current?.video;
-    if (!video || video.readyState !== 4 || scannedOnce) return;
-
-    const vW = video.videoWidth;
-    const vH = video.videoHeight;
-
-    /* work in device-pixel pixels so cropping is exact */
-    const boxSize = BOX * window.devicePixelRatio;
-    const startX = Math.round((vW - boxSize) / 2);
-    const startY = Math.round((vH - boxSize) / 2);
-
-    /* draw only the region of interest */
-    const canvas = document.createElement("canvas");
-    canvas.width = boxSize;
-    canvas.height = boxSize;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(
-      video,
-      startX,
-      startY,
-      boxSize,
-      boxSize, // src (video) rect
-      0,
-      0,
-      boxSize,
-      boxSize // dst (canvas) rect
-    );
-
-    const t0 = performance.now();
-    const imageData = ctx.getImageData(0, 0, boxSize, boxSize);
-    const code = jsQR(imageData.data, boxSize, boxSize, {
-      inversionAttempts: "attemptBoth",
+    if (!video || video.readyState < 2) return;
+    const { videoWidth: w, videoHeight: h } = video;
+    const side = Math.min(w, h);
+    const sx = (w - side) / 2;
+    const sy = (h - side) / 2;
+    const ctx = canvasRef.current.getContext("2d", {
+      willReadFrequently: true,
     });
-    const dt = (performance.now() - t0).toFixed(1);
-
-    if (code?.data) {
-      const jobNo = code.data.trim();
-      if (jobNo.length > 3) {
-        setScannedOnce(true);
-        setIsLoading(true);
-        addScan(jobNo);
-      }
+    ctx.drawImage(video, sx, sy, side, side, 0, 0, CANVAS_SIDE, CANVAS_SIDE);
+    let result = null;
+    if (hasBarcodeAPI) {
+      const barcodes = await detectorRef.current.detect(canvasRef.current);
+      if (barcodes.length) result = barcodes[0].rawValue;
+    } else {
+      const imgData = ctx.getImageData(0, 0, CANVAS_SIDE, CANVAS_SIDE);
+      const code = jsQR(imgData.data, imgData.width, imgData.height);
+      result = code?.data;
     }
-  };
+
+    if (result) {
+      const jobNo = result.trim();
+      setIsLoading(true);
+      addScan(jobNo);
+    }
+  }, []);
 
   const retryPermission = () => {
     setPermissionGranted(null);
@@ -148,123 +189,132 @@ const Scanner = () => {
       .catch(() => setPermissionGranted(false));
   };
 
-  const addScan = async (jobNumber) => {
-    const alreadyScanned = scannedData.some((item) => item.JobNo === jobNumber);
-    if (alreadyScanned) {
-      showToast({
-        message: "Job already scanned",
-        bgColor: "#f1c40f",
-        fontColor: "#000",
-        duration: 4000,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const Device_Token = sessionStorage.getItem("device_token");
-      const body = {
-        Mode: "GetScanJobData",
-        Token: Device_Token,
-        ReqData: JSON.stringify([
-          {
-            ForEvt: "GetScanJobData",
-            DeviceToken: Device_Token,
-            AppId: 3,
-            JobNo: jobNumber,
-            CustomerId: activeCustomer?.CustomerId,
-            IsVisitor: 0,
-          },
-        ]),
-      };
-
-      const response = await CallApi(body);
-      const jobData = response?.DT[0];
-      setIsLoading(false);
-      if (!jobData) {
+  const addScan = useCallback(
+    async (jobNumber) => {
+      const list = JSON.parse(sessionStorage.getItem("AllScanJobData"));
+      const alreadyScanned = list?.some((item) => item?.JobNo === jobNumber);
+      if (alreadyScanned) {
+        showToast({
+          message: "Job already scanned",
+          bgColor: "#f1c40f",
+          fontColor: "#000",
+          duration: 4000,
+        });
         setIsLoading(false);
-        setError("Invalid Job Number or No Data Found.");
         return;
       }
 
-      console.log("jobDatajobDatajobDatajobData", jobData);
+      try {
+        const Device_Token = sessionStorage.getItem("device_token");
+        const body = {
+          Mode: "GetScanJobData",
+          Token: Device_Token,
+          ReqData: JSON.stringify([
+            {
+              ForEvt: "GetScanJobData",
+              DeviceToken: Device_Token,
+              AppId: 3,
+              JobNo: jobNumber,
+              CustomerId: activeCustomer?.CustomerId,
+              IsVisitor: 0,
+            },
+          ]),
+        };
+        const response = await CallApi(body);
+        const jobData = response?.DT[0];
+        setIsLoading(false);
 
-      const formatted = {
-        JobNo: jobData.JobNo,
-        designNo: jobData.DesignNo,
-        price: (jobData.Amount)?.toFixed(0),
-        metal: jobData.TotalMetalCost,
-        diamoond: jobData.TotalDiamondCost,
-        colorStone: jobData.TotalColorstoneCost,
-        makingCharge: jobData.TotalMakingCost,
-        taxAmount: jobData.TotalOtherCost,
-        netWeight: jobData.NetWt,
-        GrossWeight: jobData.GrossWt,
-        CartListId: jobData.CartListId,
-        WishListId: jobData.WishListId,
-        Category: jobData?.Category,
-        TotalMetalCost: jobData?.TotalMetalCost?.toFixed(0),
-        TotalDiamondCost: jobData?.TotalDiamondCost?.toFixed(0),
-        TotalColorstoneCost: jobData?.TotalColorstoneCost?.toFixed(0),
-        TotalMiscCost: jobData?.TotalMiscCost?.toFixed(0),
-        TotalMakingCost: (jobData?.TotalMakingCost + jobData?.TotalDiamondhandlingCost + jobData?.TotalOtherCost)?.toFixed(0)  ,
-        DiamondWtP:
-          jobData?.DiaWt > 0 || jobData?.DiaPcs > 0
-            ? `${jobData.DiaWt > 0 ? jobData.DiaWt + "ct" : ""}${
-                jobData.DiaWt > 0 && jobData.DiaPcs > 0 ? " / " : ""
-              }${jobData.DiaPcs > 0 ? jobData.DiaPcs + "pc" : ""}`
-            : null,
-        colorStoneWtP:
-          jobData?.CsWt > 0 || jobData?.CsPcs > 0
-            ? `${jobData?.CsWt > 0 ? jobData.CsWt + "ct" : ""}${
-                jobData?.CsWt > 0 && jobData?.CsPcs > 0 ? " / " : ""
-              }${jobData?.CsPcs > 0 ? jobData.CsPcs + "pc" : ""}`
-            : null,
-        MiscWtP:
-          jobData?.MiscWt > 0 || jobData?.MiscPcs > 0
-            ? `${jobData?.MiscWt > 0 ? jobData.MiscWt + "gm" : ""}${
-                jobData?.MiscWt > 0 && jobData?.MiscPcs > 0 ? " / " : ""
-              }${jobData?.MiscPcs > 0 ? jobData.MiscPcs + "pc" : ""}`
-            : null,
-        MetalTypeTitle: `${
-          jobData?.MetalPurity +
-          " " +
-          jobData?.MetalTypeName +
-          " " +
-          jobData?.MetalColorName
-        }`,
-        status: "Scanned",
-        image: `${jobData.CDNDesignImageFol}${jobData.ImageName}`, // "1/281165"
-        isInCartList: jobData.IsInCartList, // NEW
-        isInWishList: jobData.IsInWishList, // NEW
-      };
+        if (!jobData) {
+          setIsLoading(false);
+          setError("Invalid Job Number or No Data Found.");
+          return;
+        }
 
-      const updatedData = [
-        formatted,
-        ...scannedData.filter((j) => j.JobNo !== formatted.JobNo),
-      ];
-
-      setScannedData(updatedData);
-      setActiveDetail(formatted);
-      setIsExpanded(true);
-      sessionStorage.setItem("AllScanJobData", JSON.stringify(updatedData));
-      setError(null);
-    } catch (err) {
-      setIsLoading(false);
-      console.error("Error during scan", err);
-      showToast({
-        message: "Invalid Job",
-        bgColor: "#f13f3f",
-        fontColor: "#fff",
-        duration: 5000,
-      });
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => {
-        setScannedOnce(false);
-      }, 1500);
-    }
-  };
+        const formatted = {
+          JobNo: jobData.JobNo,
+          designNo: jobData.DesignNo,
+          price: jobData.Amount?.toFixed(0),
+          metal: jobData.TotalMetalCost,
+          diamoond: jobData.TotalDiamondCost,
+          colorStone: jobData.TotalColorstoneCost,
+          makingCharge: jobData.TotalMakingCost,
+          taxAmount: jobData.TotalTaxAmount?.toFixed(0),
+          netWeight: jobData.NetWt?.toFixed(3),
+          GrossWeight: jobData.GrossWt?.toFixed(3),
+          CartListId: jobData.CartListId,
+          WishListId: jobData.WishListId,
+          Category: jobData?.Category,
+          TotalMetalCost: jobData?.TotalMetalCost?.toFixed(0),
+          TotalDiamondCost: jobData?.TotalDiamondCost?.toFixed(0),
+          TotalColorstoneCost: jobData?.TotalColorstoneCost?.toFixed(0),
+          TotalMiscCost: jobData?.TotalMiscCost?.toFixed(0),
+          TotalMakingCost: (
+            jobData?.TotalMakingCost +
+            jobData?.TotalDiamondhandlingCost +
+            jobData?.TotalOtherCost
+          )?.toFixed(0),
+          DiamondWtP:
+            jobData?.DiaWt > 0 || jobData?.DiaPcs > 0
+              ? `${jobData.DiaWt > 0 ? jobData.DiaWt?.toFixed(3) + "ct" : ""}${
+                  jobData.DiaWt > 0 && jobData.DiaPcs > 0 ? " / " : ""
+                }${jobData.DiaPcs > 0 ? jobData.DiaPcs + "pc" : ""}`
+              : null,
+          colorStoneWtP:
+            jobData?.CsWt > 0 || jobData?.CsPcs > 0
+              ? `${jobData?.CsWt > 0 ? jobData.CsWt?.toFixed(3) + "ct" : ""}${
+                  jobData?.CsWt > 0 && jobData?.CsPcs > 0 ? " / " : ""
+                }${jobData?.CsPcs > 0 ? jobData.CsPcs + "pc" : ""}`
+              : null,
+          MiscWtP:
+            jobData?.MiscWt > 0 || jobData?.MiscPcs > 0
+              ? `${jobData?.MiscWt > 0 ? jobData.MiscWt?.toFixed(3) + "gm" : ""}${
+                  jobData?.MiscWt > 0 && jobData?.MiscPcs > 0 ? " / " : ""
+                }${jobData?.MiscPcs > 0 ? jobData.MiscPcs + "pc" : ""}`
+              : null,
+          MetalTypeTitle: `${
+            jobData?.MetalPurity +
+            " " +
+            jobData?.MetalTypeName +
+            " " +
+            jobData?.MetalColorName
+          }`,
+          status: "Scanned",
+          image: `${jobData.CDNDesignImageFol}${jobData.ImageName}`, // "1/281165"
+          isInCartList: jobData.IsInCartList, // NEW
+          isInWishList: jobData.IsInWishList, // NEW
+        };
+        setScannedData((prevScannedData) => {
+          const currentScans = Array.isArray(prevScannedData)
+            ? prevScannedData
+            : [];
+          const newUpdatedData = [
+            formatted,
+            ...currentScans.filter((j) => j.JobNo !== formatted.JobNo),
+          ];
+          sessionStorage.setItem(
+            "AllScanJobData",
+            JSON.stringify(newUpdatedData)
+          );
+          return newUpdatedData;
+        });
+        setActiveDetail(formatted);
+        setIsExpanded(true);
+        setError(null);
+      } catch (err) {
+        setIsLoading(false);
+        console.error("Error during scan", err);
+        showToast({
+          message: "Invalid Job",
+          bgColor: "#f13f3f",
+          fontColor: "#fff",
+          duration: 5000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [activeCustomer]
+  );
 
   const toggleWishlist = async (detailItem, data) => {
     const Device_Token = sessionStorage.getItem("device_token");
@@ -454,9 +504,16 @@ const Scanner = () => {
     } else {
       setPrintInfo(matchedArray);
     }
-
     const element = document.getElementById("printSection");
     element.style.display = "block";
+    const height = allData
+      ? savedScans?.length >= 2
+        ? savedScans?.length >= 3
+          ? savedScans?.length * 170
+          : savedScans?.length * 190
+        : 250
+      : 300;
+
     const opt = {
       margin: [5, 5, 5, 5],
       filename: "estimate.pdf",
@@ -464,18 +521,11 @@ const Scanner = () => {
       html2canvas: { scale: 2 },
       jsPDF: {
         unit: "mm",
-        format: [
-          250,
-          allData
-            ? savedScans?.length >= 2
-              ? savedScans?.length * 130
-              : 250
-            : 250,
-        ],
+        format: [250, height],
         orientation: "portrait",
       },
     };
-
+    
     html2pdf()
       .set(opt)
       .from(element)
@@ -505,23 +555,6 @@ const Scanner = () => {
       });
   };
 
-  //  const handleShare = async () => {
-  //   if (navigator.share) {
-  //     try {
-  //       await navigator.share({
-  //         title: "temon",
-  //         text: `Check out this product: Temp`,
-  //         url: window.location.href, // or product-specific URL
-  //       });
-  //       console.log('Shared successfully');
-  //     } catch (error) {
-  //       console.error('Error sharing:', error);
-  //     }
-  //   } else {
-  //     alert('Share not supported on this browser');
-  //   }
-  // };
-
   const renderCollapsedTop = () =>
     activeDetail && (
       <div
@@ -536,7 +569,7 @@ const Scanner = () => {
       </div>
     );
 
-  console.log("activeDetail", activeDetail);
+  console.log("activeDetailactiveDetailactiveDetail", activeDetail);
 
   const renderExpandedTop = () =>
     activeDetail && (
@@ -550,15 +583,24 @@ const Scanner = () => {
               <span>{activeDetail.Category}</span>
             </div>
             <div>
-              <span
-                className={
-                  activeDetail?.discountedPrice
-                    ? "showData_price_deatil_withdiscount"
-                    : "showData_price_deatil"
-                }
+              <p
+                style={{
+                  display: "flex",
+                  gap: "5px",
+                  justifyContent: "flex-end",
+                }}
               >
-                ₹ {activeDetail.price}
-              </span>
+                <span
+                  className={
+                    activeDetail?.discountedPrice
+                      ? "showData_price_deatil_withdiscount"
+                      : "showData_price_deatil"
+                  }
+                >
+                  ₹ {activeDetail.price}
+                </span>
+              </p>
+
               {activeDetail?.discountedPrice && (
                 <div>
                   <p
@@ -568,10 +610,24 @@ const Scanner = () => {
                       fontWeight: 600,
                       display: "flex",
                       justifyContent: "flex-end",
+                      gap: "3px",
                     }}
                     className="showData_price_deatil"
                   >
                     {" "}
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "green",
+                        display: "flex",
+                        alignItems: "end",
+                      }}
+                    >
+                      Save{" "}
+                      {activeDetail?.discountType === "percentage"
+                        ? `${activeDetail?.discountValue}%`
+                        : `₹${activeDetail?.discountValue}`}
+                    </span>
                     ₹ {activeDetail.discountedPrice}
                   </p>
                 </div>
@@ -721,6 +777,7 @@ const Scanner = () => {
     );
 
   const [expandedItems, setExpandedItems] = useState([]);
+
   return (
     <div className="scanner-container">
       <LoadingBackdrop isLoading={isLoading} />
@@ -732,15 +789,8 @@ const Scanner = () => {
         showToast={showToast}
       />
 
-      {/* {scannedData?.length !== 0 && (
-        <p className="ProductScanTitle">Product Scanner</p>
-      )} */}
-
       {mode === "qr" ? (
         <div className="scanner-wrapper" style={{ "--box": `${BOX}px` }}>
-          {permissionGranted === null && (
-            <LoadingBackdrop isLoading={permissionGrantedChek} />
-          )}
           {permissionGranted === false && (
             <p className="status">
               ❌ Camera permission denied.{" "}
@@ -749,41 +799,43 @@ const Scanner = () => {
           )}
 
           {permissionGranted && (
-            <div className="camera-container camera-45">
-              <Webcam
-                ref={webcamRef}
-                audio={false}
-                playsInline
-                muted={true}
-                className="camera-feed"
-                screenshotFormat="image/jpeg"
-                videoConstraints={{
-                  facingMode: "environment",
-                  width: { ideal: 1280 },
-                  height: { ideal: 720 },
-                  advanced: [{ zoom: 1.5 }], // 👈 try zoom level 2x
-                }}
-              />
-              <div className="overlay">
-                <div className="ov top" />
-                <div className="ov bottom" />
-                <div className="ov left" />
-                <div className="ov right" />
-                <div className="scanner-box" />
+            <>
+              <div
+                className="scanner-wrapper"
+                style={{ height: "300px", width: "100%" }}
+              >
+                <div
+                  className={`camera-container ${
+                    zoomCap ? "camera-hw-zoom" : "camera-css-zoom"
+                  }`}
+                >
+                  <Webcam
+                    ref={webcamRef}
+                    mirrored={false}
+                    audio={false}
+                    playsInline
+                    muted
+                    className="camera-feed"
+                    onUserMedia={handleUserMedia}
+                    onUserMediaError={() => setPermissionGranted(false)}
+                    videoConstraints={{
+                      facingMode: { ideal: "environment" },
+                      width: { ideal: 640 },
+                      height: { ideal: 480 },
+                      advanced: zoomCap ? [{ zoom: zoomLevel }] : undefined,
+                    }}
+                  />
+                  <div className="scan-box" /> {/* white dashed overlay */}
+                </div>
               </div>
-            </div>
+            </>
           )}
 
-          {/* feedback below the camera */}
-          {/* {isLoading && <p className="status">Scanning…</p>} */}
           {error && (
             <p className="status" style={{ color: "#ff6961" }}>
               {error}
             </p>
           )}
-          {/* <h1 className="status">
-            Last scan: <strong>{activeDetail?.JobNo}</strong>
-          </h1> */}
         </div>
       ) : mode == "AllScanItem" ? (
         <div></div>
@@ -881,10 +933,23 @@ const Scanner = () => {
                                   fontWeight: 600,
                                   display: "flex",
                                   justifyContent: "flex-end",
+                                  gap: "3px",
                                 }}
                                 className="showData_price_deatil"
                               >
-                                {" "}
+                                <span
+                                  style={{
+                                    fontSize: "12px",
+                                    color: "green",
+                                    display: "flex",
+                                    alignItems: "end",
+                                  }}
+                                >
+                                  Save{" "}
+                                  {data?.discountType === "percentage"
+                                    ? `${data?.discountValue}%`
+                                    : `₹${data?.discountValue}`}
+                                </span>{" "}
                                 ₹ {data.discountedPrice}
                               </p>
                             </div>
@@ -972,10 +1037,6 @@ const Scanner = () => {
                               }}
                             >
                               <div style={{ display: "flex" }}>
-                                {console.log(
-                                  "data.DiamondWtPdata.DiamondWtP",
-                                  data.DiamondWtP
-                                )}
                                 {data.DiamondWtP && (
                                   <div style={{ width: "40%" }}>
                                     <p className="info_main_section">
@@ -1121,7 +1182,7 @@ const Scanner = () => {
             className={mode === "AllScanItem" ? "active" : ""}
             variant="text"
           >
-            <Tally3 />
+            <Menu />
           </Button>
           <Button
             onClick={() => setMode("qr")}

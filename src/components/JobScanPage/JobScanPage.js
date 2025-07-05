@@ -138,7 +138,7 @@ const JobScanPage = () => {
           onClick={() => setActiveTab("cart")}
         >
           <ShoppingCart size={20} />
-          <span class="status-dot"></span>
+          {/* <span class="status-dot"></span> */}
           <span>Cart</span>
         </div>
         <div

@@ -50,5 +50,5 @@ function App() {
 }
 export default App;
 
-// basename="/evo"
-  // "homepage": "/evo",
+//basename="/evo"
+//"homepage": "/evo",

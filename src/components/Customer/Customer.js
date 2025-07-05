@@ -671,13 +671,6 @@ const Customer = () => {
             >
               <Plus />
             </Button>
-            <Button
-              className="AddCustomer_refresh_Btn"
-              onClick={GetCustomerData}
-              variant="contained"
-            >
-              <RotateCcw />
-            </Button>
           </div>
         </div>
       </div>
@@ -694,7 +687,8 @@ const Customer = () => {
           </Button>
         </div>
       </div> */}
-      <div className={`Customer_Title_container ${tabsFixed ? "fixed" : ""}`}>
+
+      {/* <div className={`Customer_Title_container ${tabsFixed ? "fixed" : ""}`}>
         <div className="CustomerSearch">
           <div className="search-box">
             <input
@@ -712,6 +706,28 @@ const Customer = () => {
             )}
           </div>
         </div>
+      </div> */}
+
+      <div
+        style={{
+          padding: "60px 16px 4px 10px",
+          boxShadow:
+            "rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+        }}
+      >
+        <p style={{ fontSize: "17px", color: "#783eb5", fontWeight: 600 }}>
+          Customer List
+        </p>
+        <Button
+          className="AddCustomer_refresh_Btn"
+          onClick={GetCustomerData}
+          variant="contained"
+        >
+          <RotateCcw />
+        </Button>
       </div>
 
       {!loading &&
@@ -725,7 +741,7 @@ const Customer = () => {
                     key={i}
                     className="customercard_button"
                     onClick={() => {
-                      console.log("custcustcust", cust);
+                      // navigate(`/JobScanPage`);
                       if (cust.IsLockTimer === 0 || cust.IsLockTimer === 2) {
                         toggleExpand(cust.CustomerId);
                       } else {
