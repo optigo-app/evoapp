@@ -3,6 +3,9 @@ import "./PritnModel.scss";
 import { ToWords } from "to-words";
 
 const PritnModel = ({ activeDetail }) => {
+
+  const curruntActiveCustomer = JSON?.parse(sessionStorage.getItem('curruntActiveCustomer'));
+  
   const toWords = new ToWords({
     localeCode: "en-IN", // Indian English
     converterOptions: {
@@ -10,7 +13,6 @@ const PritnModel = ({ activeDetail }) => {
       ignoreDecimal: false, // keep paise
       doNotAddOnly: false, // add “only” at the end
       currencyOptions: {
-        // optional – override defaults
         name: "Rupee",
         plural: "Rupees",
         symbol: "₹",
@@ -77,7 +79,7 @@ const PritnModel = ({ activeDetail }) => {
           <div style={{ display: "flex", gap: "2px" }}>
             <p className="p_info_title">Customer name : </p>
             <p className="p_info_value">
-              {userInfo?.firstname} {userInfo?.lastname}
+              {curruntActiveCustomer?.firstname} {curruntActiveCustomer?.lastname}
             </p>
           </div>
           <div style={{ display: "flex", gap: "2px" }}>
@@ -93,7 +95,7 @@ const PritnModel = ({ activeDetail }) => {
           }}
         >
           <p className="p_info_title">Phone number : </p>
-          <p className="p_info_value">{userInfo?.CompanyTellNo}</p>
+          <p className="p_info_value">{curruntActiveCustomer?.contactNumber}</p>
         </div>
       </div>
 
@@ -355,7 +357,7 @@ const PritnModel = ({ activeDetail }) => {
               paddingBottom: "2px",
             }}
           >
-            <p style={{ margin: "2px", fontSize: "8px", width: "12%" }}>
+            <p style={{ margin: "2px", fontSize: "8px", width: "15%" }}>
               <b>In Word :</b>
             </p>
             <p
@@ -365,7 +367,7 @@ const PritnModel = ({ activeDetail }) => {
                 display: "flex",
                 justifyContent: "flex-end",
                 fontSize: "8px",
-                width: "88%",
+                width: "85%",
               }}
             >
               <b>{toWords.convert(Number(totals.finalAmount))}</b>

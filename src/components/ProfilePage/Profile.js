@@ -189,8 +189,6 @@ const Profile = () => {
     setOpenDeleteDialog(false);
   };
 
-  console.log('allProfileDataallProfileData', allProfileData)
-
   return (
     <div className="profile_main_div">
       <LoadingBackdrop isLoading={isLoading} />

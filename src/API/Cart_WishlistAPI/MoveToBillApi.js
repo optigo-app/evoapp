@@ -20,8 +20,6 @@ export const moveToBillApi = async () => {
                 },
             ]),
         };
-        console.log('body: ', body);
-
         const response = await CommonAPI(body);
         return response?.Data || [];
     } catch (error) {

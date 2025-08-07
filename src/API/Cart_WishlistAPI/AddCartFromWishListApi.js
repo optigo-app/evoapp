@@ -25,8 +25,6 @@ export const AddCartFromWishListApi = async ({
                 },
             ]),
         };
-        console.log('body: ', body);
-
         const response = await CommonAPI(body);
         return response?.Data || [];
     } catch (error) {

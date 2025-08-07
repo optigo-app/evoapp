@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./Customer.scss";
 import {
   Button,
@@ -97,6 +97,8 @@ const Customer = () => {
   const [expandedCustomerId, setExpandedCustomerId] = useState(null);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const cardRefs = useRef({});
+  const expandedSectionRefs = useRef({});
   const navigate = useNavigate();
 
   const GetProfileData = async () => {
@@ -116,8 +118,8 @@ const Customer = () => {
 
     const response = await CallApi(body);
     if (response?.DT[0]?.stat == 1) {
-      sessionStorage.setItem("profileData", JSON.stringify(response.DT[0]));
       setAllProfileData(response.DT[0]);
+      sessionStorage.setItem("profileData", JSON.stringify(response.DT[0]));
     }
   };
 
@@ -172,8 +174,33 @@ const Customer = () => {
     return () => clearInterval(interval);
   }, [mainData, stopped]);
 
-  const toggleExpand = (id) => {
-    setExpandedCustomerId((prev) => (prev === id ? null : id));
+  const toggleExpand = (customerId) => {
+    if (expandedCustomerId === customerId) {
+      setExpandedCustomerId(null);
+    } else {
+      setExpandedCustomerId(customerId);
+
+      setTimeout(() => {
+        const card = cardRefs.current[customerId];
+        const expanded = expandedSectionRefs.current[customerId];
+
+        if (!card || !expanded) return;
+
+        const cardRect = card.getBoundingClientRect();
+        const expandRect = expanded.getBoundingClientRect();
+
+        const isFullyVisible =
+          expandRect.top >= 0 && expandRect.bottom <= window.innerHeight;
+
+        if (!isFullyVisible) {
+          const scrollOffset = expandRect.bottom - window.innerHeight + 20;
+          window.scrollBy({
+            top: scrollOffset,
+            behavior: "smooth",
+          });
+        }
+      }, 200);
+    }
   };
 
   const toggleDrawer = (newOpen) => () => {
@@ -203,6 +230,15 @@ const Customer = () => {
   };
 
   const filteredData = result.length > 0 ? result : mainData;
+
+  const sortedData = useMemo(() => {
+    if (!filteredData) return [];
+    return [...filteredData].sort((a, b) => {
+      if (a.IsLockTimer === 2) return -1;
+      if (b.IsLockTimer === 2) return 1;
+      return 0;
+    });
+  }, [filteredData]);
 
   useEffect(() => {
     const runningCustomer = filteredData?.find(
@@ -251,6 +287,7 @@ const Customer = () => {
             ForEvt: "StartSession",
             DeviceToken: Device_Token,
             CustomerId: customer?.CustomerId,
+            IsVisitor: customer?.IsVisitor,
             AppId: 3,
           },
         ]),
@@ -310,7 +347,8 @@ const Customer = () => {
           duration: 5000,
         });
         sessionStorage.removeItem("AllScanJobData");
-        navigate("/feedback");
+        // navigate("/feedback");
+        GetCustomerData();
       }
       setOpen(false);
     } else {
@@ -370,7 +408,8 @@ const Customer = () => {
             fontColor: "#fff",
             duration: 5000,
           });
-          navigate("/feedback");
+          // navigate("/feedback");
+          GetCustomerData();
         }
         setOpen(false);
       }
@@ -418,16 +457,16 @@ const Customer = () => {
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <div className="header_top_profile">
-        <CustomAvatar
+        <img
           skin="light"
           color="success"
           variant="rounded"
-          sx={{ width: 42, height: 42, borderRadius: 50 }}
+          style={{ width: 42, height: 42, borderRadius: 50 }}
           src={
             allProfileData?.ImagePath ||
             "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
           }
-        ></CustomAvatar>
+        />
         <div>
           <p style={{ margin: "0px", fontWeight: 600, fontSize: "14px" }}>
             {allProfileData?.firstname} {allProfileData?.lastname}
@@ -675,47 +714,14 @@ const Customer = () => {
         </div>
       </div>
 
-      {/* <div className={`Customer_Title_container ${tabsFixed ? "fixed" : ""}`}>
-        <p className="header_title">Customer</p>
-        <div style={{ display: "flex", gap: "15px" }}>
-          <Button
-            className="AddCustomer_Btn"
-            onClick={handleNaviagte}
-            variant="contained"
-          >
-            <CirclePlus />
-          </Button>
-        </div>
-      </div> */}
-
-      {/* <div className={`Customer_Title_container ${tabsFixed ? "fixed" : ""}`}>
-        <div className="CustomerSearch">
-          <div className="search-box">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Filter By Customer Name"
-            />
-            {search && (
-              <AiOutlineCloseCircle
-                className="clear-icon"
-                onClick={handleClearSearch}
-              />
-            )}
-          </div>
-        </div>
-      </div> */}
-
       <div
         style={{
           padding: "60px 16px 4px 10px",
           boxShadow:
             "rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px",
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <p style={{ fontSize: "17px", color: "#783eb5", fontWeight: 600 }}>
@@ -734,12 +740,13 @@ const Customer = () => {
         (filteredData?.length !== 0 ? (
           <div className="CustomerContainer">
             <div className="CustomerList">
-              {filteredData.map((cust, i) => {
+              {sortedData?.map((cust, i) => {
                 const isExpanded = expandedCustomerId === cust.CustomerId;
                 return (
                   <Button
                     key={i}
                     className="customercard_button"
+                    ref={(el) => (cardRefs.current[cust.CustomerId] = el)}
                     onClick={() => {
                       // navigate(`/JobScanPage`);
                       if (cust.IsLockTimer === 0 || cust.IsLockTimer === 2) {
@@ -806,6 +813,9 @@ const Customer = () => {
                     </div>
 
                     <div
+                      ref={(el) =>
+                        (expandedSectionRefs.current[cust.CustomerId] = el)
+                      }
                       className={`expand-wrapper ${isExpanded ? "show" : ""}`}
                     >
                       {cust.IsLockTimer === 0 && (
@@ -819,8 +829,8 @@ const Customer = () => {
                               setEndReleseCust("releseCustomer");
                             }}
                             style={{
-                              color: "red",
-                              textDecoration: "underline",
+                              color: "white",
+                              backgroundColor: "#811bdb",
                             }}
                           >
                             Remove Customer
@@ -834,8 +844,8 @@ const Customer = () => {
                               handleClickStatus(cust);
                             }}
                             style={{
-                              color: "#8d07a7",
-                              textDecoration: "underline",
+                              color: "white",
+                              backgroundColor: "#811bdb",
                             }}
                           >
                             Start Session
@@ -844,8 +854,14 @@ const Customer = () => {
                       )}
 
                       {cust.IsLockTimer === 2 && (
-                        <div className="expand-actions">
-                          <Button
+                        <div
+                          className="expand-actions"
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          {/* <Button
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -858,7 +874,7 @@ const Customer = () => {
                             }}
                           >
                             Remove Customer
-                          </Button>
+                          </Button> */}
 
                           {!stopped[cust.CustomerId] && (
                             <Button
@@ -870,8 +886,10 @@ const Customer = () => {
                                 setEndReleseCust("endCustomer");
                               }}
                               style={{
-                                color: "#e22929",
-                                textDecoration: "underline",
+                                // color: "#e22929",
+                                // textDecoration: "underline",
+                                color: "white",
+                                backgroundColor: "#811bdb",
                               }}
                             >
                               End Customer

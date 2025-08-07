@@ -24,7 +24,6 @@ const WishlistCard = lazy(() =>
 const WishlistPage = () => {
   const [isLoading, setIsLoading] = useState(null);
   const [WishlistItems, setWishlistItems] = useState([]);
-  console.log('WishlistItems: ', WishlistItems);
   const [opencnfDialogOpen, setOpenCnfDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [rmflag, setRmFlag] = useState("");
@@ -162,7 +161,6 @@ const WishlistPage = () => {
   };
 
   const handleOpenDialog = (wishlistItem, flag) => {
-    console.log('flag: ', flag);
     setRmFlag(flag);
     setSelectedItems([wishlistItem]);
     setOpenCnfDialog(true);

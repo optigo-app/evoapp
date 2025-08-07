@@ -141,13 +141,13 @@ const JobScanPage = () => {
           {/* <span class="status-dot"></span> */}
           <span>Cart</span>
         </div>
-        <div
+        {/* <div
           className={`tab-item ${activeTab === "note" ? "active" : ""}`}
           onClick={() => setActiveTab("note")}
         >
           <FileSpreadsheet size={20} />
           <span>Note</span>
-        </div>
+        </div> */}
       </div>
 
       <div className="tab-body">{renderTabContent()}</div>

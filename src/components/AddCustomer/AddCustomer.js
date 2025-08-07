@@ -46,7 +46,7 @@ const AddCustomer = () => {
     }
 
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedInput);
-    const isMobile = /^\+?[0-9]{10,15}$/.test(trimmedInput);
+    const isMobile = /^[0-9]{10}$/.test(trimmedInput); // Only 10 digits allowed
 
     if (!isEmail && !isMobile) {
       setError("Please enter a valid mobile number or email.");
@@ -115,19 +115,68 @@ const AddCustomer = () => {
   };
 
   const handleModalSave = async () => {
-    const errors = {};
+  const errors = {};
 
-    if (!form.firstName.trim()) errors.firstName = "First Name is required";
-    if (!form.lastName.trim()) errors.lastName = "Last Name is required";
-    if (!form.mobile.trim()) errors.mobile = "Mobile Number is required";
-    if (!form.email.trim()) errors.email = "Email is required";
+  // Regex definitions
+  const nameRegex = /^[A-Za-z\s]{2,50}$/;
+  const lastNameRegex = /^[A-Za-z\s]{0,50}$/;
+  const mobileRegex = /^\d{10}$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const cityRegex = /^[A-Za-z\s]{2,50}$/;
+  const areaRegex = /^[A-Za-z0-9\s]{2,100}$/;
+  const stateRegex = /^[A-Za-z\s]{2,50}$/;
+  const pincodeRegex = /^\d{5,6}$/;
+  const addressRegex = /^.{5,200}$/;
 
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
+  // Required fields
+  if (!form.firstName.trim()) {
+    errors.firstName = "First Name is required";
+  } else if (!nameRegex.test(form.firstName.trim())) {
+    errors.firstName = "Only letters and spaces (2–50 chars)";
+  }
 
-    setFormErrors({});
+  if (form.lastName.trim() && !lastNameRegex.test(form.lastName.trim())) {
+    errors.lastName = "Only letters and spaces (up to 50 chars)";
+  }
+
+  if (!form.mobile.trim()) {
+    errors.mobile = "Mobile number is required";
+  } else if (!mobileRegex.test(form.mobile.trim())) {
+    errors.mobile = "Enter a valid 10-digit mobile number";
+  }
+
+  if (!form.email.trim()) {
+    errors.email = "Email is required";
+  } else if (!emailRegex.test(form.email.trim())) {
+    errors.email = "Enter a valid email address";
+  }
+
+  if (form.city && !cityRegex.test(form.city.trim())) {
+    errors.city = "Only letters and spaces allowed (2–50 chars)";
+  }
+
+  if (form.state && !stateRegex.test(form.state.trim())) {
+    errors.state = "Only letters and spaces allowed (2–50 chars)";
+  }
+
+  if (form.area && !areaRegex.test(form.area.trim())) {
+    errors.area = "Alphanumeric + spaces (2–100 chars)";
+  }
+
+  if (form.pincode && !pincodeRegex.test(form.pincode.trim())) {
+    errors.pincode = "Enter 5 or 6 digit pincode";
+  }
+
+  if (form.fullAddress && !addressRegex.test(form.fullAddress.trim())) {
+    errors.fullAddress = "Address should be 5–200 characters";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    return;
+  }
+
+  setFormErrors({});
     setLoading(true);
 
     try {
@@ -159,13 +208,51 @@ const AddCustomer = () => {
 
       const response = await CallApi(body);
       if (response?.DT[0]?.stat == 1) {
-        showToast({
-          message: "Now Customer OnFloor",
-          bgColor: "#4caf50",
-          fontColor: "#fff",
-          duration: 5000,
-        });
-        navigate("/JobScanPage");
+        const Device_Token = sessionStorage.getItem("device_token");
+        const body = {
+          Mode: "SetCustomerOnFloor",
+          Token: `"${Device_Token}"`,
+          ReqData: JSON.stringify([
+            {
+              ForEvt: "SetCustomerOnFloor",
+              DeviceToken: Device_Token,
+              CustomerId: response?.DT[0]?.CustomerId,
+              AppId: 3,
+            },
+          ]),
+        };
+        const response2 = await CallApi(body);
+        if (response2?.DT[0]?.stat == 1) {
+          sessionStorage.removeItem("AllScanJobData");
+          const body = {
+            Mode: "StartSession",
+            Token: `"${Device_Token}"`,
+            ReqData: JSON.stringify([
+              {
+                ForEvt: "StartSession",
+                DeviceToken: Device_Token,
+                CustomerId: response?.DT[0]?.CustomerId,
+                IsVisitor: response?.DT[0]?.IsVisitor,
+                AppId: 3,
+              },
+            ]),
+          };
+
+          const response3 = await CallApi(body);
+          if (response3?.DT[0]?.stat == 1) {
+            showToast({
+              message: "Customer Session Start",
+              bgColor: "#4caf50",
+              fontColor: "#fff",
+              duration: 5000,
+            });
+            navigate(`/JobScanPage`);
+            sessionStorage.setItem(
+              "curruntActiveCustomer",
+              JSON.stringify(foundCustomer)
+            );
+          }
+        }
         setOpenModal(false);
       } else {
         showToast({
@@ -182,8 +269,6 @@ const AddCustomer = () => {
       });
     } catch (error) {
       console.error("Error saving customer:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -219,6 +304,7 @@ const AddCustomer = () => {
             ForEvt: "StartSession",
             DeviceToken: Device_Token,
             CustomerId: foundCustomer?.CustomerId,
+            IsVisitor: foundCustomer?.IsVisitor,
             AppId: 3,
           },
         ]),
@@ -288,7 +374,7 @@ const AddCustomer = () => {
               value={input}
               onChange={(e) => {
                 setInput(e.target.value);
-                setError(""); // remove error on typing
+                setError("");
               }}
               error={!!error}
               helperText={error}
@@ -347,8 +433,8 @@ const AddCustomer = () => {
                 padding: "0px",
                 minWidth: "25px",
                 height: "25px",
-                border: '1px solid black',
-                borderRadius: '20px'
+                border: "1px solid black",
+                borderRadius: "20px",
               }}
             >
               <X />
@@ -363,6 +449,11 @@ const AddCustomer = () => {
               margin="dense"
               error={!!formErrors.firstName}
               helperText={formErrors.firstName}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  marginLeft: "0px !important",
+                },
+              }}
             />
 
             <TextField
@@ -374,6 +465,11 @@ const AddCustomer = () => {
               margin="dense"
               error={!!formErrors.lastName}
               helperText={formErrors.lastName}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  marginLeft: "0px !important",
+                },
+              }}
             />
 
             <TextField
@@ -385,6 +481,11 @@ const AddCustomer = () => {
               margin="dense"
               error={!!formErrors.email}
               helperText={formErrors.email}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  marginLeft: "0px !important",
+                },
+              }}
             />
 
             <TextField
@@ -396,6 +497,11 @@ const AddCustomer = () => {
               margin="dense"
               error={!!formErrors.mobile}
               helperText={formErrors.mobile}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  marginLeft: "0px !important",
+                },
+              }}
             />
 
             {!showMore && (

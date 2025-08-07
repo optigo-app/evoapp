@@ -12,9 +12,6 @@ const WishlistCard = ({
   handleWishToCart,
   handlePrint
 }) => {
-
-  console.log('wishlistItems', wishlistItems);
-
   return (
     <Card className="Wishlist-card">
       <Box className="card-content">
@@ -43,7 +40,7 @@ const WishlistCard = ({
               ₹{parseFloat(wishlistItems?.Amount).toFixed(0).toLocaleString()}
             </Typography>
             {wishlistItems?.Discount !== 0 && <Typography className="newprice_save">
-              Save ₹{parseFloat(wishlistItems?.DiscountAmount).toFixed(0).toLocaleString()}
+              Save ₹{parseFloat(wishlistItems?.Discount).toFixed(0).toLocaleString()}
             </Typography>}
           </Box>
           {/* } */}
