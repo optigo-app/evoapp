@@ -1,5 +1,5 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
-import { Box, Stack, Button, Divider } from '@mui/material';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Box, Stack, Button, Divider, Dialog, DialogContent, DialogActions } from '@mui/material';
 import { Printer, ScrollText } from 'lucide-react';
 import './CartPage.scss';
 import ConfirmationDialog from '../../Utils/ConfirmationDialog/ConfirmationDialog';
@@ -10,6 +10,9 @@ import NoDataFound from '../../Utils/NoDataFound';
 import { showToast } from '../../Utils/Tostify/ToastManager';
 import { useNavigate } from 'react-router-dom';
 import { moveToBillApi } from '../../API/Cart_WishlistAPI/MoveToBillApi';
+import PritnModel from '../../components/JobScanPage/Scanner/PritnModel/PritnModel';
+import html2pdf from 'html2pdf.js';
+import PritnModelCart from './PritnModelCart/PritnModelCart';
 
 const CartItemCard = lazy(() => import('../../components/CartComp/CartCard'));
 
@@ -20,6 +23,9 @@ const CartPage = () => {
   const [opencnfDialogOpen, setOpenCnfDialog] = React.useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [rmflag, setRmFlag] = useState("");
+  const [openPrintModel, setOpenPrintModel] = useState(false);
+  const printRef = useRef(null);
+  const [printInfo, setPrintInfo] = useState();
 
   const handleOpenDialog = (cartItems, flag) => {
     setRmFlag(flag)
@@ -110,10 +116,63 @@ const CartPage = () => {
     }
   }
 
-  const handlePrint = () => {
-    // Implement print functionality here
-    console.log("Print Estimate clicked");
+  const findleSingleDataPrint = () => {
+    setOpenPrintModel(true);
   }
+
+  const handlePrint = (data) => {
+    const savedScans = data;
+    const element = document.getElementById("printSection");
+    // element.style.display = "block";
+    const height = data
+      ? savedScans?.length >= 2
+        ? savedScans?.length >= 3
+          ? savedScans?.length * 170
+          : savedScans?.length * 190
+        : 250
+      : 300;
+
+    const opt = {
+      margin: [5, 5, 5, 5],
+      filename: "estimate.pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: {
+        unit: "mm",
+        format: [250, height],
+        orientation: "portrait",
+      },
+    };
+
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .outputPdf("blob")
+      .then((blob) => {
+        const fileName = "estimate.pdf";
+        // element.style.display = "none";
+        if (window.flutter_inappwebview) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64data = reader.result.split(",")[1];
+            window.flutter_inappwebview.callHandler(
+              "downloadPDF",
+              base64data,
+              fileName
+            );
+          };
+          reader.readAsDataURL(blob);
+        } else {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+      });
+  };
+
 
   return (
     <Box className="CartMain">
@@ -121,6 +180,36 @@ const CartPage = () => {
         <LoadingBackdrop isLoading={isLoading} />
       ) : cartItems?.length > 0 ? (
         <>
+          <Dialog
+            open={openPrintModel}
+            onClick={() => setOpenPrintModel(false)}
+            maxWidth="md"
+            fullWidth
+          >
+            <DialogContent dividers>
+              <div
+                id="printSection"
+                className="printDesign"
+                ref={printRef}
+                style={{ width: "100%" }}
+              >
+                <PritnModelCart activeDetail={printInfo} />
+              </div>
+            </DialogContent>
+
+            <DialogActions>
+              <Button onClick={() => setOpenPrintModel(false)} color="error">
+                Cancel
+              </Button>
+              <Button
+                onClick={() => handlePrint(printInfo)}
+                style={{ backgroundColor: "#5e08b6", color: "white" }}
+              >
+                Download
+              </Button>
+            </DialogActions>
+          </Dialog>
+
           <Suspense fallback={<></>}>
             <Box className="CartHeaderClBtn">
               <Button variant="text" onClick={() => handleOpenDialog({}, "all")}>
@@ -133,13 +222,17 @@ const CartPage = () => {
                   key={item.id}
                   cartItem={item}
                   handleOpenDialog={handleOpenDialog}
+                  setOpenPrintModel={setOpenPrintModel}
+                  setPrintInfo={setPrintInfo}
+                  findleSingleDataPrint={findleSingleDataPrint}
+                  cartItems={cartItems}
                 />
               ))}
             </Box>
           </Suspense>
           <Box className="CartActionsFooter">
             <Stack direction="row" spacing={2} justifyContent="center" className="action-buttons">
-              <Button variant="outlined" startIcon={<Printer size={18} />} onClick={handlePrint}>
+              <Button variant="outlined" startIcon={<Printer size={18} />} onClick={() => { setPrintInfo(cartItems); setOpenPrintModel(true); }}>
                 Print Estimate
               </Button>
               <Button variant="outlined" startIcon={<ScrollText size={18} />} onClick={handleMoveToBill}>

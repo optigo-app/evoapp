@@ -235,9 +235,9 @@ const WishlistPage = () => {
             {/* <Divider className="footer-divider" /> */}
 
             <Stack direction="row" spacing={2} justifyContent="center" className="action-buttons">
-              <Button variant="outlined" startIcon={<Printer size={18} />}>
+              {/* <Button variant="outlined" startIcon={<Printer size={18} />}>
                 Print Estimate
-              </Button>
+              </Button> */}
               <Button variant="outlined" startIcon={<ScrollText size={18} />} onClick={handleAllWishToCart}>
                 Move to Cart
               </Button>

@@ -743,12 +743,38 @@ const Customer = () => {
               {sortedData?.map((cust, i) => {
                 const isExpanded = expandedCustomerId === cust.CustomerId;
                 return (
-                  <Button
+                  <div
                     key={i}
                     className="customercard_button"
                     ref={(el) => (cardRefs.current[cust.CustomerId] = el)}
-                    onClick={() => {
+                    onClick={(e) => {
                       // navigate(`/JobScanPage`);
+                      const button = e.currentTarget;
+                      const circle = document.createElement("span");
+                      const diameter = Math.max(
+                        button.clientWidth,
+                        button.clientHeight
+                      );
+                      const radius = diameter / 2;
+
+                      circle.style.width =
+                        circle.style.height = `${diameter}px`;
+                      circle.style.left = `${
+                        e.clientX - button.offsetLeft - radius
+                      }px`;
+                      circle.style.top = `${
+                        e.clientY - button.offsetTop - radius
+                      }px`;
+                      circle.classList.add("ripple");
+
+                      // Remove old ripple if exists
+                      const ripple = button.getElementsByClassName("ripple")[0];
+                      if (ripple) {
+                        ripple.remove();
+                      }
+
+                      button.appendChild(circle);
+
                       if (cust.IsLockTimer === 0 || cust.IsLockTimer === 2) {
                         toggleExpand(cust.CustomerId);
                       } else {
@@ -855,27 +881,11 @@ const Customer = () => {
 
                       {cust.IsLockTimer === 2 && (
                         <div
-                          className="expand-actions"
                           style={{
                             display: "flex",
                             justifyContent: "flex-end",
                           }}
                         >
-                          {/* <Button
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStop(cust);
-                              setEndReleseCust("releseCustomer");
-                            }}
-                            style={{
-                              color: "red",
-                              textDecoration: "underline",
-                            }}
-                          >
-                            Remove Customer
-                          </Button> */}
-
                           {!stopped[cust.CustomerId] && (
                             <Button
                               size="small"
@@ -886,8 +896,6 @@ const Customer = () => {
                                 setEndReleseCust("endCustomer");
                               }}
                               style={{
-                                // color: "#e22929",
-                                // textDecoration: "underline",
                                 color: "white",
                                 backgroundColor: "#811bdb",
                               }}
@@ -898,7 +906,7 @@ const Customer = () => {
                         </div>
                       )}
                     </div>
-                  </Button>
+                  </div>
                 );
               })}
             </div>

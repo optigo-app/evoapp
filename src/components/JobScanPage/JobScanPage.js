@@ -150,7 +150,7 @@ const JobScanPage = () => {
         </div> */}
       </div>
 
-      <div className="tab-body">{renderTabContent()}</div>
+      <div className={`tab-body ${tabsFixed ? "stop" : ""}`}>{renderTabContent()}</div>
     </div>
   );
 };

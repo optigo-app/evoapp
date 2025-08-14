@@ -33,26 +33,24 @@
       margin: 0px !important;
       border-radius: 50px !important;
     }
-
-    
   }
 
-   .AddCustomer_refresh_Btn {
-      height: 36px;
-      width: 30px;
-      border-radius: 6px;
-      font-weight: bold;
-      box-shadow: none;
-      // background-color: #b15bbe;
-      background-color: transparent;
-      color: #783eb5;
-      // background-color: #2196f3;
-      min-width: 10px !important;
-      padding: 0px 6px !important;
-      margin: 0px !important;
-      border-radius: 50px !important;
-    }
-    
+  .AddCustomer_refresh_Btn {
+    height: 36px;
+    width: 30px;
+    border-radius: 6px;
+    font-weight: bold;
+    box-shadow: none;
+    // background-color: #b15bbe;
+    background-color: transparent;
+    color: #783eb5;
+    // background-color: #2196f3;
+    min-width: 10px !important;
+    padding: 0px 6px !important;
+    margin: 0px !important;
+    border-radius: 50px !important;
+  }
+
   .Customer_Title_container {
     display: flex;
     justify-content: space-between;
@@ -159,7 +157,7 @@
       }
     }
 
-    .CustomerList{
+    .CustomerList {
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -176,6 +174,7 @@
         min-height: 70px;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
 
         .card-header {
           display: flex;
@@ -227,6 +226,22 @@
         }
       }
     }
+  }
+}
+
+.customercard_button .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(0);
+  animation: ripple-animation 0.6s linear;
+  pointer-events: none; /* Prevent ripple from blocking clicks */
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
   }
 }
 
@@ -327,7 +342,7 @@
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    color: #6D6B77 !important;
+    color: #6d6b77 !important;
   }
 
   .expand-icon {

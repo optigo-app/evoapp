@@ -14,8 +14,10 @@ const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
 const JobScanPage = lazy(() => import("./components/JobScanPage/JobScanPage"));
 
 function App() {
-  //  http://localhost:3000/?&device_token=63J1UX1513PBL6KM
-   
+  //  http://localhost:3000/?&device_token=63J1UX1513PBL6KM   Local
+  //  http://localhost:3000/?&device_token=R77HF9W40K7QE918   online demo
+  // https://8b003b09fd6c.ngrok-free.app/?&device_token=G3B8J4007CJ8LJJZ  test73
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const device_token = queryParams.get("device_token");
@@ -54,5 +56,4 @@ export default App;
 //basename="/evo"
 //"homepage": "/evo",
 
-
-// M8X4GR853142344V  Demo copy token
+// R77HF9W40K7QE918  Demo copy token

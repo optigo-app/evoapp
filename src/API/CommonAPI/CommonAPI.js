@@ -4,7 +4,7 @@ const APIURL = (window.location.hostname === 'localhost'
     || window.location.hostname === 'nzen'
   ) ? 'http://nzen/jo/ExpressApp/EvoApp.aspx' : 'https://view.optigoapps.com/ExpressApp/EvoApp.aspx';
 
-// const APIURL = "https://api.optigoapps.com/ReactStore/ReactStore.aspx";
+// const APIURL = "https://view.optigoapps.com/ExpressApp/EvoApp.aspx";
 // const APIURL = "https://livenx.optigoapps.com/api/report";
 // const APIURL = "http://nzen/jo/ExpressApp/EvoApp.aspx";
 

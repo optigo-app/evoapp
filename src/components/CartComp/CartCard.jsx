@@ -1,10 +1,15 @@
 import React from 'react';
 import './CartCard.scss';
 import { Card, Typography, IconButton, Box } from '@mui/material';
-import { Trash2 } from 'lucide-react';
+import { Printer, Trash2 } from 'lucide-react';
 import PlaceHolderImg from '../../assests/placeHolderImg.svg';
 
-const CartCard = ({ cartItem, handleOpenDialog }) => {
+const CartCard = ({ cartItem, handleOpenDialog, setPrintInfo, findleSingleDataPrint, cartItems }) => {
+  const handlePrint = (data) => {
+    const findArray = cartItems?.filter(item => item.JobNo === data?.JobNo);
+    setPrintInfo(findArray);
+    findleSingleDataPrint();
+  }
   return (
     <Card className="Cart-card">
       <Box className="card-content">
@@ -56,6 +61,9 @@ const CartCard = ({ cartItem, handleOpenDialog }) => {
           <Box className="actions">
             <IconButton onClick={() => handleOpenDialog(cartItem, 'single')}>
               <Trash2 className="btn" />
+            </IconButton>
+            <IconButton onClick={() => handlePrint(cartItem)}>
+              <Printer className="btn" />
             </IconButton>
           </Box>
         </Box>

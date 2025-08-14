@@ -39,6 +39,7 @@ const AddCustomer = () => {
   });
 
   const handleSearch = async () => {
+    setLoading(false);
     const trimmedInput = input.trim();
     if (!trimmedInput) {
       setError("Mobile or Email is required.");
@@ -54,7 +55,6 @@ const AddCustomer = () => {
     }
 
     setError(""); // Clear error
-
     const Device_Token = sessionStorage.getItem("device_token");
     const VerifyMode = isEmail ? "email" : "mobile";
     const LoginID = trimmedInput;
@@ -74,6 +74,8 @@ const AddCustomer = () => {
     };
 
     const response = await CallApi(body);
+    setLoading(false);
+
     if (response?.DT[0]?.stat == 1) {
       setForm({
         firstName: "",
@@ -87,8 +89,10 @@ const AddCustomer = () => {
         area: "",
         fullAddress: "",
       });
+      setLoading(false);
       setOpenModal(true);
     } else {
+      setLoading(false);
       setInput("");
       showToast({
         message: "Customer Allready Available",
@@ -98,6 +102,7 @@ const AddCustomer = () => {
       });
       setFoundCustomer(response?.DT[0]);
     }
+    setLoading(false);
   };
 
   const handleFormChange = (e) => {
@@ -115,73 +120,71 @@ const AddCustomer = () => {
   };
 
   const handleModalSave = async () => {
-  const errors = {};
+    const errors = {};
 
-  // Regex definitions
-  const nameRegex = /^[A-Za-z\s]{2,50}$/;
-  const lastNameRegex = /^[A-Za-z\s]{0,50}$/;
-  const mobileRegex = /^\d{10}$/;
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const cityRegex = /^[A-Za-z\s]{2,50}$/;
-  const areaRegex = /^[A-Za-z0-9\s]{2,100}$/;
-  const stateRegex = /^[A-Za-z\s]{2,50}$/;
-  const pincodeRegex = /^\d{5,6}$/;
-  const addressRegex = /^.{5,200}$/;
+    // Regex definitions
+    const nameRegex = /^[A-Za-z\s]{2,50}$/;
+    const lastNameRegex = /^[A-Za-z\s]{0,50}$/;
+    const mobileRegex = /^\d{10}$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const cityRegex = /^[A-Za-z\s]{2,50}$/;
+    const areaRegex = /^[A-Za-z0-9\s]{2,100}$/;
+    const stateRegex = /^[A-Za-z\s]{2,50}$/;
+    const pincodeRegex = /^\d{5,6}$/;
+    const addressRegex = /^.{5,200}$/;
 
-  // Required fields
-  if (!form.firstName.trim()) {
-    errors.firstName = "First Name is required";
-  } else if (!nameRegex.test(form.firstName.trim())) {
-    errors.firstName = "Only letters and spaces (2–50 chars)";
-  }
+    // Required fields
+    if (!form.firstName.trim()) {
+      errors.firstName = "First Name is required";
+    } else if (!nameRegex.test(form.firstName.trim())) {
+      errors.firstName = "Only letters and spaces (2–50 chars)";
+    }
 
-  if (form.lastName.trim() && !lastNameRegex.test(form.lastName.trim())) {
-    errors.lastName = "Only letters and spaces (up to 50 chars)";
-  }
+    if (form.lastName.trim() && !lastNameRegex.test(form.lastName.trim())) {
+      errors.lastName = "Only letters and spaces (up to 50 chars)";
+    }
 
-  if (!form.mobile.trim()) {
-    errors.mobile = "Mobile number is required";
-  } else if (!mobileRegex.test(form.mobile.trim())) {
-    errors.mobile = "Enter a valid 10-digit mobile number";
-  }
+    if (!form.mobile.trim()) {
+      errors.mobile = "Mobile number is required";
+    } else if (!mobileRegex.test(form.mobile.trim())) {
+      errors.mobile = "Enter a valid 10-digit mobile number";
+    }
 
-  if (!form.email.trim()) {
-    errors.email = "Email is required";
-  } else if (!emailRegex.test(form.email.trim())) {
-    errors.email = "Enter a valid email address";
-  }
+    if (!form.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!emailRegex.test(form.email.trim())) {
+      errors.email = "Enter a valid email address";
+    }
 
-  if (form.city && !cityRegex.test(form.city.trim())) {
-    errors.city = "Only letters and spaces allowed (2–50 chars)";
-  }
+    if (form.city && !cityRegex.test(form.city.trim())) {
+      errors.city = "Only letters and spaces allowed (2–50 chars)";
+    }
 
-  if (form.state && !stateRegex.test(form.state.trim())) {
-    errors.state = "Only letters and spaces allowed (2–50 chars)";
-  }
+    if (form.state && !stateRegex.test(form.state.trim())) {
+      errors.state = "Only letters and spaces allowed (2–50 chars)";
+    }
 
-  if (form.area && !areaRegex.test(form.area.trim())) {
-    errors.area = "Alphanumeric + spaces (2–100 chars)";
-  }
+    if (form.area && !areaRegex.test(form.area.trim())) {
+      errors.area = "Alphanumeric + spaces (2–100 chars)";
+    }
 
-  if (form.pincode && !pincodeRegex.test(form.pincode.trim())) {
-    errors.pincode = "Enter 5 or 6 digit pincode";
-  }
+    if (form.pincode && !pincodeRegex.test(form.pincode.trim())) {
+      errors.pincode = "Enter 5 or 6 digit pincode";
+    }
 
-  if (form.fullAddress && !addressRegex.test(form.fullAddress.trim())) {
-    errors.fullAddress = "Address should be 5–200 characters";
-  }
+    if (form.fullAddress && !addressRegex.test(form.fullAddress.trim())) {
+      errors.fullAddress = "Address should be 5–200 characters";
+    }
 
-  if (Object.keys(errors).length > 0) {
-    setFormErrors(errors);
-    return;
-  }
-
-  setFormErrors({});
-    setLoading(true);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
 
     try {
+      setLoading(true);
       const Device_Token = sessionStorage.getItem("device_token");
-
       const reqData = [
         {
           ForEvt: "CutomerRegister",
@@ -208,6 +211,19 @@ const AddCustomer = () => {
 
       const response = await CallApi(body);
       if (response?.DT[0]?.stat == 1) {
+        const saveData = {
+          firstname: form.firstName,
+          lastname: form.lastName,
+          contactNumber: form.mobile,
+          CustEmail: form.email,
+          CustomerId: response?.DT[0]?.CustomerId,
+          IsVisitor: response?.DT[0]?.IsVisitor,
+        };
+        sessionStorage.setItem(
+          "curruntActiveCustomer",
+          JSON.stringify(saveData)
+        );
+
         const Device_Token = sessionStorage.getItem("device_token");
         const body = {
           Mode: "SetCustomerOnFloor",
@@ -221,6 +237,7 @@ const AddCustomer = () => {
             },
           ]),
         };
+
         const response2 = await CallApi(body);
         if (response2?.DT[0]?.stat == 1) {
           sessionStorage.removeItem("AllScanJobData");
@@ -247,14 +264,13 @@ const AddCustomer = () => {
               duration: 5000,
             });
             navigate(`/JobScanPage`);
-            sessionStorage.setItem(
-              "curruntActiveCustomer",
-              JSON.stringify(foundCustomer)
-            );
           }
+          setLoading(false);
         }
+        setLoading(false);
         setOpenModal(false);
       } else {
+        setLoading(false);
         showToast({
           message: response?.DT[0]?.stat_msg,
           bgColor: response?.DT[0]?.stat == 0 ? "red" : "#4caf50",
@@ -267,12 +283,14 @@ const AddCustomer = () => {
         customerName: `${form.firstName} ${form.lastName}`,
         ...form,
       });
+      setLoading(false);
     } catch (error) {
       console.error("Error saving customer:", error);
     }
   };
 
   const handleNaviagte = async () => {
+    setLoading(true);
     const Device_Token = sessionStorage.getItem("device_token");
     const body = {
       Mode: "SetCustomerOnFloor",
@@ -288,12 +306,12 @@ const AddCustomer = () => {
     };
     const response = await CallApi(body);
     if (response?.DT[0]?.stat == 1) {
-      showToast({
-        message: "Now Customer OnFloor",
-        bgColor: "#4caf50",
-        fontColor: "#fff",
-        duration: 5000,
-      });
+      // showToast({
+      //   message: "Now Customer OnFloor End Session Start",
+      //   bgColor: "#4caf50",
+      //   fontColor: "#fff",
+      //   duration: 5000,
+      // });
       sessionStorage.removeItem("AllScanJobData");
 
       const body = {
@@ -311,9 +329,16 @@ const AddCustomer = () => {
       };
 
       const response = await CallApi(body);
+      setLoading(false);
       if (response?.DT[0]?.stat == 1) {
+        // showToast({
+        //   message: "Customer Session Start",
+        //   bgColor: "#4caf50",
+        //   fontColor: "#fff",
+        //   duration: 5000,
+        // });
         showToast({
-          message: "Customer Session Start",
+          message: "Session Started Customer on Floor",
           bgColor: "#4caf50",
           fontColor: "#fff",
           duration: 5000,
@@ -344,6 +369,7 @@ const AddCustomer = () => {
           </div>
         </div>
       </div>
+
       <div className="AddCustomer_sub">
         <div className="form-section">
           <div

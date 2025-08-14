@@ -70,9 +70,9 @@ const WishlistCard = ({
             <IconButton onClick={() => handleOpenDialog(wishlistItems, 'single')}>
               <Trash2 className="btn" />
             </IconButton>
-            <IconButton onClick={handlePrint}>
+            {/* <IconButton onClick={handlePrint}>
               <Printer className="btn" />
-            </IconButton>
+            </IconButton> */}
           </Box>
         </Box>
         {/* <Checkbox

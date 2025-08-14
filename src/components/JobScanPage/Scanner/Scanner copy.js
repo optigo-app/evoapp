@@ -550,6 +550,20 @@ const Scanner = () => {
       });
   };
 
+  const renderCollapsedTop = () =>
+    activeDetail && (
+      <div
+        className="top-detail-card collapsed"
+        onClick={() => setIsExpanded(true)}
+      >
+        <div className="left">
+          <strong>{activeDetail.jobNumber}</strong>
+          <p>₹{activeDetail.price}</p>
+        </div>
+        <div className="right">Tap to open</div>
+      </div>
+    );
+
   const handlePrintfind = (data, allData) => {
     const savedScans = JSON.parse(sessionStorage.getItem("AllScanJobData"));
     const matchedArray = savedScans?.filter((item) => item.JobNo === data);
@@ -607,10 +621,7 @@ const Scanner = () => {
 
   const renderExpandedTop = () =>
     activeDetail && (
-      <div
-        className="top-detail-card_Big expanded"
-        style={{ marginBottom: "0px" }}
-      >
+      <div className="top-detail-card_Big expanded">
         <div style={{ padding: "5px" }}>
           <div className="header">
             <div style={{ display: "flex", flexDirection: "column" }}>
@@ -906,7 +917,7 @@ const Scanner = () => {
       <div
         style={{
           display: mode === "qr" ? "block" : "none",
-          height: "320px",
+          height: "300px",
           width: "100%",
         }}
       >
@@ -923,10 +934,11 @@ const Scanner = () => {
             muted
             className="camera-feed"
             onUserMedia={handleUserMedia}
+            // onUserMediaError={() => setPermissionGranted(false)}
             videoConstraints={{
               facingMode: { ideal: "environment" },
               width: { ideal: 640 },
-              height: { ideal: 350 },
+              height: { ideal: 480 },
               advanced: zoomCap ? [{ zoom: zoomLevel }] : undefined,
             }}
           />
@@ -950,12 +962,14 @@ const Scanner = () => {
           <button onClick={handleManualSave}>Save</button>
         </div>
       </div>
-      {/* 
+
       {error && mode != "AllScanItem" && (
         <p className="error-message">{error}</p>
-      )} */}
+      )}
 
-      {activeDetail && mode != "AllScanItem" && renderExpandedTop()}
+      {activeDetail &&
+        mode != "AllScanItem" &&
+        (isExpanded ? renderExpandedTop() : renderCollapsedTop())}
 
       <div style={{ display: mode === "AllScanItem" ? "block" : "none" }}>
         {scannedData.length !== 0 ? (

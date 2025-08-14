@@ -119,6 +119,9 @@
     flex: 1;
     padding: 10px;
     overflow-y: auto;
+     &.stop {
+      margin-top: 50px;
+     }
   }
 
   .tab-content {

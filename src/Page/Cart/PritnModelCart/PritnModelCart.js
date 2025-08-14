@@ -1,18 +1,17 @@
 import React from "react";
-import "./PritnModel.scss";
+import "./PritnModelCart.scss";
 import { ToWords } from "to-words";
 
-const PritnModel = ({ activeDetail }) => {
+const PritnModelCart = ({ activeDetail }) => {
   const curruntActiveCustomer = JSON?.parse(
     sessionStorage.getItem("curruntActiveCustomer")
   );
-
   const toWords = new ToWords({
-    localeCode: "en-IN", // Indian English
+    localeCode: "en-IN",
     converterOptions: {
-      currency: true, // treat number as money
-      ignoreDecimal: false, // keep paise
-      doNotAddOnly: false, // add “only” at the end
+      currency: true, 
+      ignoreDecimal: false,
+      doNotAddOnly: false,
       currencyOptions: {
         name: "Rupee",
         plural: "Rupees",
@@ -37,9 +36,9 @@ const PritnModel = ({ activeDetail }) => {
 
   const totals = (activeDetail || []).reduce(
     (acc, item) => {
-      acc.totalTaxAmount += Number(item.taxAmount) || 0;
-      acc.totalPrice += Number(item.price) || 0;
-      acc.allTotalDiscount += Number(item.discountValue) || 0;
+      acc.totalTaxAmount += Number(item.TotalTaxAmount) || 0;
+      acc.totalPrice += Number(item.Amount) || 0;
+      acc.allTotalDiscount += Number(item.DiscountAmount) || 0;
       return acc;
     },
     {
@@ -50,6 +49,7 @@ const PritnModel = ({ activeDetail }) => {
   );
   totals.finalAmount =
     totals.totalTaxAmount + totals.totalPrice - totals?.allTotalDiscount;
+
   return (
     <div className="printModelMain">
       <div
@@ -143,7 +143,7 @@ const PritnModel = ({ activeDetail }) => {
                 >
                   <p className="deatil_title_view">Design# : </p>
                   <p style={{ fontSize: "8px", margin: "0px" }}>
-                    {dataa?.designNo}
+                    {dataa?.DesignNo}
                   </p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ const PritnModel = ({ activeDetail }) => {
                 <div style={{ display: "flex" }}>
                   <p className="deatilTitle_p">Net wt</p>
                   <p className="deatilTitle_com">:</p>
-                  <p className="deatil_value_p">{dataa?.netWeight}</p>
+                  <p className="deatil_value_p">{dataa?.NetWt.toFixed(3)}</p>
                 </div>
                 <div>
                   <p className="deatil_totla_p">₹ {dataa?.TotalMetalCost}</p>
@@ -169,9 +169,7 @@ const PritnModel = ({ activeDetail }) => {
                   <p className="deatilTitle_p">Dia wt</p>
                   <p className="deatilTitle_com">:</p>
                   <p className="deatil_value_p">
-                    {dataa?.DiamondWtP?.replace(/ct/gi, "")
-                      .replace(/pc/gi, "")
-                      .trim()}
+                    {dataa?.DiaWt?.toFixed(3)} / {dataa?.DiaPcs}s
                   </p>
                 </div>
                 <div>
@@ -183,10 +181,7 @@ const PritnModel = ({ activeDetail }) => {
                   <p className="deatilTitle_p">CS wt</p>
                   <p className="deatilTitle_com">:</p>
                   <p className="deatil_value_p">
-                    {dataa?.colorStoneWtP
-                      ?.replace(/ct/gi, "")
-                      .replace(/pc/gi, "")
-                      .trim()}
+                    {dataa?.CsWt?.toFixed(3)} / {dataa?.CsPcs}s
                   </p>
                 </div>
                 <div>
@@ -200,9 +195,7 @@ const PritnModel = ({ activeDetail }) => {
                   <p className="deatilTitle_p">Misc wt </p>
                   <p className="deatilTitle_com">:</p>
                   <p className="deatil_value_p">
-                    {dataa?.MiscWtP?.replace(/gm/gi, "")
-                      .replace(/pc/gi, "")
-                      .trim()}
+                    {dataa?.MiscWt?.toFixed(3)} / {dataa?.MiscPcs}s
                   </p>
                 </div>
                 <div>
@@ -222,14 +215,14 @@ const PritnModel = ({ activeDetail }) => {
                 <div style={{ display: "flex" }}>
                   <p className="deatilTitle_p">Gross wt</p>
                   <p className="deatilTitle_com">:</p>
-                  <p className="deatil_value_p">{dataa?.GrossWeight} gm</p>
+                  <p className="deatil_value_p">{dataa?.GrossWt?.toFixed(3)} gm</p>
                 </div>
                 <div>
-                  <p className="deatil_totla_p">₹ {dataa?.price}</p>
+                  <p className="deatil_totla_p">₹ {dataa?.Amount?.toFixed(0)}</p>
                 </div>
               </div>
 
-              {dataa?.discountValue && (
+              {dataa?.DiscountAmount !== 0 && (
                 <div
                   style={{
                     display: "flex",
@@ -247,7 +240,7 @@ const PritnModel = ({ activeDetail }) => {
                         justifyContent: "flex-end",
                       }}
                     >
-                      ₹ {dataa?.discountValue}
+                      ₹ {dataa?.DiscountAmount}
                     </p>
                   </div>
                 </div>
@@ -271,9 +264,9 @@ const PritnModel = ({ activeDetail }) => {
                   >
                     <b>
                       ₹{" "}
-                      {dataa?.discountValue
-                        ? dataa?.price - dataa?.discountValue
-                        : dataa?.price}
+                      {dataa?.DiscountAmount
+                        ? (dataa?.Amount - dataa?.DiscountAmount)?.toFixed(0)
+                        : dataa?.Amount?.toFixed(0)}
                     </b>
                   </p>
                 </div>
@@ -303,7 +296,7 @@ const PritnModel = ({ activeDetail }) => {
               <b>Total Discount</b>
             </p>
             <p className="totalPriceValus">
-              <b>₹ {totals.allTotalDiscount}</b>
+              <b>₹ {totals.allTotalDiscount?.toFixed(0)}</b>
             </p>
           </div>
           <div
@@ -318,7 +311,7 @@ const PritnModel = ({ activeDetail }) => {
               <b>Total Amount</b>
             </p>
             <p className="totalPriceValus">
-              <b>₹ {totals.totalPrice - totals.allTotalDiscount}</b>
+              <b>₹ {(totals.totalPrice - totals.allTotalDiscount)?.toFixed(0)}</b>
             </p>
           </div>
           <div
@@ -333,7 +326,7 @@ const PritnModel = ({ activeDetail }) => {
               <b>Tax Amount</b>
             </p>
             <p className="totalPriceValus">
-              <b>₹ {totals.totalTaxAmount}</b>
+              <b>₹ {totals.totalTaxAmount?.toFixed(0)}</b>
             </p>
           </div>
           <div
@@ -348,7 +341,7 @@ const PritnModel = ({ activeDetail }) => {
               <b>Final Amount</b>
             </p>
             <p className="totalPriceValus">
-              <b>₹ {totals.finalAmount}</b>
+              <b>₹ {totals.finalAmount?.toFixed(0)}</b>
             </p>
           </div>
           <div
@@ -372,7 +365,7 @@ const PritnModel = ({ activeDetail }) => {
                 width: "85%",
               }}
             >
-              <b>{toWords.convert(Number(totals.finalAmount))}</b>
+              <b>{toWords.convert(Number(totals.finalAmount)?.toFixed(0))}</b>
             </p>
           </div>
         </div>
@@ -381,4 +374,4 @@ const PritnModel = ({ activeDetail }) => {
   );
 };
 
-export default PritnModel;
+export default PritnModelCart;
