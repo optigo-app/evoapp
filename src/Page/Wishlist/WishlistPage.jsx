@@ -107,15 +107,29 @@ const WishlistPage = () => {
   };
 
   const handleWishToCart = async (wishlistItem) => {
+    let allScanJobData = JSON?.parse(sessionStorage.getItem("AllScanJobData")) || [];
+
     if (wishlistItem?.IsInCartList !== 0) {
-      const res = await RemoveFromCartWishApi({ mode: "RemoveFromCart", flag: "single", pageFlag:"wish", cartWishData: wishlistItem });
+      const res = await RemoveFromCartWishApi({
+        mode: "RemoveFromCart",
+        flag: "single",
+        pageFlag: "wish",
+        cartWishData: wishlistItem
+      });
+
       if (res) {
         const updatedItems = WishlistItems?.map((item) =>
           item.CartWishId === wishlistItem.CartWishId
-            ? { ...item, IsInCartList: 0 } // Corrected here
+            ? { ...item, IsInCartList: 0 }
             : item
         );
         setWishlistItems(updatedItems);
+        allScanJobData = allScanJobData?.map(item =>
+          item.JobNo === wishlistItem.JobNo
+            ? { ...item, isInCartList: 0 }
+            : item
+        );
+        sessionStorage?.setItem("AllScanJobData", JSON?.stringify(allScanJobData));
         showToast({
           message: "Removed from cart",
           bgColor: "#4caf50",
@@ -128,21 +142,32 @@ const WishlistPage = () => {
       if (res) {
         const updatedItems = WishlistItems?.map((item) =>
           item.CartWishId === wishlistItem.CartWishId
-            ? { ...item, IsInCartList: 1 } // Corrected here
+            ? { ...item, IsInCartList: 1 }
             : item
         );
         setWishlistItems(updatedItems);
+        console.log('allScanJobData', allScanJobData);
+
+        allScanJobData = allScanJobData?.map(item =>
+          item.JobNo === wishlistItem.JobNo
+            ? { ...item, isInCartList: 1 }
+            : item
+        );
+        sessionStorage?.setItem("AllScanJobData", JSON?.stringify(allScanJobData));
         showToast({
           message: "Moved to cart",
           bgColor: "#4caf50",
           fontColor: "#fff",
           duration: 3000,
         });
+
         setSelectedItems(prev => prev.filter(item => item.id !== wishlistItem.id));
       }
     }
+
     handleCloseDialog();
   };
+
 
   const handleAllWishToCart = async () => {
     setIsLoading(true);

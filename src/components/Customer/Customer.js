@@ -43,6 +43,7 @@ import { showToast } from "../../Utils/Tostify/ToastManager";
 import CustomAvatar from "../../Utils/avatar";
 import logo from "../../assests/80-40.png";
 import Cookies from "js-cookie";
+import { FaChevronRight } from "react-icons/fa";
 
 const formatSecondsToTime = (seconds) => {
   const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -484,7 +485,17 @@ const Customer = () => {
         onClick={() => navigate("/support")}
       >
         <ListItemButton>
-          <Typography className="HeaderMenu_Without_Sub">Support</Typography>
+          <Typography
+            className="HeaderMenu_Without_Sub"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            Support <FaChevronRight />
+          </Typography>
         </ListItemButton>
       </Accordion>
 
@@ -493,8 +504,16 @@ const Customer = () => {
         onClick={() => navigate("/PrivacyPolicy")}
       >
         <ListItemButton>
-          <Typography className="HeaderMenu_Without_Sub">
-            Privacy Policy
+          <Typography
+            className="HeaderMenu_Without_Sub"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            Privacy Policy <FaChevronRight />
           </Typography>
         </ListItemButton>
       </Accordion>
@@ -551,6 +570,19 @@ const Customer = () => {
     // navigate("/account-delete", { replace: true });
   };
 
+  const [zIndexValue, setZIndexValue] = useState(99999);
+  useEffect(() => {
+    let timer;
+    if (openMenu) {
+      setZIndexValue(-1);
+    } else {
+      timer = setTimeout(() => {
+        setZIndexValue(99999);
+      }, 2000);
+    }
+    return () => clearTimeout(timer);
+  }, [openMenu]);
+
   return (
     <div className="CustomerMain">
       <LoadingBackdrop isLoading={loading} />
@@ -566,7 +598,7 @@ const Customer = () => {
         <DialogTitle id="logout-confirmation-dialog">
           Are you sure you want to logout?
         </DialogTitle>
-        <DialogActions style={{ display: "flex", justifyContent: "center" }}>
+        <DialogActions style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
             onClick={handleLogoutCancel}
             className="Account_delete_button"
@@ -656,7 +688,7 @@ const Customer = () => {
 
       <Dialog open={openDeleteDialog} onClose={handleDeleteCancel}>
         <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
-        <DialogActions style={{ display: "flex", justifyContent: "center" }}>
+        <DialogActions style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
             onClick={handleDeleteCancel}
             className="Account_delete_button"
@@ -716,15 +748,27 @@ const Customer = () => {
 
       <div
         style={{
-          padding: "60px 16px 4px 10px",
           boxShadow:
             "rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          position: "fixed",
+          top: "55px",
+          zIndex: zIndexValue,
+          padding: "7px",
+          width: "100%",
+          backgroundColor: "white",
         }}
       >
-        <p style={{ fontSize: "17px", color: "#783eb5", fontWeight: 600 }}>
+        <p
+          style={{
+            fontSize: "17px",
+            color: "#783eb5",
+            fontWeight: 600,
+            margin: "0px",
+          }}
+        >
           Customer List
         </p>
         <Button

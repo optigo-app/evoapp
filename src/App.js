@@ -8,6 +8,7 @@ import Support from "./components/Support/Support";
 import PrivacyPolicy from "./components/PrivacyPolicy/PrivacyPolicy";
 import Register from "./components/Register/Register";
 import FeedBack from "./components/FeedBack/FeedBack";
+import AccountDeleteStep from "./Page/AccountDelete/AccountDeleteStep";
 
 const Customer = lazy(() => import("./components/Customer/Customer"));
 const AddCustomer = lazy(() => import("./components/AddCustomer/AddCustomer"));
@@ -33,7 +34,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter basename="/evo">
+    <BrowserRouter>
       <ToastContainer />
       <Suspense fallback={<LoadingBackdrop />}>
         <Routes>
@@ -46,6 +47,7 @@ function App() {
           <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
           <Route path="/register" element={<Register />} />
           <Route path="/feedback" element={<FeedBack />} />
+          <Route path="/steps-account-delete" element={<AccountDeleteStep />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

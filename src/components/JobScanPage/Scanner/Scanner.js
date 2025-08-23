@@ -117,6 +117,7 @@ const Scanner = () => {
     canvasRef.current.height = CANVAS_SIDE;
     decodeTimerRef.current = setInterval(decodeFrame, SCAN_INTERVAL);
   };
+
   const BOX = 220;
   const retryPermission = () => {
     setPermissionGranted(null);
@@ -499,8 +500,8 @@ const Scanner = () => {
     } else {
       setPrintInfo(matchedArray);
     }
+
     const element = document.getElementById("printSection");
-    // element.style.display = "block";
     const height = allData
       ? savedScans?.length >= 2
         ? savedScans?.length >= 3
@@ -527,7 +528,6 @@ const Scanner = () => {
       .outputPdf("blob")
       .then((blob) => {
         const fileName = "estimate.pdf";
-        // element.style.display = "none";
         if (window.flutter_inappwebview) {
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -638,37 +638,40 @@ const Scanner = () => {
                 </span>
               </p>
 
-              {activeDetail?.discountedPrice && (
-                <div>
-                  <p
-                    style={{
-                      margin: "0px",
-                      fontSize: "15px",
-                      fontWeight: 600,
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      gap: "3px",
-                    }}
-                    className="showData_price_deatil"
-                  >
-                    {" "}
-                    <span
-                      style={{
-                        fontSize: "12px",
-                        color: "green",
-                        display: "flex",
-                        alignItems: "end",
-                      }}
-                    >
-                      Save{" "}
-                      {activeDetail?.discountType === "percentage"
-                        ? `${activeDetail?.discountValue}%`
-                        : `₹${activeDetail?.discountValue}`}
-                    </span>
-                    ₹ {activeDetail.discountedPrice}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p
+                  className="showData_price_deatil"
+                  style={{
+                    margin: 0,
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: "3px",
+                  }}
+                >
+                  {activeDetail?.discountedPrice > 0 ? (
+                    <>
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: "green",
+                          display: "flex",
+                          alignItems: "end",
+                        }}
+                      >
+                        Save{" "}
+                        {activeDetail?.discountType === "percentage"
+                          ? `${activeDetail?.discountValue}%`
+                          : `₹${activeDetail?.discountValue}`}
+                      </span>
+                      ₹ {activeDetail.discountedPrice}
+                    </>
+                  ) : (
+                    activeDetail?.discountedPrice !== "" && <>₹ 0</>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -677,7 +680,7 @@ const Scanner = () => {
               <img
                 src={activeDetail?.image}
                 onError={(e) => (e.target.src = PlaceHolderImg)}
-                style={{ width: "100%", height: "100%" }}
+                style={{ width: "100%", height: "100%" , maxHeight: '130px'}}
               />
             </div>
             <div className="body" style={{ width: "65%" }}>
@@ -693,7 +696,7 @@ const Scanner = () => {
                   gap: "10px",
                 }}
               >
-                <div style={{ display: "flex" }}>
+                <div style={{ display: "flex", flexWrap: "wrap" }}>
                   {activeDetail.GrossWeight && (
                     <div
                       style={{
@@ -752,9 +755,7 @@ const Scanner = () => {
                       </span>
                     </div>
                   )}
-                </div>
 
-                <div style={{ display: "flex" }}>
                   {activeDetail.colorStoneWtP && (
                     <div
                       style={{
@@ -762,6 +763,7 @@ const Scanner = () => {
                         display: "flex",
                         flexDirection: "column",
                         gap: "2px",
+                        marginTop: activeDetail.DiamondWtP && "10px",
                       }}
                     >
                       <p className="info_main_section">
@@ -780,6 +782,7 @@ const Scanner = () => {
                         width: "38%",
                         display: "flex",
                         flexDirection: "column",
+                        marginTop: activeDetail.DiamondWtP && "10px",
                         gap: "2px",
                       }}
                     >
@@ -1100,8 +1103,8 @@ const Scanner = () => {
                                 onError={(e) => (e.target.src = PlaceHolderImg)}
                                 style={{
                                   width: "100%",
-                                  objectFit: "contain",
                                   height: "100%",
+                                  maxHeight: '130px'
                                 }}
                               />
                             </div>
@@ -1132,7 +1135,9 @@ const Scanner = () => {
                                   gap: "10px",
                                 }}
                               >
-                                <div style={{ display: "flex" }}>
+                                <div
+                                  style={{ display: "flex", flexWrap: "wrap" }}
+                                >
                                   {data?.GrossWeight !== null && (
                                     <div
                                       style={{
@@ -1197,9 +1202,7 @@ const Scanner = () => {
                                       </span>
                                     </div>
                                   )}
-                                </div>
 
-                                <div style={{ display: "flex" }}>
                                   {data?.colorStoneWtP && (
                                     <div
                                       style={{
@@ -1207,6 +1210,7 @@ const Scanner = () => {
                                         display: "flex",
                                         flexDirection: "column",
                                         gap: "2px",
+                                        marginTop: data.DiamondWtP && "10px",
                                       }}
                                     >
                                       <p className="info_main_section">
@@ -1228,6 +1232,7 @@ const Scanner = () => {
                                         display: "flex",
                                         flexDirection: "column",
                                         gap: "2px",
+                                        marginTop: data.DiamondWtP && "10px",
                                       }}
                                     >
                                       <p className="info_main_section">

@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./Scanner.scss";
 import { Box, Button, Stack } from "@mui/material";
 import { Keyboard, Menu, Printer, ScanLine, Share2 } from "lucide-react";
-import { showToast } from "../../../Utils/Tostify/ToastManager";
-import { CallApi } from "../../../API/CallApi/CallApi";
+import { showToast } from "../../../../Utils/Tostify/ToastManager";
+import { CallApi } from "../../../../API/CallApi/CallApi";
 import Webcam from "react-webcam";
 import jsQR from "jsqr";
-import LoadingBackdrop from "../../../Utils/LoadingBackdrop";
+import LoadingBackdrop from "../../../../Utils/LoadingBackdrop";
 
 const CANVAS_SIDE = 400; // side‑length we’ll decode at (≤ BOX_PX * devicePixelRatio)
 const SCAN_INTERVAL = 200; // ms between decode attempts  (≈5 fps)

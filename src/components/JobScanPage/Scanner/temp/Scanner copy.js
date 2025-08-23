@@ -26,12 +26,12 @@ import {
   ShoppingBag,
   Tally3,
 } from "lucide-react";
-import { showToast } from "../../../Utils/Tostify/ToastManager";
+import { showToast } from "../../../../Utils/Tostify/ToastManager";
 import { Heart } from "lucide-react";
 import { ShoppingCart } from "lucide-react";
 import { Percent } from "lucide-react";
-import { CallApi } from "../../../API/CallApi/CallApi";
-import DiscountModal from "./DiscountModal";
+import { CallApi } from "../../../../API/CallApi/CallApi";
+import DiscountModal from "../DiscountModal";
 import PlaceHolderImg from "../../../assests/placeHolderImg.svg";
 import {
   MdKeyboardDoubleArrowDown,
@@ -39,9 +39,9 @@ import {
 } from "react-icons/md";
 import Webcam from "react-webcam";
 import jsQR from "jsqr";
-import LoadingBackdrop from "../../../Utils/LoadingBackdrop";
+import LoadingBackdrop from "../../../../Utils/LoadingBackdrop";
 import html2pdf from "html2pdf.js";
-import PritnModel from "./PritnModel/PritnModel";
+import PritnModel from "../PritnModel/PritnModel";
 
 const CANVAS_SIDE = 400; // side‑length we’ll decode at (≤ BOX_PX * devicePixelRatio)
 const SCAN_INTERVAL = 200; // ms between decode attempts  (≈5 fps)

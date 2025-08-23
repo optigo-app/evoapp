@@ -46,8 +46,8 @@ const AddCustomer = () => {
       return;
     }
 
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedInput);
-    const isMobile = /^[0-9]{10}$/.test(trimmedInput); // Only 10 digits allowed
+    const isEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(trimmedInput);
+    const isMobile = /^[0-9]{10}$/.test(trimmedInput);
 
     if (!isEmail && !isMobile) {
       setError("Please enter a valid mobile number or email.");

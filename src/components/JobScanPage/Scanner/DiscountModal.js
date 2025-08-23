@@ -94,6 +94,21 @@ const DiscountModal = ({
       (discountValue === "" || Number(discountValue) === 0);
 
     if (noDiscount) {
+      const updated = {
+        ...activeDetail,
+        discountValue: "",
+        discountType: "",
+        discountedPrice: "",
+      };
+      updateScannedAndSession(updated);
+
+      showToast({
+        message: "Discount removed",
+        bgColor: "#f44336",
+        fontColor: "#fff",
+        duration: 5000,
+      });
+
       setDiscountModalOpen(false);
       return;
     }
@@ -104,103 +119,115 @@ const DiscountModal = ({
       discountedPrice: calculatedPrice,
     };
     updateScannedAndSession(updated);
+
     showToast({
       message: "Discount saved",
       bgColor: "#2196f3",
       fontColor: "#fff",
       duration: 5000,
     });
+
     setDiscountModalOpen(false);
   };
 
-  const handleApplyDiscount = async () => {
-    const Device_Token = sessionStorage.getItem("device_token");
-    const discount = Number(discountValue);
-    const hasDiscount = discount > 0;
+  // const handleApplyDiscount = async () => {
+  //   const Device_Token = sessionStorage.getItem("device_token");
+  //   const discount = Number(discountValue);
+  //   const hasDiscount = discount > 0;
 
-    const body = {
-      Mode: "AddToCart",
-      Token: Device_Token,
-      ReqData: JSON.stringify([
-        {
-          ForEvt: "AddToCart",
-          DeviceToken: Device_Token,
-          AppId: 3,
-          JobNo: activeDetail?.JobNo,
-          CustomerId: curruntActiveCustomer?.CustomerId,
-          IsVisitor: curruntActiveCustomer?.IsVisitor,
-          DiscountOnId: hasDiscount
-            ? directPriceInput !== ""
-              ? 1
-              : discountType === "flat"
-              ? 1
-              : 0
-            : 0,
-          Discount: hasDiscount ? discount : 0,
-        },
-      ]),
-    };
+  //   const body = {
+  //     Mode: "AddToCart",
+  //     Token: Device_Token,
+  //     ReqData: JSON.stringify([
+  //       {
+  //         ForEvt: "AddToCart",
+  //         DeviceToken: Device_Token,
+  //         AppId: 3,
+  //         JobNo: activeDetail?.JobNo,
+  //         CustomerId: curruntActiveCustomer?.CustomerId,
+  //         IsVisitor: curruntActiveCustomer?.IsVisitor,
+  //         DiscountOnId: hasDiscount
+  //           ? directPriceInput !== ""
+  //             ? 1
+  //             : discountType === "flat"
+  //             ? 1
+  //             : 0
+  //           : 0,
+  //         Discount: hasDiscount ? discount : 0,
+  //       },
+  //     ]),
+  //   };
 
-    try {
-      await CallApi(body);
+  //   try {
+  //     await CallApi(body);
 
-      showToast({
-        message: hasDiscount
-          ? "Item added to cart with discount"
-          : "Item added to cart",
-        bgColor: "#4caf50",
-        fontColor: "#fff",
-        duration: 5000,
-      });
+  //     showToast({
+  //       message: hasDiscount
+  //         ? "Item added to cart with discount"
+  //         : "Item added to cart",
+  //       bgColor: "#4caf50",
+  //       fontColor: "#fff",
+  //       duration: 5000,
+  //     });
 
-      const updated = {
-        ...activeDetail,
-        isInCartList: 1,
-        discountedPrice: hasDiscount ? calculatedPrice : originalPrice,
-      };
-      updateScannedAndSession(updated);
-      setDiscountModalOpen(false);
-    } catch (error) {
-      console.error("Error applying discount", error);
-      showToast({
-        message: "Failed to add to cart",
-        bgColor: "#f44336",
-        fontColor: "#fff",
-        duration: 5000,
-      });
-    }
-  };
+  //     const updated = {
+  //       ...activeDetail,
+  //       isInCartList: 1,
+  //       discountedPrice: hasDiscount ? calculatedPrice : originalPrice,
+  //     };
+  //     updateScannedAndSession(updated);
+  //     setDiscountModalOpen(false);
+  //   } catch (error) {
+  //     console.error("Error applying discount", error);
+  //     showToast({
+  //       message: "Failed to add to cart",
+  //       bgColor: "#f44336",
+  //       fontColor: "#fff",
+  //       duration: 5000,
+  //     });
+  //   }
+  // };
 
   const maxDirectPrice = Math.max(originalPrice - 1, 0);
   const handleDirectPriceInput = (e) => {
+    setDiscountType("flat");
     const cleaned = e.target.value.replace(/[^\d]/g, "");
     if (cleaned === "") {
       setDirectPriceInput("");
       setDiscountValue("");
       return;
     }
-
     let num = Number(cleaned);
-    if (num > maxDirectPrice) num = maxDirectPrice; // <-- never >= original
-
+    if (num > maxDirectPrice) num = maxDirectPrice;
     setDirectPriceInput(String(num));
+    setDiscountValue("");
   };
 
   const maxFlatDiscount = Math.max(originalPrice - 1, 0);
 
   const handleDiscountChange = (e) => {
-    const cleaned = e.target.value.replace(/[^\d]/g, "");
-    if (cleaned === "") {
+    let val = e.target.value;
+    if (!/^\d*\.?\d*$/.test(val)) return;
+    if (val === "") {
       setDiscountValue("");
       return;
     }
-    let num = Number(cleaned);
-    if (discountType === "percentage") {
-      if (num > 100) num = 100;
-    } else {
-      if (num > maxFlatDiscount) num = maxFlatDiscount;
+    if (val.startsWith(".")) {
+      val = "0" + val;
     }
-    setDiscountValue(num);
+    if (discountType === "percentage") {
+      const num = parseFloat(val);
+      if (!Number.isNaN(num) && num > 100) {
+        val = "100";
+      }
+    } else {
+      const num = parseFloat(val);
+      const maxFlatDiscount = Math.max(originalPrice - 1, 0);
+      if (!Number.isNaN(num) && num > maxFlatDiscount) {
+        val = String(maxFlatDiscount);
+      }
+    }
+    setDiscountValue(val);
   };
 
   const handleClearDirect = () => {
@@ -291,42 +318,31 @@ const DiscountModal = ({
             if (newVal && directPriceInput === "") {
               setDiscountType(newVal);
             }
+            setDiscountValue("");
           }}
           fullWidth
           disabled={directPriceInput !== ""}
           sx={{ mb: 2 }}
         >
-          <ToggleButton value="flat" style={{fontSize: '11px'}}>
-            Amount(<IndianRupee style={{height: '13px', width :'13px'}} />)
+          <ToggleButton value="flat" style={{ fontSize: "11px" }}>
+            Amount(
+            <IndianRupee style={{ height: "13px", width: "13px" }} />)
           </ToggleButton>
-          <ToggleButton value="percentage" style={{fontSize: '11px'}}>
-            Percentage(<Percent style={{height: '15px', width :'13px'}} />)
+          <ToggleButton value="percentage" style={{ fontSize: "11px" }}>
+            Percentage(
+            <Percent style={{ height: "15px", width: "13px" }} />)
           </ToggleButton>
         </ToggleButtonGroup>
 
         <TextField
           label={discountType === "flat" ? "Discount (₹)" : "Discount (%)"}
-          type="text" // ← use text so you control everything
+          type="text"
           fullWidth
-          readOnly={directPriceInput !== ""} // replaces 'disabled'
-          value={discountValue === 0 ? "" : discountValue}
+          readOnly={directPriceInput !== ""}
+          value={discountValue === "" ? "" : discountValue}
           onChange={handleDiscountChange}
-          onKeyDown={(e) => {
-            if (
-              [
-                "Backspace",
-                "Delete",
-                "ArrowLeft",
-                "ArrowRight",
-                "Tab",
-              ].includes(e.key)
-            )
-              return;
-            if (!/^\d$/.test(e.key)) e.preventDefault();
-          }}
           inputProps={{
-            inputMode: "numeric", // mobile keypad
-            pattern: "[0-9]*", // HTML hint for only digits
+            inputMode: "decimal", // allows decimal point keypad
           }}
           InputProps={{
             endAdornment:
