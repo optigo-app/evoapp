@@ -81,13 +81,6 @@ const JobScanPage = () => {
             >
               {curruntActiveCustomer?.firstname}{" "}
               {curruntActiveCustomer?.lastname}
-              {/* {activeTab == "scan"
-              ? "Scan Job"
-              : activeTab == "wishlist"
-              ? "WishList"
-              : activeTab == "cart"
-              ? "Cart List"
-              : "Notes"} */}
             </p>
             <p
               style={{
@@ -100,12 +93,6 @@ const JobScanPage = () => {
               {curruntActiveCustomer?.CompanyName}
             </p>
           </div>
-
-          {/* <Typography
-            variant="h6"
-            style={{ width: "33.33%" }}
-            fontWeight={600}
-          ></Typography> */}
           <Box textAlign="right" style={{ width: "33.33%" }}>
             <Button
               className="AddCustomer_Btn"
@@ -138,9 +125,9 @@ const JobScanPage = () => {
           onClick={() => setActiveTab("cart")}
         >
           <ShoppingCart size={20} />
-          {/* <span class="status-dot"></span> */}
           <span>Cart</span>
         </div>
+
         {/* <div
           className={`tab-item ${activeTab === "note" ? "active" : ""}`}
           onClick={() => setActiveTab("note")}

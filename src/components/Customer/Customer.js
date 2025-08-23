@@ -102,6 +102,17 @@ const Customer = () => {
   const expandedSectionRefs = useRef({});
   const navigate = useNavigate();
 
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: "environment" } })
+      .then((stream) => {
+        window._cachedCameraStream = stream;
+      })
+      .catch((err) => {
+        console.error("Camera init failed:", err);
+      });
+  }, []);
+
   const GetProfileData = async () => {
     const Device_Token = sessionStorage.getItem("device_token");
 
@@ -570,15 +581,15 @@ const Customer = () => {
     // navigate("/account-delete", { replace: true });
   };
 
-  const [zIndexValue, setZIndexValue] = useState(99999);
+  const [zIndexValue, setZIndexValue] = useState(9);
   useEffect(() => {
     let timer;
     if (openMenu) {
       setZIndexValue(-1);
     } else {
       timer = setTimeout(() => {
-        setZIndexValue(99999);
-      }, 2000);
+        setZIndexValue(9);
+      }, 200);
     }
     return () => clearTimeout(timer);
   }, [openMenu]);

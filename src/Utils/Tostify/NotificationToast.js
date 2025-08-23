@@ -27,6 +27,7 @@ const NotificationToast = ({
         color: fontColor,
         width: '60%',
         ...animationStyle,
+        zIndex: '999999999999 !important',
       }}
     >
       {message}

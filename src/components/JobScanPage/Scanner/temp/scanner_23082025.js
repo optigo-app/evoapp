@@ -568,22 +568,13 @@ const Scanner = () => {
     } else {
       setPrintInfo(matchedArray);
     }
-    const height = allData
-      ? savedScans?.length >= 2
-        ? savedScans?.length >= 3
-          ? savedScans?.length * 170
-          : savedScans?.length * 190
-        : 250
-      : 300;
-
     const element = document.getElementById("printSection");
-    
     const opt = {
       margin: [5, 5, 5, 5],
       filename: "estimate.pdf",
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: "mm", format: [250, height], orientation: "portrait" },
+      jsPDF: { unit: "mm", format: [73, 297], orientation: "portrait" },
     };
 
     html2pdf()
@@ -689,7 +680,7 @@ const Scanner = () => {
               <img
                 src={activeDetail?.image}
                 onError={(e) => (e.target.src = PlaceHolderImg)}
-                style={{ width: "100%", height: "100%", maxHeight: "130px" }}
+                style={{ width: "100%", height: "100%" , maxHeight: '130px'}}
               />
             </div>
             <div className="body" style={{ width: "65%" }}>
@@ -902,6 +893,7 @@ const Scanner = () => {
         </div>
       </div>
     );
+
   const [expandedItems, setExpandedItems] = useState([]);
 
   return (
@@ -914,7 +906,7 @@ const Scanner = () => {
         updateScannedAndSession={updateScannedAndSession}
         showToast={showToast}
       />
-
+      
       <div
         style={{
           display: mode === "qr" ? "block" : "none",
@@ -1109,7 +1101,7 @@ const Scanner = () => {
                                 style={{
                                   width: "100%",
                                   height: "100%",
-                                  maxHeight: "130px",
+                                  maxHeight: '130px'
                                 }}
                               />
                             </div>
@@ -1406,14 +1398,10 @@ const Scanner = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogContent
-          dividers
-          style={{
-            margin: "10px",
-            padding: "0px",
-            border: "none",
-          }}
-        >
+        <DialogContent dividers style={{
+          margin: '10px',
+          padding: '0px'
+        }}>
           <div
             id="printSection"
             className="printDesign"
@@ -1423,6 +1411,7 @@ const Scanner = () => {
             <PritnModel activeDetail={printInfo} />
           </div>
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setOpenPrintModel(false)} color="error">
             Cancel
@@ -1431,11 +1420,10 @@ const Scanner = () => {
             onClick={() => {
               printOption
                 ? handlePrint(activeDetail?.JobNo, printAllData)
-                : handleShare(printInfo[0]?.JobNo, false);
+                : handleShare(printInfo?.JobNo, false);
             }}
             style={{ backgroundColor: "#5e08b6", color: "white" }}
           >
-
             {printOption ? "Download" : "Share"}
           </Button>
         </DialogActions>

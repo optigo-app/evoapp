@@ -48,10 +48,13 @@ const PritnModel = ({ activeDetail }) => {
       allTotalDiscount: 0,
     }
   );
+
   totals.finalAmount =
     totals.totalTaxAmount + totals.totalPrice - totals?.allTotalDiscount;
+
   return (
     <div className="printModelMain">
+
       <div
         style={{
           display: "flex",
@@ -66,9 +69,11 @@ const PritnModel = ({ activeDetail }) => {
         <p className="p_city">
           {userInfo?.CompanyCity}-{userInfo?.CompanyPinCode}
         </p>
+        <p className="p_gst">{userInfo?.CompanyTellNo}</p>
         <p className="p_gst">{userInfo?.GSTNo}</p>
         <p className="p_estimate">Estimate</p>
       </div>
+
       <div className="info_section_main">
         <div
           style={{
@@ -282,6 +287,7 @@ const PritnModel = ({ activeDetail }) => {
           </div>
         );
       })}
+
       <div style={{ display: "flex" }}>
         <div
           style={{
@@ -377,6 +383,7 @@ const PritnModel = ({ activeDetail }) => {
           </div>
         </div>
       </div>
+      
     </div>
   );
 };
